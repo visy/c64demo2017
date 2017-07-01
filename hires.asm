@@ -838,13 +838,16 @@ Tab:
     .byte %10000000 // 10
     .byte %11110000 // 13
 
+sprg:
+.byte 0
+sprg2:
+.byte 0
 
 start2:
     :INIT_LS()
     jsr generate_lookups
 
     sei
-
 
     // Turn off interrupts from the two CIA chips.
     // Used by the kernal to flash cursor and scan 
@@ -890,13 +893,13 @@ start2:
     lda #$01
     sta $dd0e       // Start timer A -> NMI
 
-    lda #1
+    lda #0
     sta $d020
     sta $d021
 
-//    :B2_DECRUNCH(crunch_screen1a)
-    FillBitmap($6000,0)
-    FillScreenMemory($5000,(1<<4) + 5)
+    :B2_DECRUNCH(crunch_screen1a)
+//    FillBitmap($6000,0)
+//    FillScreenMemory($5000,(1<<4) + 5)
     :B2_DECRUNCH(crunch_music)
     ldx #0
     ldy #0
@@ -927,6 +930,8 @@ wait:
 
     jmp no_switch
 
+    // switcher logic for pics
+
     lda frame
     cmp #$ff
     bne no_switch
@@ -955,10 +960,10 @@ switch0:
     :B2_DECRUNCH(crunch_screen1a)
     jmp no_switch2
 switch1:
-    :B2_DECRUNCH(crunch_screen1b)
+//    :B2_DECRUNCH(crunch_screen1b)
     jmp no_switch2
 switch2:
-    :B2_DECRUNCH(crunch_screen1c)
+//    :B2_DECRUNCH(crunch_screen1c)
     jmp no_switch2
 
 
@@ -971,7 +976,137 @@ no_switch2:
     sta frame
 
 no_switch:
+
+    // the rest of the logic
+    lda #%0
+
+    lda ls_times
+    cmp #5
+    bcc no_enable_sprites_ls
+
+    // enable all sprites
+    lda #%11111111
+    sta $d015
+no_enable_sprites_ls:
+
+    // sprite 0 pos
+    lda #100+20-2
+    sta $d000
+    lda #106-20
+    sta $d001
+    
+    lda #100+20-2
+    sta $d002
+    lda #146-20
+    sta $d003
+    
+    lda #100+20-2
+    sta $d004
+    lda #148+40-20
+    sta $d005
+
+    lda #142+20
+    sta $d006
+    lda #104-20
+    sta $d007
+
+    lda #184+20+2
+    sta $d008
+    lda #148+40-20
+    sta $d009
+
+    lda #142+20
+    sta $d00a
+    lda #148+40-20
+    sta $d00b
+
+    lda #184+20+2
+    sta $d00c
+    lda #104-20
+    sta $d00d
+
+    lda #184+20+2
+    sta $d00e
+    lda #146-20
+    sta $d00f
+
+    lda #0
+    sta $d010
+
+
+    // sprite pointer
+    lda #190
+    adc sprg
+    sta $53f8
+    lda #191
+    adc sprg
+    sta $53f9
+    lda #190
+    adc sprg
+    sta $53fa
+    lda #191
+    adc sprg
+    sta $53fb
+    lda #190
+    adc sprg
+    sta $53fc
+    lda #191
+    adc sprg
+    sta $53fd
+    lda #196
+    adc sprg
+    sta $53fe
+    lda #197
+    adc sprg
+    sta $53ff
+
+    // behind screen sprites
+    lda #$0
+    sta $d01b
+
+    // sprite color
+    lda #11
+    sta $d027
+    sta $d028
+    sta $d029
+    sta $d02a
+    sta $d02b
+    sta $d02c
+    sta $d02d
+    sta $d02e
+
+    // single color sprites
+    lda #0
+    sta $d01c
+
+    // stretch sprites
+    lda #$ff
+    sta $d01d
+    sta $d017
+
+
+
     inc frame2
+
+    lda frame2
+    cmp #100
+    lda #0
+    sta frame2
+    bne no_sprg
+    inc sprg2
+    lda sprg2
+    cmp #8
+    bne no_sprg
+    lda #0
+    sta sprg2
+    inc sprg
+    lda sprg
+    cmp #8
+    bne no_sprg
+    lda #2
+    sta sprg
+
+no_sprg:
 /*
     lda stro
     sta $F5
@@ -991,10 +1126,6 @@ no_switch:
     jsr do_draw
     jsr do_draw
 */
-    jsr lsystem
-    jsr lsystem
-    jsr lsystem
-    jsr lsystem
     jsr lsystem
     jsr lsystem
     jsr lsystem
@@ -1071,6 +1202,8 @@ no_lshi:
     sta $F6
     lda #>lsysdata
     sta $F7
+
+    inc ls_times
 
     lda #1
     sta ls_stackp
@@ -1355,9 +1488,9 @@ XTAB:
 
 .label crunch_screen1a = *
 .modify B2() {
-    :PNGtoHIRES("test.png", bitmap_address, screen_memory)
+    :PNGtoHIRES("lsysbg.png", bitmap_address, screen_memory)
 }
-
+/*
 .label crunch_screen1b = *
 .modify B2() {
     :PNGtoHIRES("test_a.png", bitmap_address, screen_memory)
@@ -1367,7 +1500,7 @@ XTAB:
 .modify B2() {
     :PNGtoHIRES("test4.png", bitmap_address, screen_memory)
 }
-
+*/
 .pc=$c000
 
 // lsystem data
