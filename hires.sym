@@ -1,0 +1,5 @@
+.label mainirq=$8a1
+.label frame2=$8fe
+.label start=$80e
+.label nmi_nop=$8a0
+.label frame=$8fd

@@ -1,0 +1,18 @@
+# Window size. 1=mini, 2=normal (default), 3=maxi
+
+ZOOM=
+
+# One of: C64, C64M, SPECTRUM, MSX, PLUS4, PLUS4M, CPC. Leave empty to ask each time.
+
+MACHINE=
+
+# Default image path, leave empty for default.
+
+PATH=
+
+# PNG export options, scale, horizontal and vertical border sizes.
+
+PNGSCALE=1
+PNGHBORD=64
+PNGVBORD=32
+

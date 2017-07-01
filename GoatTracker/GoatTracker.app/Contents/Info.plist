@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>BuildMachineOSBuild</key>
+	<string>14C109</string>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>sng</string>
+			</array>
+			<key>CFBundleTypeIconFile</key>
+			<string>goatsong.icns</string>
+			<key>CFBundleTypeName</key>
+			<string>GoatTracker song file</string>
+			<key>CFBundleTypeOSTypes</key>
+			<array>
+				<string>SONG</string>
+			</array>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>LSTypeIsPackage</key>
+			<false/>
+			<key>NSPersistentStoreTypeKey</key>
+			<string>Binary</string>
+		</dict>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>ins</string>
+			</array>
+			<key>CFBundleTypeIconFile</key>
+			<string>goatinstrument.icns</string>
+			<key>CFBundleTypeName</key>
+			<string>GoatTracker instrument file</string>
+			<key>CFBundleTypeOSTypes</key>
+			<array>
+				<string>INST</string>
+			</array>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>LSTypeIsPackage</key>
+			<false/>
+			<key>NSPersistentStoreTypeKey</key>
+			<string>Binary</string>
+		</dict>
+	</array>
+	<key>CFBundleExecutable</key>
+	<string>GoatTracker</string>
+	<key>CFBundleGetInfoString</key>
+	<string>Version 2.73</string>
+	<key>CFBundleIconFile</key>
+	<string>goat.icns</string>
+	<key>CFBundleIdentifier</key>
+	<string>org.c64.covertbitops.goattrk</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>GoatTracker</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleSignature</key>
+	<string>GOAT</string>
+	<key>CFBundleVersion</key>
+	<string>2.73</string>
+	<key>DTCompiler</key>
+	<string>com.apple.compilers.llvm.clang.1_0</string>
+	<key>DTPlatformBuild</key>
+	<string>6A2008a</string>
+	<key>DTPlatformVersion</key>
+	<string>GM</string>
+	<key>DTSDKBuild</key>
+	<string>13F26</string>
+	<key>DTSDKName</key>
+	<string>macosx10.9</string>
+	<key>DTXcode</key>
+	<string>0611</string>
+	<key>DTXcodeBuild</key>
+	<string>6A2008a</string>
+	<key>NSMainNibFile</key>
+	<string>SDLMain</string>
+	<key>NSPrincipalClass</key>
+	<string>NSApplication</string>
+	<key>SUFeedURL</key>
+	<string>http://www.sidmusic.org/goattracker/mac/goattracker_appcast.xml</string>
+</dict>
+</plist>

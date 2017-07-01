@@ -1,0 +1,95 @@
+.label nybdone=$b69
+.label nybind=$af0
+.label zp_base=$3
+.label switch2=$a97 {
+}
+.label switch1=$a8d {
+}
+.label drawt=$d6a
+.label switch0=$a83 {
+}
+.label no_switch=$aae
+.label mainirq=$ed0
+.label MShort=$8cd
+.label LLen=$86a
+.label M8=$8be
+.label put=$5
+.label no_nyb0=$b61
+.label no_rule6=$c7b
+.label no_rule7=$c98
+.label ls_times=$819
+.label loop=$a4e
+.label no_rule2=$c47
+.label Literal=$844 {
+}
+.label no_rule3=$c5e
+.label no_rule0=$b97
+.label ls_dir=$811
+.label no_rule1=$c30
+.label Get1=$8f3
+.label drawp=$d69
+.label Decrunch=$81a
+.label Get3=$85e
+.label Get2=$8c1
+.label GetNewBits=$8f3
+.label Mdone=$8cf
+.label BITTAB=$10f7
+.label lsystem=$b46
+.label bits=$3
+.label MLen=$8e2
+.label no_zero=$a6e
+.label XTAB=$11f7
+.label ls_sy=$813
+.label ls_sx=$812
+.label End=$8f2
+.label do_draw=$c99
+.label M_1=$8b2 {
+}
+.label frame=$f2c
+.label GnbInc=$8fd
+.label wait=$a4e
+.label no_lshi=$b82
+.label LLoop=$85e
+.label GnbEnd=$906
+.label no_drawf=$d68
+.label no_switch2=$aa1
+.label genloop=$e8f
+.label Match=$87b {
+}
+.label stroy=$df2
+.label strox=$d6c
+.label start2=$90f {
+}
+.label putpixel=$e78
+.label generate_lookups=$e8d
+.label YTABHI=$f2f
+.label crunch_music=$12f7
+.label YTABLO=$102f
+.label lsysdata=$c000
+.label ls_stackp=$af1
+.label L1=$867
+.label ls_py=$817
+.label ls_px=$816
+.label frame2=$f2d
+.label start=$80e
+.label stro=$d6b
+.label crunch_screen1c=$9c2b
+.label DLoop=$83b {
+}
+.label ls_stacky=$b1c
+.label ls_stackx=$af2
+.label MLoop=$8dc
+.label genskip=$ec9
+.label ls_x=$814
+.label ls_y=$815
+.label Tab=$907
+.label fwder=$ba4 {
+}
+.label crunch_screen1a=$8000
+.label genloop2=$eb9
+.label crunch_screen1b=$94a1
+.label MLda=$8dd
+.label nmi_nop=$ecf
+.label ls_rule=$818
+.label no_rule=$ba1
+.label base=$f2e

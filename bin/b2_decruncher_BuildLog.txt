@@ -1,0 +1,15 @@
+parsing
+Got 2 errors while executing:
+  (/Users/visy/dev/kick/hires/b2_decruncher.inc 8:6) Unknown symbol 'B2_ZP_BASE'
+  (/Users/visy/dev/kick/hires/b2_decruncher.inc 12:19) Unknown symbol 'B2_ZP_BASE'
+
+.filenamespace b2
+
+// You must set .const B2_ZP_BASE prior the import of this file
+.if (B2_ZP_BASE > $ff) {
+     ^
+
+Error: Unknown symbol 'B2_ZP_BASE'
+at line 8, column 6 in b2_decruncher.inc
+
+
