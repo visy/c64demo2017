@@ -347,6 +347,130 @@ checkup:
         }
     }
 
+    .macro copymem_eor(src,dst,size) {
+        lda #<src // set our source memory address to copy from, $6000
+        sta $FB
+        lda #>src 
+        sta $FC
+        lda #<dst // set our destination memory to copy to, $5000
+        sta $FD 
+        lda #>dst
+        sta $FE
+
+        ldx #size // size of copy
+        ldy #$00
+
+    copyloop:
+
+        lda ($FB),y  // indirect index source memory address, starting at $00
+        eor ($FD),y  // indirect index dest memory address, starting at $00
+        sta ($FD),y  // indirect index dest memory address, starting at $00
+        iny
+        bne copyloop // loop until our dest goes over 255
+
+        inc $FC // increment high order source memory address
+        inc $FE // increment high order dest memory address
+        dex
+        bne copyloop // if we're not there yet, loop
+
+    }
+
+    .macro copymem(src,dst,size) {
+        lda #<src // set our source memory address to copy from, $6000
+        sta $FB
+        lda #>src 
+        sta $FC
+        lda #<dst // set our destination memory to copy to, $5000
+        sta $FD 
+        lda #>dst
+        sta $FE
+
+        ldx #size // size of copy
+        ldy #$00
+
+    copyloop:
+
+        lda ($FB),y  // indirect index source memory address, starting at $00
+        //eor ($FD),y  // indirect index dest memory address, starting at $00
+        sta ($FD),y  // indirect index dest memory address, starting at $00
+        iny
+        bne copyloop // loop until our dest goes over 255
+
+        inc $FC // increment high order source memory address
+        inc $FE // increment high order dest memory address
+        dex
+        bne copyloop // if we're not there yet, loop
+
+    }
+
+    .macro PNGtoHIRES_single(PNGpicture,BMPData,ColData,color,bgcolor) {
+
+        .var Graphics = LoadPicture(PNGpicture)
+
+        // Graphics RGB Colors. Must be adapted to the graphics
+
+        .const C64Black   = 000 * 65536 + 000 * 256 + 000   
+        .const C64White   = 255 * 65536 + 255 * 256 + 255
+        .const C64Red     = 104 * 65536 + 055 * 256 + 043
+        .const C64Cyan    = 112 * 65536 + 164 * 256 + 178
+        .const C64Purple  = 111 * 65536 + 061 * 256 + 134
+        .const C64Green   = 088 * 65536 + 141 * 256 + 067
+        .const C64Blue    = 053 * 65536 + 040 * 256 + 121 
+        .const C64Yellow  = 184 * 65536 + 199 * 256 + 111
+        .const C64L_brown = 111 * 65536 + 079 * 256 + 037
+        .const C64D_brown = 067 * 65536 + 057 * 256 + 000
+        .const C64L_red   = 154 * 65536 + 103 * 256 + 089
+        .const C64D_grey  = 068 * 65536 + 068 * 256 + 068
+        .const C64Grey    = 108 * 65536 + 108 * 256 + 108
+        .const C64L_green = 154 * 65536 + 210 * 256 + 132
+        .const C64L_blue  = 108 * 65536 + 094 * 256 + 181
+        .const C64L_grey  = 149 * 65536 + 149 * 256 + 149
+
+        // Add the colors neatly into a Hashtable for easy lookup reference
+        .var ColorTable = Hashtable()
+        .eval ColorTable.put(C64Black,0)
+        .eval ColorTable.put(C64White,1)
+        .eval ColorTable.put(C64Red,2)
+        .eval ColorTable.put(C64Cyan,3)
+        .eval ColorTable.put(C64Purple,4)
+        .eval ColorTable.put(C64Green,5)
+        .eval ColorTable.put(C64Blue,6)
+        .eval ColorTable.put(C64Yellow,7)
+        .eval ColorTable.put(C64L_brown,8)
+        .eval ColorTable.put(C64D_brown,9)
+        .eval ColorTable.put(C64L_red,10)
+        .eval ColorTable.put(C64D_grey,11)
+        .eval ColorTable.put(C64Grey,12)
+        .eval ColorTable.put(C64L_green,13)
+        .eval ColorTable.put(C64L_blue,14)
+        .eval ColorTable.put(C64L_grey,15)
+
+        .pc = BMPData "Hires Bitmap"
+
+        .var ScreenMem = List()
+        .for (var Line = 0 ; Line < 200 ; Line = Line + 8) {
+            .for (var Block = 0 ; Block < 320 ; Block=Block+8) {
+                .var Coll1 = Graphics.getPixel(Block,Line)
+                .var Coll2 = bgcolor
+                .for (var j = 0 ; j < 8 ; j++ ) {
+                    .var ByteValue = 0
+                    .for (var i = 0 ; i < 8 ; i++ ) {
+                        .if (Graphics.getPixel(Block+i,Line+j) != 0) .eval ByteValue = ByteValue + pow(2,7-i)
+                    }
+                .byte ByteValue
+                }
+            .var BlockColor = bgcolor*16+color
+            .eval ScreenMem.add(BlockColor)
+            }
+        }
+        .pc = ColData "Hires Color Data"
+    ScreenMemColors:
+        .for (var i = 0 ; i < 1000 ; i++ ) {
+            .byte ScreenMem.get(i)
+        }
+    }
+
+
 //
 // Stabilize the IRQ so that the handler function is called exactly when the
 // line scan begins.
@@ -487,7 +611,7 @@ stabilizedirq:
 .var screen_memory=$1000 + vic_base
 .var bitmap_address=$2000 + vic_base
 
-.var music = LoadSid("musare.sid")
+.var music = LoadSid("nightshift.sid")
 
 /*
 
@@ -498,166 +622,11 @@ stabilizedirq:
     $8000 -> crunched data
 */
 
+
 BasicUpstart2(start)
 
 start:
     jmp start2
-
-ls_dir:
-.byte 0
-
-ls_sx:
-.byte 160
-ls_sy:
-.byte 195-40
-
-ls_x:
-.byte 0
-
-ls_y:
-.byte 0
-
-ls_px:
-.byte 0
-
-ls_py:
-.byte 0
-
-ls_rule:
-.byte 0
-
-ls_times:
-.byte 0
-
-.macro INIT_LS() {
-    lda ls_sx
-    sta ls_x
-    sta ls_px
-    lda ls_sy
-    sta ls_y
-    sta ls_py
-}
-
-.macro FWD() {
-    lda ls_x
-    sta ls_px
-    lda ls_y
-    sta ls_py
-
-    ldx ls_px
-    ldy ls_py
-    jsr putpixel
-
-    lda ls_dir
-    cmp #0
-    bne next0
-    ldx ls_px
-    lda ls_py
-    clc
-    sbc #0
-    tay
-    jsr putpixel
-
-    lda ls_y
-    clc
-    sbc #1
-    sta ls_y
-    jmp ende
-next0:
-    lda ls_dir
-    cmp #1
-    bne next1
-    lda ls_px
-    clc
-    adc #1
-    tax
-    ldy ls_py
-    jsr putpixel
-
-    lda ls_x
-    clc
-    adc #2
-    sta ls_x
-    jmp ende
-next1:
-    lda ls_dir
-    cmp #2
-    bne next2
-    ldx ls_px
-    lda ls_py
-    clc
-    adc #1
-    tay
-    jsr putpixel
-
-    lda ls_y
-    clc
-    adc #2
-    sta ls_y
-    jmp ende
-next2:
-    lda ls_px
-    clc
-    sbc #0
-    tax
-    ldy ls_py
-    jsr putpixel
-
-    lda ls_x
-    clc
-    sbc #1
-    sta ls_x
-ende:
-}
-
-.macro PUSH() {
-    inc ls_stackp
-
-    lda ls_x
-    ldx ls_stackp
-    sta ls_stackx,x
-
-    lda ls_y
-    ldx ls_stackp
-    sta ls_stacky,x 
-
-}
-
-.macro POP() {
-
-    ldx ls_stackp
-    lda ls_stackx,x
-    sta ls_x
-
-    ldx ls_stackp
-    lda ls_stacky,x
-    sta ls_y
-
-    dec ls_stackp
-
-}
-
-.macro DIR_L() {
-    dec ls_dir
-    
-    lda ls_dir
-    cmp #$ff
-    bne no_lff
-    lda #3
-    sta ls_dir
-no_lff:
-}
-
-.macro DIR_R() {
-    inc ls_dir
-    lda ls_dir
-    cmp #$4
-    bne no_rff
-    lda #0
-    sta ls_dir
-no_rff:
-}
-
 
 
 // decruncher
@@ -838,15 +807,266 @@ Tab:
     .byte %10000000 // 10
     .byte %11110000 // 13
 
-sprg:
-.byte 0
-sprg2:
-.byte 0
+generate_lookups:
+    ldx #$00
+genloop:
+    txa
+    and #$07
+    asl
+    asl
+    sta $FC
+    txa
+    lsr
+    lsr
+    lsr
+    sta $FD
+    lsr
+    ror $FC
+    lsr
+    ror $FC
+    adc $FD
+    ora #$60 // bitmap address $6000
+    sta YTABHI,x
+    lda $FC
+    sta YTABLO,x
+    inx
+    cpx #200
+    bne genloop
+
+    lda #$80
+    sta $FC
+    ldx #$00
+genloop2:
+    txa
+    and #$F8
+    sta XTAB,x
+    lda $FC
+    sta BITTAB,x
+    lsr
+    bcc genskip
+    lda #$80
+genskip:
+    sta $FC
+    inx
+    bne genloop2
+
+    rts
+
+YTABHI:
+.fill 200,0
+
+YTABLO:
+.fill 200,0
+
+BITTAB:
+.fill 256,0
+
+XTAB:
+.fill 256,0
+
+.macro putpixel() {
+    lda YTABLO,y
+    sta $FC
+    lda YTABHI,y
+    sta $FD
+    ldy XTAB,x
+    lda ($FC),y
+    ora BITTAB,x
+    sta ($FC),y
+}
+
+.var bres_x1 = $50
+.var bres_y1 = $51
+.var bres_x2 = $60
+.var bres_y2 = $61
+.var bres_err = $62
+.var bres_cntr = $63
+.var bres_dx = $64
+.var bres_dy = $65
+
+hline_sto:
+    .byte 0,0,0
+.macro hline() {
+    sta hline_sto
+    stx hline_sto+1
+    sty hline_sto+2
+hlineloop:
+    ldx hline_sto+1
+    ldy hline_sto+2
+    :putpixel()
+
+    inx
+    stx hline_sto+1
+    cpx hline_sto
+    bne hlineloop
+
+}
+
+.macro bresenham(xa,ya,xb,yb,err,cntr,dx,dy) {
+    ldy ya
+    cpy yb
+    bne no_hline
+    ldx xa
+    lda xb
+    :hline()
+    jmp bhamdone
+no_hline:
+
+    ldx xb
+    ldy yb
+    :putpixel()    // s.Plot(x,y,colour);
+
+    lda #$00        // initialise err
+    sta err
+    lda xb      // check if the line is going right or left (delta x is positive or negative)
+    sec
+    sbc xa
+    bpl dxpos
+    lda ya      // if the line is going leftward, swap xa/ya and xb/yb around so it goes rightward
+    ldx yb
+    sta yb
+    stx ya
+    lda xa
+    ldx xb
+    sta xb
+    stx xa
+    sec
+    sbc xa
+dxpos:          // here we have secured a rightward line, accumulator is filled with delta xa/xb
+    sta dx      // save the delta
+    sta cntr        // use the delta as counter for the loop
+    inc cntr        // and increment by one to prevent off-by-one when we compare with 0
+
+    lda yb      // now we check for y
+    sec
+    sbc ya
+    bmi dyneg       // check if the line is going up or downward (delta ya/yb is negative)
+    sta dy
+    cmp dx      // compare delta ya/yb with delta xa/xy to see if we loop over x or y axis
+    lda #$c8        // c8 is the opcode iny
+    sta bhamyloop   // because delta ya/yb was positive, we increment y in this loop
+    sta bhamyy      // and also in the loop over y
+    bcc blup
+    jmp bremenovery // and into the loop over y
+blup:
+    jmp dypos       // or loop over x, knowing that delta ya/yb is positive 
+dyneg:
+    lda #$88        // 88 is the opcode for dey
+    sta bhamyloop   // because delta ya/yb was negative, we decrement y in this loop
+    sta bhamyy
+    lda ya      // calculate and store delta ya/yb again (this time ya-yb instead of yb-ya)
+    sec
+    sbc yb
+    sta dy
+    cmp dx
+    bcs bremenovery // if delta ya/yb is larger then delta xa/xb, we loop over y
+dypos:
+
+    ldx xa      // see the C++ implementation at https://www.cs.helsinki.fi/group/goa/mallinnus/lines/bresenh.html
+    ldy ya      // this is for ( int x = x1; x <= x2; 
+
+bhamoverx:      // here the loop over x begins
+    dec cntr        // first we check if we're done
+    beq bhamxdone
+    inx         // x++ )  {
+    stx xa
+    sty ya
+    :putpixel()    // s.Plot(x,y,colour);
+    ldx xa
+    ldy ya
+    lda err     // eps += dy;
+    clc
+    adc dy
+    sta err
+    bvs bhamyloop   // if ( (eps << 1) >= dx )  {
+    cmp dx
+    bcc bhamoverx
+bhamyloop:
+    iny         // y++; 
+                // or y-- if the delta ya/yb was negative
+    lda err     // eps -= dx;
+    sec
+    sbc dx
+    sta err
+    jmp bhamoverx
+
+bhamxdone:
+    jmp bhamdone
+
+bremenovery:
+    lda dy
+    sta cntr
+    inc cntr
+    ldx xa
+    ldy ya
+
+bhamovery:
+    dec cntr
+    beq bhamdone
+bhamyy:
+    iny
+    stx xa
+    sty ya
+    :putpixel()
+    ldx xa
+    ldy ya
+    lda err
+    clc
+    adc dx
+    sta err
+    bvs bhamxloop
+    cmp dy
+    bcc bhamovery
+bhamxloop:
+    inx
+    lda err
+    sec
+    sbc dy
+    sta err
+    jmp bhamovery
+
+bhamdone:
+}
+
+
+.pc=$c000
+
+.macro drawtri(xx,yy) {
+    lda #64
+    sta frame
+triloop:
+    ldx #160
+    lda #0
+    clc
+    adc yy
+    tay
+    stx bres_x1
+    sty bres_y1
+    lda frame
+    clc
+    adc xx
+    tax
+    lda #100
+    clc
+    adc yy
+    tay
+    stx bres_x2
+    sty bres_y2
+    :bresenham(bres_x1,bres_y1,bres_x2,bres_y2,bres_err,bres_cntr,bres_dx,bres_dy)
+
+    inc frame
+    lda frame
+    cmp #200
+    bcc no_nullframe
+    jmp tri_done
+no_nullframe:
+    jmp triloop
+tri_done:
+}
 
 start2:
-    :INIT_LS()
-    jsr generate_lookups
 
+    jsr generate_lookups
     sei
 
     // Turn off interrupts from the two CIA chips.
@@ -897,10 +1117,12 @@ start2:
     sta $d020
     sta $d021
 
-    :B2_DECRUNCH(crunch_screen1a)
+   :B2_DECRUNCH(crunch_fox)
+
 //    FillBitmap($6000,0)
 //    FillScreenMemory($5000,(1<<4) + 5)
-    :B2_DECRUNCH(crunch_music)
+//    :FillBitmap($6000,0)
+//    :FillScreenMemory($5000,(1<<4) + 0)
     ldx #0
     ldy #0
     lda #music.startSong                      //<- Here we get the startsong and init address from the sid file
@@ -914,471 +1136,101 @@ start2:
     RasterInterrupt(mainirq, $35)
 
     cli
+ //   lda #5
+ //   sta $d020
+//    :copymem($6000,$8000,30)
+/*
+    :copymem($7180,$8000,13)
+    :FillBitmap($6000,0)
+*/
+//    :copymem($68c0,$68c0,15)
 
 
-    lda #>lsysdata
-    sta $F6
-    lda #<lsysdata
-    sta $F7
+
 
 loop:
-
 wait: 
     lda #$ff 
     cmp $d012 
     bne wait 
 
-    jmp no_switch
+    // glitch logo top & bot
+    /*
+    :copymem_eor($6000,$6000-1,5)
+    :copymem_eor($6000+320*20,$6000+320*20-1,5)
+    */
 
-    // switcher logic for pics
-
-    lda frame
-    cmp #$ff
-    bne no_switch
-    inc base
-
-    lda base
-    cmp #3
-    bne no_zero
-    lda #0
-    sta base
-
-no_zero:
-
-    lda $d011
-    eor #%00010000
-    sta $d011
-
-    lda base
-    cmp #0
-    beq switch0
-    cmp #1
-    beq switch1
-    bne switch2
-
-switch0:
-    :B2_DECRUNCH(crunch_screen1a)
-    jmp no_switch2
-switch1:
-//    :B2_DECRUNCH(crunch_screen1b)
-    jmp no_switch2
-switch2:
-//    :B2_DECRUNCH(crunch_screen1c)
-    jmp no_switch2
-
-
-no_switch2:
-    lda $d011
-    eor #%00010000
-    sta $d011
-
-    lda #0
-    sta frame
-
-no_switch:
-
-    // the rest of the logic
-    lda #%0
-
-    lda ls_times
-    cmp #5
-    bcc no_enable_sprites_ls
-
-    // enable all sprites
-    lda #%11111111
-    sta $d015
-no_enable_sprites_ls:
-
-    // sprite 0 pos
-    lda #100+20-2
-    sta $d000
-    lda #106-20
-    sta $d001
-    
-    lda #100+20-2
-    sta $d002
-    lda #146-20
-    sta $d003
-    
-    lda #100+20-2
-    sta $d004
-    lda #148+40-20
-    sta $d005
-
-    lda #142+20
-    sta $d006
-    lda #104-20
-    sta $d007
-
-    lda #184+20+2
-    sta $d008
-    lda #148+40-20
-    sta $d009
-
-    lda #142+20
-    sta $d00a
-    lda #148+40-20
-    sta $d00b
-
-    lda #184+20+2
-    sta $d00c
-    lda #104-20
-    sta $d00d
-
-    lda #184+20+2
-    sta $d00e
-    lda #146-20
-    sta $d00f
-
-    lda #0
-    sta $d010
-
-
-    // sprite pointer
-    lda #190
-    adc sprg
-    sta $53f8
-    lda #191
-    adc sprg
-    sta $53f9
-    lda #190
-    adc sprg
-    sta $53fa
-    lda #191
-    adc sprg
-    sta $53fb
-    lda #190
-    adc sprg
-    sta $53fc
-    lda #191
-    adc sprg
-    sta $53fd
-    lda #196
-    adc sprg
-    sta $53fe
-    lda #197
-    adc sprg
-    sta $53ff
-
-    // behind screen sprites
-    lda #$0
-    sta $d01b
-
-    // sprite color
-    lda #11
-    sta $d027
-    sta $d028
-    sta $d029
-    sta $d02a
-    sta $d02b
-    sta $d02c
-    sta $d02d
-    sta $d02e
-
-    // single color sprites
-    lda #0
-    sta $d01c
-
-    // stretch sprites
-    lda #$ff
-    sta $d01d
-    sta $d017
-
-
+//    :drawlinetri()
 
     inc frame2
 
-    lda frame2
-    cmp #100
-    lda #0
-    sta frame2
-    bne no_sprg
-    inc sprg2
-    lda sprg2
-    cmp #8
-    bne no_sprg
-    lda #0
-    sta sprg2
-    inc sprg
-    lda sprg
-    cmp #8
-    bne no_sprg
-    lda #2
-    sta sprg
 
-no_sprg:
-/*
-    lda stro
-    sta $F5
-    lda #<strox
-    sta $F6
-    lda #>strox
-    sta $F7
 
-    lda #<stroy
-    sta $F8
-    lda #>stroy
-    sta $F9
+//    :drawtri(frame2,frame2g)
 
-    jsr do_draw
-    jsr do_draw
-    jsr do_draw
-    jsr do_draw
-    jsr do_draw
-*/
-    jsr lsystem
-    jsr lsystem
-    jsr lsystem
-    jsr lsystem
-    jsr lsystem
-    jsr lsystem
-    jsr lsystem
-    jsr lsystem
-    jsr lsystem
-    jsr lsystem
-    jsr lsystem
-    jsr lsystem
-    jsr lsystem
-    jsr lsystem
-    jsr lsystem
-    jsr lsystem
 
     jmp loop
 
-nybind:
-    .byte 0
-
-
-ls_stackp:
-.byte 1
-
-ls_stackx:
-.byte 100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
-
-ls_stacky:
-.byte 100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
-
-lsystem:
-
-    ldy #0
-    lda ($F6),y
-    sta ls_rule
-
-    lda nybind
-    cmp #0
-    bne no_nyb0
-    lda ls_rule
-    lsr
-    lsr
-    lsr
-    lsr
-    sta ls_rule
-    jmp nybdone
-no_nyb0:
-    lda ls_rule
-    and #%00001111
-    sta ls_rule
-
-nybdone:
-
-    inc nybind
-    lda nybind
-    cmp #2
-    bne no_lshi
-    lda #0
-    sta nybind
-
-    inc $F6
-    lda $F6
-    cmp #$0
-    bne no_lshi
-    inc $F7
-no_lshi:
-    lda ls_rule
-    cmp #0
-    bne no_rule0
-
-    lda #<lsysdata
-    sta $F6
-    lda #>lsysdata
-    sta $F7
-
-    inc ls_times
-
-    lda #1
-    sta ls_stackp
-
-
-    rts
-
-no_rule0:
-    lda ls_rule
-    cmp #1
-    bne no_rule
-    jmp fwder
-no_rule:
-    jmp no_rule1
-fwder:
-    :FWD()
-    rts
-no_rule1:
-    lda ls_rule
-    cmp #2
-    bne no_rule2
-    :DIR_L()
-    rts
-no_rule2:
-    lda ls_rule
-    cmp #3
-    bne no_rule3
-    :DIR_R()
-    rts
-no_rule3:
-    lda ls_rule
-    cmp #6
-    bne no_rule6
-    :PUSH()
-    rts
-no_rule6:
-    lda ls_rule
-    cmp #7
-    bne no_rule7
-    :POP()
-    rts
-no_rule7:
-
-    rts
-
-
-do_draw:
-    ldy drawp
-    lda ($F6),y
-    sta $FA
-    lda ($F8),y
-    sta $FB
-
-    lda $FA
-    adc drawt
-    tax
-    lda $FB
+.macro drawlinetri() {
+        ldx frame2
+    lda #28
+    clc
+    adc sintab,x
     tay
-    jsr putpixel
-    lda $FA
-    adc #1
-    adc drawt
-    tax
-    lda $FB
-    adc #1
-    adc drawt
+    ldx #160
+
+    stx bres_x1
+    sty bres_y1
+
+    ldx frame2
+    lda #100
+    clc
+    adc sintab,x
     tay
-    jsr putpixel
-    lda $FA
-    adc #2
-    tax
-    lda $FB
-    adc #2
-    adc drawt
+    ldx #100
+
+    stx bres_x2
+    sty bres_y2
+    :bresenham(bres_x1,bres_y1,bres_x2,bres_y2,bres_err,bres_cntr,bres_dx,bres_dy)
+
+    ldx frame2
+    lda #28
+    clc
+    adc sintab,x
     tay
-    jsr putpixel
-    lda $FA
-    adc #3
-    adc drawt
-    tax
-    lda $FB
-    adc #3
+    ldx #160
+    stx bres_x1
+    sty bres_y1
+
+    ldx frame2
+    lda #100
+    clc
+    adc sintab,x
     tay
-    jsr putpixel
+    ldx #255
 
-    inc drawp
-    lda drawp
-    cmp $F5
-    bcc no_drawf
-    lda #0
-    sta drawp
-    inc drawt
-    lda drawt
-    cmp #2
-    bne no_drawf
-    lda #0
-    sta drawt
-    FillBitmap($6000,0)
+    stx bres_x2
+    sty bres_y2
+    :bresenham(bres_x1,bres_y1,bres_x2,bres_y2,bres_err,bres_cntr,bres_dx,bres_dy)
 
+    ldx frame2
+    lda #100
+    clc
+    adc sintab,x
+    tay
 
-no_drawf:
+    ldx #100
+    stx bres_x1
+    sty bres_y1
+    ldx #255
+    stx bres_x2
+    sty bres_y2
+    :bresenham(bres_x1,bres_y1,bres_x2,bres_y2,bres_err,bres_cntr,bres_dx,bres_dy)
 
-    rts
+}
 
-drawp:
-    .byte 0
-drawt:
-    .byte 0
-
-stro:
-.byte 134
-strox:
-.byte 34,34,33,31,28,25,23,21,19,16,14,13,13,13,13,14,16,19,22,25,27,30,32,34,35,35,36,36,36,35,33,32,30,29,27,26,25,25,24,24,23,23,23,24,27,29,31,34,38,39,39,40,41,43,44,46,47,48,48,48,48,49,48,47,47,46,46,46,50,51,52,53,54,56,57,57,57,58,58,58,58,58,61,63,65,66,66,66,66,66,66,66,66,67,67,68,70,73,74,75,76,77,78,79,81,82,82,82,83,81,79,78,76,75,74,74,73,83,85,86,87,87,81,82,82,83,85,87,88,90,90,91,92,93
-stroy:
-.byte 22,22,22,22,22,22,22,22,22,23,25,26,27,28,30,32,34,36,38,40,41,43,44,47,49,50,51,53,54,55,56,57,58,58,58,58,58,58,59,59,60,60,60,60,60,60,60,58,56,54,53,52,50,47,43,38,32,28,23,20,19,33,41,44,45,46,47,45,44,44,45,45,46,48,50,51,52,54,55,56,57,58,58,57,56,55,54,52,50,48,46,45,43,57,58,59,60,58,58,57,56,54,52,49,46,44,42,40,39,46,47,47,47,47,47,47,47,47,48,48,48,48,53,54,56,58,60,60,60,60,60,60,60,60
-
-
-/////////////////
-
-putpixel:
-
-    lda YTABLO,y
-    sta $FC
-    lda YTABHI,y
-    sta $FD
-    ldy XTAB,x
-    lda ($FC),y
-    ora BITTAB,x
-    sta ($FC),y
-    rts
-
-generate_lookups:
-    ldx #$00
-genloop:
-    txa
-    and #$07
-    asl
-    asl
-    sta $FC
-    txa
-    lsr
-    lsr
-    lsr
-    sta $FD
-    lsr
-    ror $FC
-    lsr
-    ror $FC
-    adc $FD
-    ora #$60 // bitmap address $6000
-    sta YTABHI,x
-    lda $FC
-    sta YTABLO,x
-    inx
-    cpx #200
-    bne genloop
-
-    lda #$80
-    sta $FC
-    ldx #$00
-genloop2:
-    txa
-    and #$F8
-    sta XTAB,x
-    lda $FC
-    sta BITTAB,x
-    lsr
-    bcc genskip
-    lda #$80
-genskip:
-    sta $FC
-    inx
-    bne genloop2
-
-    rts
+sintab:
+ .fill 256,round(80*atan(toRadians(i*360/200)))
 
 nmi_nop:
     //
@@ -1386,6 +1238,7 @@ nmi_nop:
     // This prevents subsequent NMI's from interfering.
     //
     rti
+
 
 mainirq:
     //
@@ -1422,10 +1275,6 @@ mainirq:
     // Stabilize raster using double irq's.
     StabilizeRaster()
 
-    inc frame
-    lda frame
-//    sta $d020
-
     jsr music.play 
 
     //
@@ -1454,70 +1303,24 @@ mainirq:
     rti
 
 frame:
-.byte 0
-
+.byte 64
 frame2:
 .byte 0
 
-base:
-.byte 0
-
-YTABHI:
-.fill 256,0
-
-YTABLO:
-.fill 200,0
-
-BITTAB:
-.fill 256,0
-
-XTAB:
-.fill 256,0
+.pc = music.location "Music"
+.fill music.size, music.getData(i)
 
 
-// crunched data
 
-
-.label crunch_music = *
+.label crunch_logo = *
 .modify B2() {
-    .pc = music.location "Music"
-    .fill music.size, music.getData(i)
+    :PNGtoHIRES("quadlogo.png", bitmap_address, screen_memory)
+}
+.label crunch_fox = *
+.modify B2() {
+    :PNGtoHIRES("thefox2.png", bitmap_address, screen_memory)
 }
 
-.pc=$8000
-
-.label crunch_screen1a = *
-.modify B2() {
-    :PNGtoHIRES("lsysbg.png", bitmap_address, screen_memory)
-}
-/*
-.label crunch_screen1b = *
-.modify B2() {
-    :PNGtoHIRES("test_a.png", bitmap_address, screen_memory)
-}
-
-.label crunch_screen1c = *
-.modify B2() {
-    :PNGtoHIRES("test4.png", bitmap_address, screen_memory)
-}
-*/
-.pc=$c000
-
-// lsystem data
-// each nybble = rule
-// 0 = end
-// 1 = fwd
-// 2 = turn left
-// 3 = turn right
-// 6 = push
-// 7 = pop
-
-// pseudo:
-// read both nybs in buffer, hi then lo
-// cmp and process rule
-// continue until 2619.5 rules parsed
-lsysdata:
-.byte 17,17,17,17,17,17,17,17,38,97,17,17,17,18,102,17,17,38,97,18,102,18,102,115,115,22,49,114,115,18,102,115,115,22,49,114,115,17,99,17,18,102,115,115,22,49,114,114,18,102,115,115,22,49,114,115,17,38,97,38,103,55,49,99,23,39,49,38,103,55,49,99,23,39,49,22,49,17,38,103,55,49,99,23,39,33,38,103,55,49,99,23,39,49,17,22,49,17,17,18,102,18,102,115,115,22,49,114,115,18,102,115,115,22,49,114,115,17,99,17,18,102,115,115,22,49,114,114,18,102,115,115,22,49,114,114,17,38,97,38,103,55,49,99,23,39,49,38,103,55,49,99,23,39,49,22,49,17,38,103,55,49,99,23,39,33,38,103,55,49,99,23,39,49,17,18,102,17,38,97,38,103,55,49,99,23,39,49,38,103,55,49,99,23,39,49,22,49,17,38,103,55,49,99,23,39,33,38,103,55,49,99,23,39,49,18,102,18,102,115,115,22,49,114,115,18,102,115,115,22,49,114,115,17,99,17,18,102,115,115,22,49,114,114,18,102,115,115,22,49,114,115,17,17,99,17,17,17,38,97,38,103,55,49,99,23,39,49,38,103,55,49,99,23,39,49,22,49,17,38,103,55,49,99,23,39,33,38,103,55,49,99,23,39,33,18,102,18,102,115,115,22,49,114,115,18,102,115,115,22,49,114,115,17,99,17,18,102,115,115,22,49,114,114,18,102,115,115,22,49,114,115,17,17,17,17,99,17,17,17,17,17,17,38,97,18,102,18,102,115,115,22,49,114,115,18,102,115,115,22,49,114,115,17,99,17,18,102,115,115,22,49,114,114,18,102,115,115,22,49,114,115,17,38,97,38,103,55,49,99,23,39,49,38,103,55,49,99,23,39,49,22,49,17,38,103,55,49,99,23,39,33,38,103,55,49,99,23,39,49,17,22,49,17,17,18,102,18,102,115,115,22,49,114,115,18,102,115,115,22,49,114,115,17,99,17,18,102,115,115,22,49,114,114,18,102,115,115,22,49,114,114,17,38,97,38,103,55,49,99,23,39,49,38,103,55,49,99,23,39,49,22,49,17,38,103,55,49,99,23,39,33,38,103,55,49,99,23,39,33,17,18,102,17,38,97,38,103,55,49,99,23,39,49,38,103,55,49,99,23,39,49,22,49,17,38,103,55,49,99,23,39,33,38,103,55,49,99,23,39,49,18,102,18,102,115,115,22,49,114,115,18,102,115,115,22,49,114,115,17,99,17,18,102,115,115,22,49,114,114,18,102,115,115,22,49,114,115,17,17,99,17,17,17,38,97,38,103,55,49,99,23,39,49,38,103,55,49,99,23,39,49,22,49,17,38,103,55,49,99,23,39,33,38,103,55,49,99,23,39,33,18,102,18,102,115,115,22,49,114,115,18,102,115,115,22,49,114,115,17,99,17,18,102,115,115,22,49,114,114,18,102,115,115,22,49,114,115,17,17,17,17,38,97,17,18,102,17,38,97,38,103,55,49,99,23,39,49,38,103,55,49,99,23,39,49,22,49,17,38,103,55,49,99,23,39,33,38,103,55,49,99,23,39,49,18,102,18,102,115,115,22,49,114,115,18,102,115,115,22,49,114,115,17,99,17,18,102,115,115,22,49,114,114,18,102,115,115,22,49,114,115,17,17,99,17,17,17,38,97,38,103,55,49,99,23,39,49,38,103,55,49,99,23,39,49,22,49,17,38,103,55,49,99,23,39,33,38,103,55,49,99,23,39,33,18,102,18,102,115,115,22,49,114,115,18,102,115,115,22,49,114,115,17,99,17,18,102,115,115,22,49,114,114,18,102,115,115,22,49,114,115,17,17,38,97,18,102,18,102,115,115,22,49,114,115,18,102,115,115,22,49,114,115,17,99,17,18,102,115,115,22,49,114,114,18,102,115,115,22,49,114,115,17,38,97,38,103,55,49,99,23,39,49,38,103,55,49,99,23,39,49,22,49,17,38,103,55,49,99,23,39,33,38,103,55,49,99,23,39,49,17,22,49,17,17,18,102,18,102,115,115,22,49,114,115,18,102,115,115,22,49,114,115,17,99,17,18,102,115,115,22,49,114,114,18,102,115,115,22,49,114,114,17,38,97,38,103,55,49,99,23,39,49,38,103,55,49,99,23,39,49,22,49,17,38,103,55,49,99,23,39,33,38,103,55,49,99,23,39,49,17,17,17,22,49,17,17,17,17,17,18,102,17,38,97,38,103,55,49,99,23,39,49,38,103,55,49,99,23,39,49,22,49,17,38,103,55,49,99,23,39,33,38,103,55,49,99,23,39,49,18,102,18,102,115,115,22,49,114,115,18,102,115,115,22,49,114,115,17,99,17,18,102,115,115,22,49,114,114,18,102,115,115,22,49,114,115,17,17,99,17,17,17,38,97,38,103,55,49,99,23,39,49,38,103,55,49,99,23,39,49,22,49,17,38,103,55,49,99,23,39,33,38,103,55,49,99,23,39,33,18,102,18,102,115,115,22,49,114,115,18,102,115,115,22,49,114,115,17,99,17,18,102,115,115,22,49,114,114,18,102,115,115,22,49,114,114,17,17,38,97,18,102,18,102,115,115,22,49,114,115,18,102,115,115,22,49,114,115,17,99,17,18,102,115,115,22,49,114,114,18,102,115,115,22,49,114,115,17,38,97,38,103,55,49,99,23,39,49,38,103,55,49,99,23,39,49,22,49,17,38,103,55,49,99,23,39,33,38,103,55,49,99,23,39,49,17,22,49,17,17,18,102,18,102,115,115,22,49,114,115,18,102,115,115,22,49,114,115,17,99,17,18,102,115,115,22,49,114,114,18,102,115,115,22,49,114,114,17,38,97,38,103,55,49,99,23,39,49,38,103,55,49,99,23,39,49,22,49,17,38,103,55,49,99,23,39,33,38,103,55,49,99,23,39,49,17,17,17,17,17,17,17,22,49,17,17,17,17,17,17,17,17,17,17,17,18,102,17,17,38,97,18,102,18,102,115,115,22,49,114,115,18,102,115,115,22,49,114,115,17,99,17,18,102,115,115,22,49,114,114,18,102,115,115,22,49,114,115,17,38,97,38,103,55,49,99,23,39,49,38,103,55,49,99,23,39,49,22,49,17,38,103,55,49,99,23,39,33,38,103,55,49,99,23,39,49,17,22,49,17,17,18,102,18,102,115,115,22,49,114,115,18,102,115,115,22,49,114,115,17,99,17,18,102,115,115,22,49,114,114,18,102,115,115,22,49,114,114,17,38,97,38,103,55,49,99,23,39,49,38,103,55,49,99,23,39,49,22,49,17,38,103,55,49,99,23,39,33,38,103,55,49,99,23,39,49,17,18,102,17,38,97,38,103,55,49,99,23,39,49,38,103,55,49,99,23,39,49,22,49,17,38,103,55,49,99,23,39,33,38,103,55,49,99,23,39,49,18,102,18,102,115,115,22,49,114,115,18,102,115,115,22,49,114,115,17,99,17,18,102,115,115,22,49,114,114,18,102,115,115,22,49,114,115,17,17,99,17,17,17,38,97,38,103,55,49,99,23,39,49,38,103,55,49,99,23,39,49,22,49,17,38,103,55,49,99,23,39,33,38,103,55,49,99,23,39,33,18,102,18,102,115,115,22,49,114,115,18,102,115,115,22,49,114,115,17,99,17,18,102,115,115,22,49,114,114,18,102,115,115,22,49,114,115,17,17,17,17,99,17,17,17,17,17,17,38,97,18,102,18,102,115,115,22,49,114,115,18,102,115,115,22,49,114,115,17,99,17,18,102,115,115,22,49,114,114,18,102,115,115,22,49,114,115,17,38,97,38,103,55,49,99,23,39,49,38,103,55,49,99,23,39,49,22,49,17,38,103,55,49,99,23,39,33,38,103,55,49,99,23,39,49,17,22,49,17,17,18,102,18,102,115,115,22,49,114,115,18,102,115,115,22,49,114,115,17,99,17,18,102,115,115,22,49,114,114,18,102,115,115,22,49,114,114,17,38,97,38,103,55,49,99,23,39,49,38,103,55,49,99,23,39,49,22,49,17,38,103,55,49,99,23,39,33,38,103,55,49,99,23,39,33,17,18,102,17,38,97,38,103,55,49,99,23,39,49,38,103,55,49,99,23,39,49,22,49,17,38,103,55,49,99,23,39,33,38,103,55,49,99,23,39,49,18,102,18,102,115,115,22,49,114,115,18,102,115,115,22,49,114,115,17,99,17,18,102,115,115,22,49,114,114,18,102,115,115,22,49,114,115,17,17,99,17,17,17,38,97,38,103,55,49,99,23,39,49,38,103,55,49,99,23,39,49,22,49,17,38,103,55,49,99,23,39,33,38,103,55,49,99,23,39,33,18,102,18,102,115,115,22,49,114,115,18,102,115,115,22,49,114,115,17,99,17,18,102,115,115,22,49,114,114,18,102,115,115,22,49,114,114,17,17,17,17,38,97,17,18,102,17,38,97,38,103,55,49,99,23,39,49,38,103,55,49,99,23,39,49,22,49,17,38,103,55,49,99,23,39,33,38,103,55,49,99,23,39,49,18,102,18,102,115,115,22,49,114,115,18,102,115,115,22,49,114,115,17,99,17,18,102,115,115,22,49,114,114,18,102,115,115,22,49,114,115,17,17,99,17,17,17,38,97,38,103,55,49,99,23,39,49,38,103,55,49,99,23,39,49,22,49,17,38,103,55,49,99,23,39,33,38,103,55,49,99,23,39,33,18,102,18,102,115,115,22,49,114,115,18,102,115,115,22,49,114,115,17,99,17,18,102,115,115,22,49,114,114,18,102,115,115,22,49,114,115,17,17,38,97,18,102,18,102,115,115,22,49,114,115,18,102,115,115,22,49,114,115,17,99,17,18,102,115,115,22,49,114,114,18,102,115,115,22,49,114,115,17,38,97,38,103,55,49,99,23,39,49,38,103,55,49,99,23,39,49,22,49,17,38,103,55,49,99,23,39,33,38,103,55,49,99,23,39,49,17,22,49,17,17,18,102,18,102,115,115,22,49,114,115,18,102,115,115,22,49,114,115,17,99,17,18,102,115,115,22,49,114,114,18,102,115,115,22,49,114,114,17,38,97,38,103,55,49,99,23,39,49,38,103,55,49,99,23,39,49,22,49,17,38,103,55,49,99,23,39,33,38,103,55,49,99,23,39,49,17,17,17,22,49,17,17,17,17,17,18,102,17,38,97,38,103,55,49,99,23,39,49,38,103,55,49,99,23,39,49,22,49,17,38,103,55,49,99,23,39,33,38,103,55,49,99,23,39,49,18,102,18,102,115,115,22,49,114,115,18,102,115,115,22,49,114,115,17,99,17,18,102,115,115,22,49,114,114,18,102,115,115,22,49,114,115,17,17,99,17,17,17,38,97,38,103,55,49,99,23,39,49,38,103,55,49,99,23,39,49,22,49,17,38,103,55,49,99,23,39,33,38,103,55,49,99,23,39,33,18,102,18,102,115,115,22,49,114,115,18,102,115,115,22,49,114,115,17,99,17,18,102,115,115,22,49,114,114,18,102,115,115,22,49,114,114,17,17,38,97,18,102,18,102,115,115,22,49,114,115,18,102,115,115,22,49,114,115,17,99,17,18,102,115,115,22,49,114,114,18,102,115,115,22,49,114,115,17,38,97,38,103,55,49,99,23,39,49,38,103,55,49,99,23,39,49,22,49,17,38,103,55,49,99,23,39,33,38,103,55,49,99,23,39,49,17,22,49,17,17,18,102,18,102,115,115,22,49,114,115,18,102,115,115,22,49,114,115,17,99,17,18,102,115,115,22,49,114,114,18,102,115,115,22,49,114,114,17,38,97,38,103,55,49,99,23,39,49,38,103,55,49,99,23,39,49,22,49,17,38,103,55,49,99,23,39,33,38,103,55,49,99,23,32
 
 .print "vic_bank: " + toHexString(vic_bank)
 .print "vic_base: " + toHexString(vic_base)

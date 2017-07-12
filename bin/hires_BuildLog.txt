@@ -1,7 +1,7 @@
 parsing
 flex pass 1
-B2: Music $3006 - $3fb6 Packed size $08f5 (57%) Pack start: $f705
-B2: [ Hires Color Data, Hires Bitmap ] $5000 - $7f3f Packed size $0c7c (26%) Pack start: $f37e
+B2: [ Hires Color Data, Hires Bitmap ] $5000 - $7f3f Packed size $0f6e (32%) Pack start: $f08c
+B2: [ Hires Color Data, Hires Bitmap ] $5000 - $7f3f Packed size $0f2e (32%) Pack start: $f0cc
 flex pass 2
 flex pass 3
 Output pass
@@ -15,10 +15,10 @@ Memory Map
 ----------
 Default-segment:
   $0801-$080c Basic
-  $080e-$1c57 Basic End
-  $8000-$8c7b Unnamed
-  $c000-$ca3b Unnamed
+  $080e-$0cda Basic End
+  $1000-$3c13 Music
+  $c000-$c20b Unnamed
 
-Writing prg file: /Users/visy/dev/kick/hires/bin/hires_Compiled.prg
-Writing Vice symbol file: /Users/visy/dev/kick/hires/bin/hires.vs
+Writing prg file: /Users/visy/dev/kick/hires2/bin/hires_Compiled.prg
+Writing Vice symbol file: /Users/visy/dev/kick/hires2/bin/hires.vs
 Writing Symbol file: bin/hires.sym
