@@ -613,15 +613,6 @@ stabilizedirq:
 
 .var music = LoadSid("nightshift.sid")
 
-/*
-
-    memory map:
-    $080e - $2fff code
-    $3000 - $4fff music
-    $5000 - $7fff vic1
-    $8000 -> crunched data
-*/
-
 
 BasicUpstart2(start)
 
@@ -1029,7 +1020,7 @@ bhamdone:
 }
 
 
-.pc=$c000
+.pc=$c000 "code"
 
 .macro drawtri(xx,yy) {
     lda #64
@@ -1117,7 +1108,7 @@ start2:
     sta $d020
     sta $d021
 
-   :B2_DECRUNCH(crunch_fox)
+   :B2_DECRUNCH(crunch_broke)
 
 //    FillBitmap($6000,0)
 //    FillScreenMemory($5000,(1<<4) + 5)
@@ -1310,6 +1301,7 @@ frame2:
 .pc = music.location "Music"
 .fill music.size, music.getData(i)
 
+.pc = $8000 "crunchdata"
 
 
 .label crunch_logo = *
@@ -1319,6 +1311,10 @@ frame2:
 .label crunch_fox = *
 .modify B2() {
     :PNGtoHIRES("thefox2.png", bitmap_address, screen_memory)
+}
+.label crunch_broke = *
+.modify B2() {
+    :PNGtoHIRES("broke.png", bitmap_address, screen_memory)
 }
 
 

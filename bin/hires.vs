@@ -18,7 +18,7 @@ al C:8c6 .Mdone
 al C:ad8 .BITTAB
 al C:3 .bits
 al C:8d9 .MLen
-al C:2ce6 .crunch_fox
+al C:8f6e .crunch_fox
 al C:bd8 .XTAB
 al C:8e9 .End
 al C:8a9 .M_1
@@ -31,6 +31,7 @@ al C:908 .genloop
 al C:80b .upstartEnd
 al C:5000 .ScreenMemColors__0
 al C:5000 .ScreenMemColors__1
+al C:5000 .ScreenMemColors__2
 al C:872 .Match
 al C:839 .DgEnd__0
 al C:844 .DgEnd__1
@@ -47,12 +48,13 @@ al C:948 .YTABHI
 al C:cd8 .hline_sto
 al C:a10 .YTABLO
 al C:85e .L1
-al C:1d78 .crunch_logo
+al C:8000 .crunch_logo
 al C:c20b .frame2
 al C:80e .start
 al C:832 .DLoop
 al C:8d3 .MLoop
 al C:942 .genskip
+al C:9e9c .crunch_broke
 al C:8fe .Tab
 al C:83d .GlLoop__0
 al C:874 .GlLoop__1
