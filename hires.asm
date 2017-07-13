@@ -1200,25 +1200,19 @@ dkdloader:
 .import c64 "dkdload.prg"
 
 loadfile:
-    ldx #<$5000
-    ldy #>$5000
-    lda #1
-    jsr $0400
+    ldx $FB
+    ldy $FC
+    jsr $0100
     rts
 
 .pc = * "democode"
 
 start2:
-    lda #1
-    sta $d020
-    :WaitForSpace()
+
     lda #$36
     sta $01
-    lda #$04
+    lda #$01
     jsr dkdloader // init the dkd loader to $0100
-    lda #2
-    sta $d020
-    :WaitForSpace()
 
     jsr generate_lookups
     sei
@@ -1280,49 +1274,37 @@ start2:
     lda #music.startSong                      //<- Here we get the startsong and init address from the sid file
     jsr music.init  
 
-    SwitchVICBank(vic_bank)
+    lda #$02   // set vic bank #1 with the dkd loader way
+    and #$03
+    eor #$3f
+    sta $dd02
+
     SetHiresBitmapMode()
     SetScreenMemory(screen_memory - vic_base)
     SetBitmapAddress(bitmap_address - vic_base)
 
     RasterInterrupt(mainirq, $35)
-    lda #3
-    sta $d020
-    :WaitForSpace()
-
 
     cli
- //   lda #5
- //   sta $d020
-//    :copymem($6000,$8000,30)
-/*
-    :copymem($7180,$8000,13)
-*/
-//    :copymem($68c0,$68c0,15)
-    :FillBitmap($6000,0)
-    :FillScreenMemory($5000,(1<<4) + 0)
-
-    lda #4
-    sta $d020
-    :WaitForSpace()
-
-
-    jsr loadfile // load file #1 to $5000 (hires gfx memory dump)
-
-    lda #5
-    sta $d020
-loop2:
-    jmp loop2
 
     lda $d011
-    eor #%00010000
+    eor #%00010000 // off
+    sta $d011
+
+    :FillBitmap($6000,0)
+    :FillScreenMemory($5000,(0<<4) + 0)
+
+    :B2_DECRUNCH(crunch_logo)
+
+    lda $d011
+    eor #%00010000 // on
     sta $d011
 
 loop:
 wait: 
-            lda #$ff 
-            cmp $d012 
-            bne wait 
+    lda #$ff 
+    cmp $d012 
+    bne wait 
 
     // glitch logo top & bot
     /*
@@ -1330,72 +1312,49 @@ wait:
     :copymem_eor($6000+320*20,$6000+320*20-1,5)
     */
 
-   :B2_DECRUNCH(crunch_logo)
-   :copymem_bitmap($6000,$e000)
-   :copymem($5000,$4000,4)
+    lda #<$9000
+    sta $FB
+    lda #>$9000
+    sta $FC
+    lda #1 // fox
+    jsr loadfile // load file #1 to $5000 (hires gfx memory dump)
+
+    :centerwipeout_trans(20)
+
+    lda $d011
+    eor #%00010000 // off
+    sta $d011
 
     :FillBitmap($6000,0)
     :FillScreenMemory($5000,(0<<4) + 0)
 
     lda $d011
-    eor #%00010000
+    eor #%00010000 // on
     sta $d011
 
     :centerwipein_trans(10)
-    :wait(255)
-    :wait(255)
-    :wait(255)
+
+    lda #<$9000
+    sta $FB
+    lda #>$9000
+    sta $FC
+    lda #2 // broke
+    jsr loadfile // load file #2 to $5000 (hires gfx memory dump)
+
     :centerwipeout_trans(20)
 
     lda $d011
-    eor #%00010000
+    eor #%00010000 // off
     sta $d011
-
-   :B2_DECRUNCH(crunch_fox)
-   :copymem_bitmap($6000,$e000)
-   :copymem($5000,$4000,4)
 
     :FillBitmap($6000,0)
     :FillScreenMemory($5000,(0<<4) + 0)
 
     lda $d011
-    eor #%00010000
+    eor #%00010000 // on
     sta $d011
 
     :centerwipein_trans(10)
-    :wait(255)
-    :wait(255)
-    :wait(255)
-    :centerwipeout_trans(20)
-
-    lda $d011
-    eor #%00010000
-    sta $d011
-
-
-   :B2_DECRUNCH(crunch_broke)
-   :copymem_bitmap($6000,$e000)
-   :copymem($5000,$4000,4)
-
-    :FillBitmap($6000,0)
-    :FillScreenMemory($5000,(0<<4) + 0)
-
-    lda $d011
-    eor #%00010000
-    sta $d011
-
-
-    :centerwipein_trans(10)
-    :wait(255)
-    :wait(255)
-    :wait(255)
-    :centerwipeout_trans(20)
-
-    lda $d011
-    eor #%00010000
-    sta $d011
-
-//    :drawlinetri()
 
     inc frame2
 
@@ -1419,10 +1378,11 @@ wait:
     .for(var i=0;i<13;i++) { 
         :wait(waittime)
 
-        :copymem_line($e000+320*12+320*i,$6000+320*12+320*i)
-        :copymem_line($e000+320*12-320*i,$6000+320*12-320*i)
-        :copymem_colorline($4000+40*12+40*i,$5000+40*12+40*i)
-        :copymem_colorline($4000+40*12-40*i,$5000+40*12-40*i)
+        :copymem_line($a000+320*12+320*i,$6000+320*12+320*i)
+        :copymem_line($a000+320*12-320*i,$6000+320*12-320*i)
+
+        :copymem_colorline($9000+40*12+40*i,$5000+40*12+40*i)
+        :copymem_colorline($9000+40*12-40*i,$5000+40*12-40*i)
 
 
     }
@@ -1582,18 +1542,11 @@ frame2:
 
 .pc = $8000 "crunchdata"
 
-.label crunch_fox = *
-.modify B2() {
-    :PNGtoHIRES("thefox2.png", bitmap_address, screen_memory)
-}
-.label crunch_broke = *
-.modify B2() {
-    :PNGtoHIRES("broke.png", bitmap_address, screen_memory)
-}
 .label crunch_logo = *
 .modify B2() {
     :PNGtoHIRES("quadlogo.png", bitmap_address, screen_memory)
 }
+.pc = * "crunchdata end"
 
 
 .print "vic_bank: " + toHexString(vic_bank)
