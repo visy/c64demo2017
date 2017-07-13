@@ -403,6 +403,148 @@ checkup:
 
     }
 
+    .macro copymem_bitmap(src,dst) {
+        lda #<src // set our source memory address to copy from, $6000
+        sta $FB
+        lda #>src 
+        sta $FC
+        lda #<dst // set our destination memory to copy to, $5000
+        sta $FD 
+        lda #>dst
+        sta $FE
+
+        ldx #31 // size of copy
+        ldy #$00
+
+    copyloop:
+
+        lda ($FB),y  // indirect index source memory address, starting at $00
+        //eor ($FD),y  // indirect index dest memory address, starting at $00
+        sta ($FD),y  // indirect index dest memory address, starting at $00
+        iny
+        bne copyloop // loop until our dest goes over 255
+
+        inc $FC // increment high order source memory address
+        inc $FE // increment high order dest memory address
+        dex
+        bne copyloop // if we're not there yet, loop
+
+        ldy #$00
+
+    copyloop2:
+
+        lda ($FB),y  // indirect index source memory address, starting at $00
+        //eor ($FD),y  // indirect index dest memory address, starting at $00
+        sta ($FD),y  // indirect index dest memory address, starting at $00
+        iny
+        cpy #64
+        bne copyloop2 // loop until our dest goes over 255
+
+    }
+
+
+    .macro copymem_line(src,dst) {
+        lda #<src // set our source memory address to copy from, $6000
+        sta $FB
+        lda #>src 
+        sta $FC
+        lda #<dst // set our destination memory to copy to, $5000
+        sta $FD 
+        lda #>dst
+        sta $FE
+
+        ldy #$00
+
+    copyloop:
+
+        lda ($FB),y  // indirect index source memory address, starting at $00
+        //eor ($FD),y  // indirect index dest memory address, starting at $00
+        sta ($FD),y  // indirect index dest memory address, starting at $00
+        iny
+        bne copyloop // loop until our dest goes over 255
+
+        inc $FC // increment high order source memory address
+        inc $FE // increment high order dest memory address
+
+    copyloop2:
+
+        lda ($FB),y  // indirect index source memory address, starting at $00
+        //eor ($FD),y  // indirect index dest memory address, starting at $00
+        sta ($FD),y  // indirect index dest memory address, starting at $00
+        iny
+        cpy #65
+        bne copyloop2 // loop until our dest goes over 255
+
+    }
+
+    .macro clear_line(dst) {
+        lda #<dst // set our destination memory to copy to, $5000
+        sta $FD 
+        lda #>dst
+        sta $FE
+
+        ldy #$00
+
+    copyloop:
+
+        lda #0
+        sta ($FD),y  // indirect index dest memory address, starting at $00
+        iny
+        bne copyloop // loop until our dest goes over 255
+
+        inc $FE // increment high order dest memory address
+
+    copyloop2:
+
+        lda #0
+        sta ($FD),y  // indirect index dest memory address, starting at $00
+        iny
+        cpy #64
+        bne copyloop2 // loop until our dest goes over 255
+
+    }
+
+    .macro copymem_colorline(src,dst) {
+        lda #<src // set our source memory address to copy from, $6000
+        sta $FB
+        lda #>src 
+        sta $FC
+        lda #<dst // set our destination memory to copy to, $5000
+        sta $FD 
+        lda #>dst
+        sta $FE
+
+        ldy #$00
+
+    copyloop:
+
+        lda ($FB),y  // indirect index source memory address, starting at $00
+        //eor ($FD),y  // indirect index dest memory address, starting at $00
+        sta ($FD),y  // indirect index dest memory address, starting at $00
+        iny
+        cpy #40
+        bne copyloop // loop until our dest goes over 255
+
+    }
+
+    .macro clear_colorline(dst) {
+        lda #<dst // set our destination memory to copy to, $5000
+        sta $FD 
+        lda #>dst
+        sta $FE
+
+        ldy #$00
+
+    copyloop:
+
+        lda #0
+        sta ($FD),y  // indirect index dest memory address, starting at $00
+        iny
+        cpy #40
+        bne copyloop // loop until our dest goes over 255
+
+    }
+
     .macro PNGtoHIRES_single(PNGpicture,BMPData,ColData,color,bgcolor) {
 
         .var Graphics = LoadPicture(PNGpicture)
@@ -611,7 +753,7 @@ stabilizedirq:
 .var screen_memory=$1000 + vic_base
 .var bitmap_address=$2000 + vic_base
 
-.var music = LoadSid("nightshift.sid")
+.var music = LoadSid("nightre.sid")
 
 
 BasicUpstart2(start)
@@ -1019,9 +1161,6 @@ bhamxloop:
 bhamdone:
 }
 
-
-.pc=$c000 "code"
-
 .macro drawtri(xx,yy) {
     lda #64
     sta frame
@@ -1108,8 +1247,6 @@ start2:
     sta $d020
     sta $d021
 
-   :B2_DECRUNCH(crunch_broke)
-
 //    FillBitmap($6000,0)
 //    FillScreenMemory($5000,(1<<4) + 5)
 //    :FillBitmap($6000,0)
@@ -1126,30 +1263,100 @@ start2:
 
     RasterInterrupt(mainirq, $35)
 
+
     cli
  //   lda #5
  //   sta $d020
 //    :copymem($6000,$8000,30)
 /*
     :copymem($7180,$8000,13)
-    :FillBitmap($6000,0)
 */
 //    :copymem($68c0,$68c0,15)
+    lda $d011
+    eor #%00010000
+    sta $d011
 
+    :FillBitmap($6000,0)
+    :FillScreenMemory($5000,(1<<4) + 0)
 
 
 
 loop:
 wait: 
-    lda #$ff 
-    cmp $d012 
-    bne wait 
+            lda #$ff 
+            cmp $d012 
+            bne wait 
 
     // glitch logo top & bot
     /*
     :copymem_eor($6000,$6000-1,5)
     :copymem_eor($6000+320*20,$6000+320*20-1,5)
     */
+
+   :B2_DECRUNCH(crunch_logo)
+   :copymem_bitmap($6000,$e000)
+   :copymem($5000,$4000,4)
+
+    :FillBitmap($6000,0)
+    :FillScreenMemory($5000,(0<<4) + 0)
+
+    lda $d011
+    eor #%00010000
+    sta $d011
+
+    :centerwipein_trans(10)
+    :wait(255)
+    :wait(255)
+    :wait(255)
+    :centerwipeout_trans(20)
+
+    lda $d011
+    eor #%00010000
+    sta $d011
+
+   :B2_DECRUNCH(crunch_fox)
+   :copymem_bitmap($6000,$e000)
+   :copymem($5000,$4000,4)
+
+    :FillBitmap($6000,0)
+    :FillScreenMemory($5000,(0<<4) + 0)
+
+    lda $d011
+    eor #%00010000
+    sta $d011
+
+    :centerwipein_trans(10)
+    :wait(255)
+    :wait(255)
+    :wait(255)
+    :centerwipeout_trans(20)
+
+    lda $d011
+    eor #%00010000
+    sta $d011
+
+
+   :B2_DECRUNCH(crunch_broke)
+   :copymem_bitmap($6000,$e000)
+   :copymem($5000,$4000,4)
+
+    :FillBitmap($6000,0)
+    :FillScreenMemory($5000,(0<<4) + 0)
+
+    lda $d011
+    eor #%00010000
+    sta $d011
+
+
+    :centerwipein_trans(10)
+    :wait(255)
+    :wait(255)
+    :wait(255)
+    :centerwipeout_trans(20)
+
+    lda $d011
+    eor #%00010000
+    sta $d011
 
 //    :drawlinetri()
 
@@ -1162,6 +1369,43 @@ wait:
 
     jmp loop
 
+.macro centerwipeout_trans(waittime) {
+
+    .for(var i=0;i<13;i++) { 
+        :wait(waittime)
+
+        :clear_colorline($5000+40*12+40*i)
+        :clear_colorline($5000+40*12-40*i)
+        :clear_line($6000+320*12+320*i)
+        :clear_line($6000+320*12-320*i)
+    }
+}
+.macro centerwipein_trans(waittime) {
+    .for(var i=0;i<13;i++) { 
+        :wait(waittime)
+
+        :copymem_line($e000+320*12+320*i,$6000+320*12+320*i)
+        :copymem_line($e000+320*12-320*i,$6000+320*12-320*i)
+        :copymem_colorline($4000+40*12+40*i,$5000+40*12+40*i)
+        :copymem_colorline($4000+40*12-40*i,$5000+40*12-40*i)
+
+
+    }
+}
+
+.macro wait(time) {
+    ldx #time
+waiter1:
+waiter: 
+    lda #$ff 
+    cmp $d012 
+    bne waiter 
+
+    dex
+    bne waiter1
+
+}
+/*
 .macro drawlinetri() {
         ldx frame2
     lda #28
@@ -1222,7 +1466,7 @@ wait:
 
 sintab:
  .fill 256,round(80*atan(toRadians(i*360/200)))
-
+*/
 nmi_nop:
     //
     // This is the irq handler for the NMI. Just returns without acknowledge.
@@ -1303,11 +1547,6 @@ frame2:
 
 .pc = $8000 "crunchdata"
 
-
-.label crunch_logo = *
-.modify B2() {
-    :PNGtoHIRES("quadlogo.png", bitmap_address, screen_memory)
-}
 .label crunch_fox = *
 .modify B2() {
     :PNGtoHIRES("thefox2.png", bitmap_address, screen_memory)
@@ -1315,6 +1554,10 @@ frame2:
 .label crunch_broke = *
 .modify B2() {
     :PNGtoHIRES("broke.png", bitmap_address, screen_memory)
+}
+.label crunch_logo = *
+.modify B2() {
+    :PNGtoHIRES("quadlogo.png", bitmap_address, screen_memory)
 }
 
 
