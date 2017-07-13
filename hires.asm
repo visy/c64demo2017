@@ -1265,14 +1265,13 @@ start2:
     sta $d020
     sta $d021
 
-//    FillBitmap($6000,0)
-//    FillScreenMemory($5000,(1<<4) + 5)
-//    :FillBitmap($6000,0)
-//    :FillScreenMemory($5000,(1<<4) + 0)
     ldx #0
     ldy #0
     lda #music.startSong                      //<- Here we get the startsong and init address from the sid file
     jsr music.init  
+
+    :FillBitmap($6000,0)
+    :FillScreenMemory($5000,(0<<4) + 0)
 
     lda #$02   // set vic bank #1 with the dkd loader way
     and #$03
@@ -1283,22 +1282,20 @@ start2:
     SetScreenMemory(screen_memory - vic_base)
     SetBitmapAddress(bitmap_address - vic_base)
 
-    RasterInterrupt(mainirq, $35)
-
-    cli
-
     lda $d011
     eor #%00010000 // off
     sta $d011
 
-    :FillBitmap($6000,0)
-    :FillScreenMemory($5000,(0<<4) + 0)
 
-    :B2_DECRUNCH(crunch_logo)
+   // :B2_DECRUNCH(crunch_logo)
 
     lda $d011
     eor #%00010000 // on
     sta $d011
+
+    RasterInterrupt(mainirq, $35)
+
+    cli
 
 loop:
 wait: 
@@ -1306,64 +1303,126 @@ wait:
     cmp $d012 
     bne wait 
 
+    jsr dithers
     // glitch logo top & bot
     /*
     :copymem_eor($6000,$6000-1,5)
     :copymem_eor($6000+320*20,$6000+320*20-1,5)
     */
 
-    lda #<$9000
-    sta $FB
-    lda #>$9000
-    sta $FC
-    lda #1 // fox
-    jsr loadfile // load file #1 to $5000 (hires gfx memory dump)
-
-    :centerwipeout_trans(20)
-
-    lda $d011
-    eor #%00010000 // off
-    sta $d011
-
-    :FillBitmap($6000,0)
-    :FillScreenMemory($5000,(0<<4) + 0)
-
-    lda $d011
-    eor #%00010000 // on
-    sta $d011
-
-    :centerwipein_trans(10)
-
-    lda #<$9000
-    sta $FB
-    lda #>$9000
-    sta $FC
-    lda #2 // broke
-    jsr loadfile // load file #2 to $5000 (hires gfx memory dump)
-
-    :centerwipeout_trans(20)
-
-    lda $d011
-    eor #%00010000 // off
-    sta $d011
-
-    :FillBitmap($6000,0)
-    :FillScreenMemory($5000,(0<<4) + 0)
-
-    lda $d011
-    eor #%00010000 // on
-    sta $d011
-
-    :centerwipein_trans(10)
-
-    inc frame2
-
-
-
-//    :drawtri(frame2,frame2g)
-
 
     jmp loop
+
+dithers:
+    :FillBitmap($6000,0)
+    :FillScreenMemory($5000,(11<<4) + 0)
+
+    lda #<$9000
+    sta $FB
+    lda #>$9000
+    sta $FC
+    lda #5 
+    jsr loadfile 
+
+    :copymem_eor($9000,$6000,40)
+
+    :wait(255)
+
+    lda #<$9000
+    sta $FB
+    lda #>$9000
+    sta $FC
+    lda #3 
+    jsr loadfile 
+
+    :FillScreenMemory($5000,(12<<4) + 0)
+
+    :copymem_eor($9000,$6000,40)
+
+    :wait(255)
+
+    lda #<$9000
+    sta $FB
+    lda #>$9000
+    sta $FC
+    lda #4
+    jsr loadfile 
+
+    :FillScreenMemory($5000,(15<<4) + 0)
+
+    :copymem_eor($9000,$6000,40)
+
+    :wait(255)
+
+    lda #<$9000
+    sta $FB
+    lda #>$9000
+    sta $FC
+    lda #5
+    jsr loadfile 
+
+    :FillScreenMemory($5000,(1<<4) + 0)
+
+    :copymem_eor($9000,$6000,40)
+
+    :wait(255)
+
+    lda #<$9000
+    sta $FB
+    lda #>$9000
+    sta $FC
+    lda #3
+    jsr loadfile 
+
+    :FillScreenMemory($5000,(15<<4) + 0)
+
+    :copymem_eor($9000,$6000,40)
+
+    :wait(255)
+
+    lda #<$9000
+    sta $FB
+    lda #>$9000
+    sta $FC
+    lda #4
+    jsr loadfile 
+
+    :FillScreenMemory($5000,(12<<4) + 0)
+
+    :copymem_eor($9000,$6000,40)
+
+    :wait(255)
+
+
+    rts
+
+pics_fromdisk:
+/*
+    lda #<$9000
+    sta $FB
+    lda #>$9000
+    sta $FC
+    lda prgnum // prg index
+    jsr loadfile // load file #1 to $5000 (hires gfx memory dump)
+    :centerwipein_trans(10)
+
+    :drawtri(frame2,frame2)
+
+    inc frame2
+    inc prgnum
+
+    lda prgnum
+    cmp #6
+    bne no_resetprg
+    lda #1
+    sta prgnum
+no_resetprg:
+*/
+    rts
+
+prgnum:
+    .byte 1
+
 
 .macro centerwipeout_trans(waittime) {
 

@@ -1,0 +1,12 @@
+parsing
+Got 2 errors while executing:
+  (/Users/visy/dev/kick/hires2/makedisk.sh 1:2) Token must be an identifer
+  (/Users/visy/dev/kick/hires2/makedisk.sh 2:1) Invalid token
+
+#!/bin/sh
+ ^
+
+Error: Token must be an identifer
+at line 1, column 2 in makedisk.sh
+
+

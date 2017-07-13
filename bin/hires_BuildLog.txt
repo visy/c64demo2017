@@ -15,7 +15,7 @@ Default-segment:
   $0801-$080c Basic
   $080e-$0cda Basic End
   $1000-$1587 dkdloader
-  $1588-$2bd8 democode
+  $1588-$1981 democode
   $8000-$8f6d crunchdata
   $8f6e-$8f6d crunchdata end
   $c200-$cf77 Music
