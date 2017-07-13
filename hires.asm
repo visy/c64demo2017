@@ -1194,7 +1194,31 @@ no_nullframe:
 tri_done:
 }
 
+.pc = $1000 "dkdloader"
+
+dkdloader:
+.import c64 "dkdload.prg"
+
+loadfile:
+    ldx #<$5000
+    ldy #>$5000
+    lda #1
+    jsr $0400
+    rts
+
+.pc = * "democode"
+
 start2:
+    lda #1
+    sta $d020
+    :WaitForSpace()
+    lda #$36
+    sta $01
+    lda #$04
+    jsr dkdloader // init the dkd loader to $0100
+    lda #2
+    sta $d020
+    :WaitForSpace()
 
     jsr generate_lookups
     sei
@@ -1262,6 +1286,9 @@ start2:
     SetBitmapAddress(bitmap_address - vic_base)
 
     RasterInterrupt(mainirq, $35)
+    lda #3
+    sta $d020
+    :WaitForSpace()
 
 
     cli
@@ -1272,14 +1299,24 @@ start2:
     :copymem($7180,$8000,13)
 */
 //    :copymem($68c0,$68c0,15)
-    lda $d011
-    eor #%00010000
-    sta $d011
-
     :FillBitmap($6000,0)
     :FillScreenMemory($5000,(1<<4) + 0)
 
+    lda #4
+    sta $d020
+    :WaitForSpace()
 
+
+    jsr loadfile // load file #1 to $5000 (hires gfx memory dump)
+
+    lda #5
+    sta $d020
+loop2:
+    jmp loop2
+
+    lda $d011
+    eor #%00010000
+    sta $d011
 
 loop:
 wait: 
@@ -1376,8 +1413,6 @@ wait:
 
         :clear_colorline($5000+40*12+40*i)
         :clear_colorline($5000+40*12-40*i)
-        :clear_line($6000+320*12+320*i)
-        :clear_line($6000+320*12-320*i)
     }
 }
 .macro centerwipein_trans(waittime) {

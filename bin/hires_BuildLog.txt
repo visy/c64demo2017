@@ -16,7 +16,9 @@ Memory Map
 ----------
 Default-segment:
   $0801-$080c Basic
-  $080e-$3749 Basic End
+  $080e-$0cda Basic End
+  $1000-$1589 dkdloader
+  $158a-$37d0 democode
   $8000-$b446 crunchdata
   $c200-$cf77 Music
 

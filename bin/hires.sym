@@ -1,10 +1,10 @@
 .label zp_base=$3
-.label mainirq=$36f2
+.label mainirq=$3779
 .label MShort=$8c4
 .label LLen=$861
 .label M8=$8b5
 .label put=$5
-.label loop=$e01
+.label loop=$1710
 .label Literal=$83b {
 }
 .label Get1=$8ea
@@ -15,35 +15,38 @@
 .label Mdone=$8c6
 .label BITTAB=$ad8
 .label bits=$3
+.label loop2=$1705
 .label MLen=$8d9
 .label crunch_fox=$8000
 .label XTAB=$bd8
 .label End=$8e9
 .label M_1=$8a9 {
 }
-.label frame=$3748
+.label frame=$37cf
 .label GnbInc=$8f4
-.label wait=$e01
+.label wait=$1710
 .label LLoop=$855
 .label GnbEnd=$8fd
 .label genloop=$908
+.label dkdloader=$1000
 .label Match=$872 {
 }
 .label generate_lookups=$906
-.label start2=$cdb
+.label start2=$158a
 .label YTABHI=$948
 .label hline_sto=$cd8
 .label YTABLO=$a10
 .label L1=$85e
 .label crunch_logo=$a4d9
-.label frame2=$3749
+.label frame2=$37d0
 .label start=$80e
 .label DLoop=$832 {
 }
+.label loadfile=$1580
 .label MLoop=$8d3
 .label genskip=$942
 .label crunch_broke=$8f2e
 .label Tab=$8fe
 .label genloop2=$932
 .label MLda=$8d4
-.label nmi_nop=$36f1
+.label nmi_nop=$3778
