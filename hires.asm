@@ -1204,13 +1204,9 @@ loadfile:
     rts
 
 start2:
-
-    lda $d011
-    eor #%00010000 // off
-    sta $d011
-
-    lda #0
+    lda #14
     sta $d020
+    lda #6
     sta $d021
 
     SwitchVICBank(1)
@@ -1275,17 +1271,6 @@ start2:
     RasterInterrupt(mainirq, $35)
 
     cli
-
-    lda $d011
-    eor #%00010000 // on
-    sta $d011
-
-    lda #14
-    sta $d020
-    lda #6
-    sta $d021
-
-
 
     ldx #255
     ldy #255
