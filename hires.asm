@@ -532,12 +532,9 @@ checkup:
         sta $FD 
         lda #>dst
         sta $FE
-
         ldy #$00
-
     copyloop:
-
-        lda #0
+        txa
         sta ($FD),y  // indirect index dest memory address, starting at $00
         iny
         cpy #40
@@ -1199,7 +1196,7 @@ tri_done:
 dkdloader:
 .import c64 "dkdload.prg"
 
-.pc = $0d00 "democode"
+.pc = $0cdb "democode"
 
 loadfile:
     ldx $FB
@@ -1308,7 +1305,8 @@ start2:
 
 
 loop16:
-    wait(1)
+    ldy #1
+    jsr wait
 
     sei
 
@@ -1410,8 +1408,10 @@ exit16:
 
 // hires
 
-    :wait(255)
-    :wait(255)
+    ldy #255
+    jsr wait
+    ldy #255
+    jsr wait
 
     lda $d011
     eor #%00010000 // off
@@ -1432,16 +1432,18 @@ exit16:
     eor #%00010000 // on
     sta $d011
 
-    :wait(255)
-    :wait(255)
-    :wait(255)
-    :wait(255)
+    ldy #255
+    jsr wait
+    ldy #255
+    jsr wait
+    ldy #255
+    jsr wait
+    ldy #255
+    jsr wait
 
 loop:
-wait: 
-    lda #$ff 
-    cmp $d012 
-    bne wait 
+    ldy #255
+    jsr wait
 
     jsr dithers
 
@@ -1465,9 +1467,12 @@ wait:
 
     :centerwipein_trans(30)
 
-    :wait(255)
-    :wait(255)
-    :wait(255)
+    ldy #255
+    jsr wait
+    ldy #255
+    jsr wait
+    ldy #255
+    jsr wait
 
     :centerwipeout_trans(30)
 
@@ -1551,7 +1556,8 @@ dithers:
 
     :copymem_eor($9000,$6000,40)
 
-    :wait(255)
+    ldy #255
+    jsr wait
 
     lda #<$9000
     sta $FB
@@ -1564,7 +1570,8 @@ dithers:
 
     :copymem_eor($9000,$6000,40)
 
-    :wait(255)
+    ldy #255
+    jsr wait
 
     lda #<$9000
     sta $FB
@@ -1577,7 +1584,8 @@ dithers:
 
     :copymem_eor($9000,$6000,40)
 
-    :wait(255)
+    ldy #255
+    jsr wait
 
     lda #<$9000
     sta $FB
@@ -1590,7 +1598,8 @@ dithers:
 
     :copymem_eor($9000,$6000,40)
 
-    :wait(255)
+    ldy #255
+    jsr wait
 
     lda #<$9000
     sta $FB
@@ -1603,7 +1612,8 @@ dithers:
 
     :copymem_eor($9000,$6000,40)
 
-    :wait(255)
+    ldy #255
+    jsr wait
 
     lda #<$9000
     sta $FB
@@ -1616,7 +1626,8 @@ dithers:
 
     :copymem_eor($9000,$6000,40)
 
-    :wait(255)
+    ldy #255
+    jsr wait
 
     :FillScreenMemory($5000,(11<<4) + 0)
 
@@ -1649,14 +1660,15 @@ no_resetprg:
 prgnum:
     .byte 1
 
-helper:
     .byte 0
 clear_y:
     .byte 0,0
 
 .macro centerwipeout_trans(waittime) {
+    ldx #0
     .for(var i=0;i<13;i++) { 
-        :wait(waittime)
+        ldy #waittime
+        jsr wait
         :clear_colorline($5000+40*12+40*i)
         :clear_colorline($5000+40*12-40*i)
     }
@@ -1665,25 +1677,25 @@ clear_y:
     :FillScreenMemory($5000,(0<<4)+0)
     :copymem($a000,$6000,35)
 
+    ldx #0
     .for(var i=0;i<13;i++) { 
-        :wait(waittime)
+        ldy #waittime
+        jsr wait
         :copymem_colorline($9000+40*12+40*i,$5000+40*12+40*i)
         :copymem_colorline($9000+40*12-40*i,$5000+40*12-40*i)
     }
 }
 
-.macro wait(time) {
-    ldx #time
+
+
+wait:
 waiter1:
 waiter: 
-    lda #$ff 
-    cmp $d012 
+    cpx $d012 
     bne waiter 
-
-    dex
+    dey
     bne waiter1
-
-}
+    rts
 /*
 .macro drawlinetri() {
         ldx frame2
