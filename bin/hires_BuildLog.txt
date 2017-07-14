@@ -15,8 +15,8 @@ Memory Map
 Default-segment:
   $0801-$080c Basic
   $080e-$0cda Basic End
-  $0cdb-$1e42 democode
-  $1e43-$209b sintab
+  $0cdb-$1e77 democode
+  $1e78-$20d0 sintab
   $7900-$7e7f dkdloader
   $8000-$8f6d crunchdata
   $8f6e-$8f6d crunchdata end

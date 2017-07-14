@@ -321,6 +321,7 @@ checkup:
         .eval ColorTable.put(C64L_blue,14)
         .eval ColorTable.put(C64L_grey,15)
 
+
         .pc = BMPData "Hires Bitmap"
 
         .var ScreenMem = List()
@@ -1279,8 +1280,24 @@ start2:
     eor #%00010000 // on
     sta $d011
 
+    lda #14
+    sta $d020
+    lda #6
+    sta $d021
+
+
+
+    ldx #255
+    ldy #255
+    jsr wait
+    ldx #255
+    ldy #255
+    jsr wait
+
+
 // 16x16
-    :FillScreenMemory($d800,(1<<4) + 1) // color ram
+
+    :FillScreenMemory($d800,(0<<4) + 1) // color ram
     :FillScreenMemory($4400, 0) // screen mem
     :FillScreenMemory($6000, 0) // character mem aka 128x128 "framebuffer"
     :FillScreenMemory($63e8, 0) // character mem
@@ -1296,10 +1313,6 @@ start2:
 
     lda #$02   // set vic bank #1
     sta $dd00
-
-    lda #0
-    sta $d020
-    sta $d021
 
 
 loop16:
@@ -1412,17 +1425,32 @@ feedback16:
 
     rts
 
+fade_border_tab:
+    .byte 14,8,4,11,10,9,6,0
+
+
 exit16:
 
+    :centerwipeout16_trans(30)
 
-
-
-// hires
-
-
-    ldy #32
+    lda #0
+    sta $FA
+// hires part
+fade_border1:
+    ldx #255
+    ldy #45
     jsr wait
-    :centerwipeout_trans(30)
+    ldx $FA
+    lda fade_border_tab,x
+    sta $d020
+    inx
+    stx $FA
+    cpx #7
+    bne fade_border1
+
+    lda #0
+    sta $d020
+    sta $d021
 
     ldy #255
     jsr wait
@@ -1677,6 +1705,16 @@ prgnum:
     .byte 0
 clear_y:
     .byte 0,0
+
+.macro centerwipeout16_trans(waittime) {
+    ldx #0
+    .for(var i=0;i<13;i++) { 
+        ldy #waittime
+        jsr wait
+        :clear_colorline($4400+40*12+40*i)
+        :clear_colorline($4400+40*12-40*i)
+    }
+}
 
 .macro centerwipeout_trans(waittime) {
     ldx #0
