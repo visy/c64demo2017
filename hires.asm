@@ -1392,7 +1392,7 @@ sinop:
 no_index_clear:
 
     lda frame
-    cmp #64
+    cmp #32
     bne no_fres
 
     inc index16+1
@@ -1403,8 +1403,22 @@ no_index_clear:
     beq exit16
 
 no_fres:
+    jsr feedback16
+
     jmp loop16
+
+feedback16:
+//    copymem_eor($6000,$6081,4) // sierpinski
+
+
+    copymem_eor($6000,$6081,4)
+
+    rts
+
 exit16:
+
+
+
 
 // hires
 
