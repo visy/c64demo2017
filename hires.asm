@@ -1194,18 +1194,18 @@ no_nullframe:
 tri_done:
 }
 
-.pc = $1000 "dkdloader"
+.pc = $4000 "dkdloader"
 
 dkdloader:
 .import c64 "dkdload.prg"
+
+.pc = $0d00 "democode"
 
 loadfile:
     ldx $FB
     ldy $FC
     jsr $0100
     rts
-
-.pc = * "democode"
 
 start2:
 
@@ -1309,8 +1309,29 @@ wait:
 
     jsr dithers
 
-    :wait(200)
-    :wait(200)
+    lda #<$9000
+    sta $FB
+    lda #>$9000
+    sta $FC
+    lda #1
+    jsr loadfile 
+
+    :centerwipein_trans(30)
+
+    lda #<$9000
+    sta $FB
+    lda #>$9000
+    sta $FC
+    lda #2
+    jsr loadfile 
+
+    :centerwipein_trans(30)
+
+    :wait(255)
+    :wait(255)
+    :wait(255)
+
+    :centerwipeout_trans(30)
 
     // glitch logo top & bot
     /*
@@ -1401,6 +1422,7 @@ dithers:
 
     :wait(255)
 
+    :FillScreenMemory($5000,(11<<4) + 0)
 
     rts
 
