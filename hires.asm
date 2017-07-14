@@ -1314,7 +1314,7 @@ loop16:
 
     lda #$44
     sta i162+2
-    lda index
+    lda index16
     tax
     clc
     lda sintab,x
@@ -1364,15 +1364,15 @@ sinop:
     jsr init16 // address for 16x16 screen pos
     cli
     lda #0
-    ldx index
+    ldx index16
     clc
     adc sintab,x 
     clc
     adc #64
     tax
-    lda index
+    lda index16
     clc
-    adc index+1
+    adc index16+1
     and #255
     tay
     lda #63
@@ -1382,13 +1382,13 @@ sinop:
     jsr putpix16
 
     inc frame
-    inc index
+    inc index16
 
-    lda index
+    lda index16
     cmp #255
     bne no_index_clear
     lda #0
-    sta index
+    sta index16
     :FillScreenMemory($4400, 0) // screen mem
 
 no_index_clear:
@@ -1397,22 +1397,25 @@ no_index_clear:
     cmp #64
     bne no_fres
 
-    inc index+1
+    inc index16+1
     lda #0
     sta frame
+    lda index16+1
+    cmp #10
+    beq exit16
 
 no_fres:
-
-
     jmp loop16
-
+exit16:
 
 // hires
 
     :wait(255)
     :wait(255)
-    :wait(255)
-    :wait(255)
+
+    lda $d011
+    eor #%00010000 // off
+    sta $d011
 
     lda #$02   // set vic bank #1 with the dkd loader way
     and #$03
@@ -1424,6 +1427,15 @@ no_fres:
     SetBitmapAddress(bitmap_address - vic_base)
 
     :B2_DECRUNCH(crunch_logo)
+
+    lda $d011
+    eor #%00010000 // on
+    sta $d011
+
+    :wait(255)
+    :wait(255)
+    :wait(255)
+    :wait(255)
 
 loop:
 wait: 
@@ -1442,12 +1454,14 @@ wait:
 
     :centerwipein_trans(30)
 
+
     lda #<$9000
     sta $FB
     lda #>$9000
     sta $FC
     lda #2
     jsr loadfile 
+    :centerwipeout_trans(30)
 
     :centerwipein_trans(30)
 
@@ -1490,7 +1504,7 @@ putpix16:
     sta ($fb),y
     rts
 
-index:
+index16:
     .byte 0,0
 
 bitmask16:
@@ -1635,27 +1649,26 @@ no_resetprg:
 prgnum:
     .byte 1
 
+helper:
+    .byte 0
+clear_y:
+    .byte 0,0
 
 .macro centerwipeout_trans(waittime) {
-
     .for(var i=0;i<13;i++) { 
         :wait(waittime)
-
         :clear_colorline($5000+40*12+40*i)
         :clear_colorline($5000+40*12-40*i)
     }
 }
 .macro centerwipein_trans(waittime) {
+    :FillScreenMemory($5000,(0<<4)+0)
+    :copymem($a000,$6000,35)
+
     .for(var i=0;i<13;i++) { 
         :wait(waittime)
-
-        :copymem_line($a000+320*12+320*i,$6000+320*12+320*i)
-        :copymem_line($a000+320*12-320*i,$6000+320*12-320*i)
-
         :copymem_colorline($9000+40*12+40*i,$5000+40*12+40*i)
         :copymem_colorline($9000+40*12-40*i,$5000+40*12-40*i)
-
-
     }
 }
 
@@ -1734,9 +1747,9 @@ waiter:
 
 .pc = * "sintab"
 sintab:
- .fill 256,round(63*sin(toRadians(i*360/128)))
+ .fill 256,round(63*sin(toRadians(i*360/63)))
 costab:
- .fill 256,round(63*cos(toRadians(i*360/128)))
+ .fill 256,round(63*cos(toRadians(i*360/63)))
 
 nmi_nop:
     //

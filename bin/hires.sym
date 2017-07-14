@@ -1,14 +1,16 @@
 .label zp_base=$3
 .label over_half_sin=$e80
-.label sintab=$2366
+.label sintab=$1ede
 .label no_index_clear=$ee6
-.label mainirq=$2567
+.label mainirq=$20df
 .label MShort=$8c4
 .label LLen=$861
 .label M8=$8b5
 .label put=$5
-.label i162=$20c7
-.label loop=$f5c
+.label i162=$1c3c
+.label helper=$1edb
+.label loop=$f8b
+.label clear_y=$1edc
 .label Literal=$83b {
 }
 .label Get1=$8ea
@@ -16,54 +18,56 @@
 .label Get3=$855
 .label Get2=$8b8
 .label GetNewBits=$8ea
-.label dithers=$20e6 {
+.label dithers=$1c5b {
 }
 .label Mdone=$8c6
 .label BITTAB=$ad8
+.label index16=$1c2d
 .label bits=$3
-.label index=$20b8
 .label MLen=$8d9
-.label bitmask16=$20ba
+.label bitmask16=$1c2f
 .label XTAB=$bd8
 .label End=$8e9
 .label sinop=$e93
 .label M_1=$8a9 {
 }
-.label frame=$25bd
+.label frame=$2135
 .label GnbInc=$8f4
 .label no_neg_sin=$e90
-.label wait=$f5c
+.label wait=$f8b
 .label LLoop=$855
 .label GnbEnd=$8fd
-.label initic=$20c4
-.label pics_fromdisk=$2364
+.label initic=$1c39
+.label pics_fromdisk=$1ed9
 .label genloop=$908
-.label ichar=$20c2
+.label ichar=$1c37
 .label dkdloader=$7900
 .label Match=$872 {
 }
 .label loop16=$e47 {
 }
-.label prgnum=$2365
-.label init16=$20c2
+.label prgnum=$1eda
+.label init16=$1c37
 .label generate_lookups=$906
 .label start2=$d08
-.label putpix16=$209d
+.label putpix16=$1c12
 .label YTABHI=$948
 .label hline_sto=$cd8
 .label YTABLO=$a10
 .label L1=$85e
+.label exit16=$eff {
+}
 .label crunch_logo=$8000
-.label frame2=$25be
+.label frame2=$2136
 .label start=$80e
 .label DLoop=$832 {
 }
 .label loadfile=$d00
-.label costab=$2466
+.label costab=$1fde
 .label MLoop=$8d3
 .label genskip=$942
 .label Tab=$8fe
 .label genloop2=$932
 .label MLda=$8d4
-.label nmi_nop=$2566
-.label no_fres=$ef5
+.label nmi_nop=$20de
+.label no_fres=$efc
