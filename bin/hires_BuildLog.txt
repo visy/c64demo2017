@@ -4,6 +4,7 @@ B2: [ Hires Color Data, Hires Bitmap ] $5000 - $7f3f Packed size $0f6e (32%) Pac
 flex pass 2
 flex pass 3
 Output pass
+  bits=%10
   vic_bank: 1
   vic_base: 4000
   screen_memory: 5000
@@ -15,7 +16,7 @@ Default-segment:
   $0801-$080c Basic
   $080e-$0cda Basic End
   $1000-$1587 dkdloader
-  $1588-$1981 democode
+  $1588-$1965 democode
   $8000-$8f6d crunchdata
   $8f6e-$8f6d crunchdata end
   $c200-$cf77 Music

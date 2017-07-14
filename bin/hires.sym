@@ -1,10 +1,10 @@
 .label zp_base=$3
-.label mainirq=$192a
+.label mainirq=$190e
 .label MShort=$8c4
 .label LLen=$861
 .label M8=$8b5
 .label put=$5
-.label loop=$16b4
+.label loop=$1680
 .label Literal=$83b {
 }
 .label Get1=$8ea
@@ -12,7 +12,7 @@
 .label Get3=$855
 .label Get2=$8b8
 .label GetNewBits=$8ea
-.label dithers=$16c1 {
+.label dithers=$16a5 {
 }
 .label Mdone=$8c6
 .label BITTAB=$ad8
@@ -22,17 +22,17 @@
 .label End=$8e9
 .label M_1=$8a9 {
 }
-.label frame=$1980
+.label frame=$1964
 .label GnbInc=$8f4
-.label wait=$16b4
+.label wait=$1680
 .label LLoop=$855
 .label GnbEnd=$8fd
-.label pics_fromdisk=$1927
+.label pics_fromdisk=$190b
 .label genloop=$908
 .label dkdloader=$1000
 .label Match=$872 {
 }
-.label prgnum=$1928
+.label prgnum=$190c
 .label generate_lookups=$906
 .label start2=$1588
 .label YTABHI=$948
@@ -40,7 +40,7 @@
 .label YTABLO=$a10
 .label L1=$85e
 .label crunch_logo=$8000
-.label frame2=$1981
+.label frame2=$1965
 .label start=$80e
 .label DLoop=$832 {
 }
@@ -50,4 +50,4 @@
 .label Tab=$8fe
 .label genloop2=$932
 .label MLda=$8d4
-.label nmi_nop=$1929
+.label nmi_nop=$190d

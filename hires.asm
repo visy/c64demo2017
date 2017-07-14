@@ -1209,6 +1209,16 @@ loadfile:
 
 start2:
 
+    lda $d011
+    eor #%00010000 // off
+    sta $d011
+
+    lda #0
+    sta $d020
+    sta $d021
+
+    SwitchVICBank(1)
+
     lda #$36
     sta $01
     lda #$01
@@ -1261,17 +1271,10 @@ start2:
     lda #$01
     sta $dd0e       // Start timer A -> NMI
 
-    lda #0
-    sta $d020
-    sta $d021
-
     ldx #0
     ldy #0
     lda #music.startSong                      //<- Here we get the startsong and init address from the sid file
     jsr music.init  
-
-    :FillBitmap($6000,0)
-    :FillScreenMemory($5000,(0<<4) + 0)
 
     lda #$02   // set vic bank #1 with the dkd loader way
     and #$03
@@ -1282,20 +1285,21 @@ start2:
     SetScreenMemory(screen_memory - vic_base)
     SetBitmapAddress(bitmap_address - vic_base)
 
-    lda $d011
-    eor #%00010000 // off
-    sta $d011
 
+    RasterInterrupt(mainirq, $35)
 
-   // :B2_DECRUNCH(crunch_logo)
+    cli
+
+    :B2_DECRUNCH(crunch_logo)
 
     lda $d011
     eor #%00010000 // on
     sta $d011
 
-    RasterInterrupt(mainirq, $35)
-
-    cli
+    :wait(255)
+    :wait(255)
+    :wait(255)
+    :wait(255)
 
 loop:
 wait: 
@@ -1304,6 +1308,10 @@ wait:
     bne wait 
 
     jsr dithers
+
+    :wait(200)
+    :wait(200)
+
     // glitch logo top & bot
     /*
     :copymem_eor($6000,$6000-1,5)
