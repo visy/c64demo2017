@@ -133,7 +133,7 @@ al C:1b9d .copyloop2__48
 al C:1bc3 .copyloop2__49
 al C:1c2b .copyloop2__50
 al C:1c51 .copyloop2__51
-al C:4000 .dkdloader
+al C:7900 .dkdloader
 al C:5000 .ScreenMemColors
 al C:872 .Match
 al C:21c0 .prgnum

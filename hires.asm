@@ -1194,7 +1194,7 @@ no_nullframe:
 tri_done:
 }
 
-.pc = $4000 "dkdloader"
+.pc = $7900 "dkdloader" // will be overwritten with gfx runtime
 
 dkdloader:
 .import c64 "dkdload.prg"

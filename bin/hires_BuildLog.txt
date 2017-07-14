@@ -15,8 +15,8 @@ Memory Map
 Default-segment:
   $0801-$080c Basic
   $080e-$0cda Basic End
-  $0d00-$2219 democode
-  $4000-$457f dkdloader
+  $0d00-$712f democode
+  $7900-$7e7f dkdloader
   $8000-$8f6d crunchdata
   $8f6e-$8f6d crunchdata end
   $c200-$cf77 Music

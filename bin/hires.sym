@@ -29,7 +29,7 @@
 .label GnbEnd=$8fd
 .label pics_fromdisk=$21bf
 .label genloop=$908
-.label dkdloader=$4000
+.label dkdloader=$7900
 .label Match=$872 {
 }
 .label prgnum=$21c0
