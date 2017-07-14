@@ -1453,7 +1453,7 @@ fade_border1:
     SetScreenMemory(screen_memory - vic_base)
     SetBitmapAddress(bitmap_address - vic_base)
 
-    lda #6
+    lda #0
     sta $d020
 
     :B2_DECRUNCH(crunch_logo)
@@ -1493,10 +1493,27 @@ loop:
     sta $FC
     lda #2
     jsr loadfile 
+
     :centerwipeout_trans(30)
 
     :centerwipein_trans(30)
 
+
+    lda #<$9000
+    sta $FB
+    lda #>$9000
+    sta $FC
+    lda #6
+    jsr loadfile 
+
+    :centerwipeout_trans(30)
+
+    lda #6
+    sta $d020
+
+    :centerwipein_trans(30)
+
+    ldx #255
     ldy #255
     jsr wait
     ldy #255
@@ -1505,6 +1522,9 @@ loop:
     jsr wait
 
     :centerwipeout_trans(30)
+
+    lda #0
+    sta $d020
 
     // glitch logo top & bot
     /*
@@ -1887,8 +1907,9 @@ frame2:
 
 .label crunch_logo = *
 .modify B2() {
-    :PNGtoHIRES("bune.png", bitmap_address, screen_memory)
+    :PNGtoHIRES("quadlogo.png", bitmap_address, screen_memory)
 }
+
 .pc = * "crunchdata end"
 
 
