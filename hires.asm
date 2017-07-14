@@ -1276,6 +1276,144 @@ start2:
     lda #music.startSong                      //<- Here we get the startsong and init address from the sid file
     jsr music.init  
 
+    RasterInterrupt(mainirq, $35)
+
+    cli
+
+    lda $d011
+    eor #%00010000 // on
+    sta $d011
+
+// 16x16
+    :FillScreenMemory($d800,(1<<4) + 1) // color ram
+    :FillScreenMemory($4400, 0) // screen mem
+    :FillScreenMemory($6000, 0) // character mem aka 128x128 "framebuffer"
+    :FillScreenMemory($63e8, 0) // character mem
+    :FillScreenMemory($63e8+$3e8*1, 0) // character mem
+    :FillScreenMemory($63e8+$3e8*2, 0) // character mem
+    lda #%00011000
+    sta $d018
+
+    lda #$02   // set vic bank #1 with the dkd loader way
+    and #$03
+    eor #$3f
+    sta $dd02
+
+    lda #$02   // set vic bank #1
+    sta $dd00
+
+    lda #0
+    sta $d020
+    sta $d021
+
+
+loop16:
+    wait(1)
+
+    sei
+
+    lda #$44
+    sta i162+2
+    lda index
+    tax
+    clc
+    lda sintab,x
+
+    sta $FC
+    cmp #128
+    bcc over_half_sin
+    lda #$65 // adc zp
+    sta sinop
+
+    lda $FC
+    clc
+    ror
+    clc
+    ror
+    clc
+    ror
+    clc
+    sta $FC
+    lda #32
+    sbc $FC
+    sta $FC
+
+    jmp no_neg_sin
+over_half_sin:
+    lda $FC
+    clc
+    ror
+    clc
+    ror
+    clc
+    ror
+    clc
+    sta $FC
+
+    lda #$e5 // sbc zp
+    sta sinop
+
+no_neg_sin:
+    
+    lda #4*40+12
+    clc
+sinop:
+    adc $FC
+
+    sta i162+1
+    jsr init16 // address for 16x16 screen pos
+    cli
+    lda #0
+    ldx index
+    clc
+    adc sintab,x 
+    clc
+    adc #64
+    tax
+    lda index
+    clc
+    adc index+1
+    and #255
+    tay
+    lda #63
+    adc costab,y
+    tay
+
+    jsr putpix16
+
+    inc frame
+    inc index
+
+    lda index
+    cmp #255
+    bne no_index_clear
+    lda #0
+    sta index
+    :FillScreenMemory($4400, 0) // screen mem
+
+no_index_clear:
+
+    lda frame
+    cmp #64
+    bne no_fres
+
+    inc index+1
+    lda #0
+    sta frame
+
+no_fres:
+
+
+    jmp loop16
+
+
+// hires
+
+    :wait(255)
+    :wait(255)
+    :wait(255)
+    :wait(255)
+
     lda #$02   // set vic bank #1 with the dkd loader way
     and #$03
     eor #$3f
@@ -1285,21 +1423,7 @@ start2:
     SetScreenMemory(screen_memory - vic_base)
     SetBitmapAddress(bitmap_address - vic_base)
 
-
-    RasterInterrupt(mainirq, $35)
-
-    cli
-
     :B2_DECRUNCH(crunch_logo)
-
-    lda $d011
-    eor #%00010000 // on
-    sta $d011
-
-    :wait(255)
-    :wait(255)
-    :wait(255)
-    :wait(255)
 
 loop:
 wait: 
@@ -1341,6 +1465,64 @@ wait:
 
 
     jmp loop
+
+putpix16:
+    lda #<$6000
+    sta $fb
+
+    // ptr = (x / 8) * 128
+    txa
+    lsr                     // x / 8
+    lsr
+    lsr
+
+    lsr                     // * 128 (16-bit)
+    ror $fb
+    adc #>$6000
+    sta $fc
+
+    // mask = 2 ^ (x & 3)
+    txa
+    and #%00000111
+    tax
+    lda ($fb),y
+    ora bitmask16,x
+    sta ($fb),y
+    rts
+
+index:
+    .byte 0,0
+
+bitmask16:
+     .byte $80,$40,$20,$10,$08,$04,$02,$01
+
+init16:
+
+ichar:
+    ldx #0
+initic: 
+    txa
+    ldy #0
+i162:
+    sta $4400,y
+    clc
+    adc #16
+    iny
+    cpy #16
+    bne i162
+
+    lda i162+1
+    clc
+    adc #40
+    sta i162+1
+    bcc *+5
+    inc i162+2
+
+    inx
+    cpx #16
+    bne initic
+
+    rts
 
 dithers:
     :FillBitmap($6000,0)
@@ -1548,9 +1730,14 @@ waiter:
 
 }
 
-sintab:
- .fill 256,round(80*atan(toRadians(i*360/200)))
 */
+
+.pc = * "sintab"
+sintab:
+ .fill 256,round(63*sin(toRadians(i*360/128)))
+costab:
+ .fill 256,round(63*cos(toRadians(i*360/128)))
+
 nmi_nop:
     //
     // This is the irq handler for the NMI. Just returns without acknowledge.
