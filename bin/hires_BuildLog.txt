@@ -1,6 +1,6 @@
 parsing
 flex pass 1
-B2: [ Hires Color Data, Hires Bitmap ] $5000 - $7f3f Packed size $0f6e (32%) Pack start: $f08c
+B2: [ Hires Color Data, Hires Bitmap ] $5000 - $7f3f Packed size $0ae8 (23%) Pack start: $f512
 flex pass 2
 flex pass 3
 Output pass
@@ -15,11 +15,11 @@ Memory Map
 Default-segment:
   $0801-$080c Basic
   $080e-$0cda Basic End
-  $0cdb-$1e5f democode
-  $1e60-$20b8 sintab
+  $0cdb-$1e64 democode
+  $1e65-$20bd sintab
   $7900-$7e7f dkdloader
-  $8000-$8f6d crunchdata
-  $8f6e-$8f6d crunchdata end
+  $8000-$8ae7 crunchdata
+  $8ae8-$8ae7 crunchdata end
   $c200-$cf77 Music
 
 Writing prg file: /Users/visy/dev/kick/hires2/bin/hires_Compiled.prg

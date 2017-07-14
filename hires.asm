@@ -1453,6 +1453,9 @@ fade_border1:
     SetScreenMemory(screen_memory - vic_base)
     SetBitmapAddress(bitmap_address - vic_base)
 
+    lda #6
+    sta $d020
+
     :B2_DECRUNCH(crunch_logo)
 
     lda $d011
@@ -1884,7 +1887,7 @@ frame2:
 
 .label crunch_logo = *
 .modify B2() {
-    :PNGtoHIRES("quadlogo.png", bitmap_address, screen_memory)
+    :PNGtoHIRES("bune.png", bitmap_address, screen_memory)
 }
 .pc = * "crunchdata end"
 
