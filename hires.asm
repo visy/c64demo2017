@@ -514,15 +514,14 @@ checkup:
         lda #>dst
         sta $FE
 
-        ldy #$00
+        ldy #40
 
     copyloop:
 
         lda ($FB),y  // indirect index source memory address, starting at $00
         //eor ($FD),y  // indirect index dest memory address, starting at $00
         sta ($FD),y  // indirect index dest memory address, starting at $00
-        iny
-        cpy #40
+        dey
         bne copyloop // loop until our dest goes over 255
 
     }
@@ -532,12 +531,11 @@ checkup:
         sta $FD 
         lda #>dst
         sta $FE
-        ldy #$00
+        ldy #40
     copyloop:
-        txa
+        lda #0    
         sta ($FD),y  // indirect index dest memory address, starting at $00
-        iny
-        cpy #40
+        dey
         bne copyloop // loop until our dest goes over 255
 
     }
@@ -1399,7 +1397,7 @@ no_index_clear:
     lda #0
     sta frame
     lda index16+1
-    cmp #10
+    cmp #5
     beq exit16
 
 no_fres:
@@ -1409,7 +1407,6 @@ no_fres:
 
 feedback16:
 //    copymem_eor($6000,$6081,4) // sierpinski
-
 
     copymem_eor($6000,$6081,4)
 
@@ -1422,8 +1419,11 @@ exit16:
 
 // hires
 
-    ldy #255
+
+    ldy #32
     jsr wait
+    :centerwipeout_trans(30)
+
     ldy #255
     jsr wait
 
@@ -1703,6 +1703,8 @@ clear_y:
 
 
 wait:
+    tya
+    tax
 waiter1:
 waiter: 
     cpx $d012 
