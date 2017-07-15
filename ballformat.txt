@@ -1,0 +1,18 @@
+stroke = color 1 x akseli bits
+fill = color 2 y akseli bits
+
+1. add bits set = x axis
+2. add bits filled = y axis
+
+encode in 2x2 pixel groups, 3 colors per pixel
+
+1 byte per 2x2 block, msb y, lsb x 0-15
+
+charnum = y<<4 + x
+
+reso: 80x50x3
+
+.. #
+ . .
+#...
+.  #
