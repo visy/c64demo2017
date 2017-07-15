@@ -1887,7 +1887,13 @@ bols:
     :FillScreenMemory($4400, 0)
 
     // load bolscroll-data to 6800-c8000
-
+    lda #<$6800
+    sta $FB
+    lda #>$6800
+    sta $FC
+    lda #7
+    jsr loadfile 
+/*
 .for (var f = 0; f<16; f++) {
     lda #<$6800+1000*f
     sta $FB
@@ -1898,10 +1904,10 @@ bols:
     adc #7
     jsr loadfile 
 }
-
-    lda #<$6800
+*/
+    lda #<$6800-1000
     sta $F9
-    lda #>$6800
+    lda #>$6800-1000
     sta $FA
 
     lda $F9
@@ -1963,7 +1969,7 @@ bol_no_fb_up2:
     sta $FB
     lda $FA
     sta $FC
-    cmp #$a2
+    cmp #$a3
     beq boscroll_over
 
 
