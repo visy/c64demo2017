@@ -776,14 +776,15 @@ checkup:
         lda #>dst
         sta $FE
 
-        ldy #40
+        ldy #0
 
     copyloop:
 
         lda ($FB),y  // indirect index source memory address, starting at $00
         //eor ($FD),y  // indirect index dest memory address, starting at $00
         sta ($FD),y  // indirect index dest memory address, starting at $00
-        dey
+        iny
+        cpy #40
         bne copyloop // loop until our dest goes over 255
 
     }
@@ -793,11 +794,12 @@ checkup:
         sta $FD 
         lda #>dst
         sta $FE
-        ldy #40
+        ldy #0
     copyloop:
         lda #0    
         sta ($FD),y  // indirect index dest memory address, starting at $00
-        dey
+        iny
+        cpy #40
         bne copyloop // loop until our dest goes over 255
 
     }
@@ -1533,90 +1535,7 @@ start2:
 
     cli
 
-    // bols
-
-    lda #%00011000
-    sta $d018
-
-    lda #$02   // set vic bank #1 with the dkd loader way
-    and #$03
-    eor #$3f
-    sta $dd02
-
-    lda #$02   // set vic bank #1
-    sta $dd00
-
-    lda #0
-    sta $d020
-    lda #0
-    sta $d021
-
-    :copymem(bolchars,$6000,16)
-    :FillScreenMemory($d800,(1<<4) + 11) // color ram
-    :FillScreenMemory($4400, 0)
-
-    lda #0
-    sta $FC
-    sta $FD
-    sta $FB
-
-    fillloop1:
-    ldx #255
-    ldy #1
-    jsr wait
-    ldx #255
-
-fillloop:
-    lda $FB
-    beq doEor
-    asl
-    beq noEor
-    bcc noEor
-doEor:  
-    eor #$1d
-noEor:  
-    sta $FB
-
-    sta $43ff,x
-    sta $44ff,x
-    sta $45ff,x
-    sta $46ff,x
-
-    eor $FC
-    sta $d7ff,x
-    sta $d8ff,x
-    sta $d9ff,x
-    sta $daff,x
-    dex
-    bne fillloop
-
-    dex
-
-    inc $FD
-
-
-    lda $FD
-    cmp #32
-    bne no_incflasheor
-    lda #0
-    sta $FD
-    inc $FC
-no_incflasheor:
-    sta $4400,x
-    sta $4500,x
-    sta $4600,x
-    sta $4700,x
-
-    eor $FC
-
-    sta $d800,x
-    sta $d900,x
-    sta $da00,x
-    sta $db00,x
-
-    jmp fillloop1
-
-    // bols end
+koalapic:
 
     lda #$d8
     sta $d016
@@ -1677,6 +1596,8 @@ fade_screen1:
     lda $d011
     eor #%00010000 // on
     sta $d011
+
+dotball:
 
 // 16x16
     lda #$11
@@ -1844,6 +1765,8 @@ fade_border1:
     ldy #255
     jsr wait
 
+dithersandpics:
+
     lda $d011
     eor #%00010000 // off
     sta $d011
@@ -1875,12 +1798,12 @@ fade_border1:
     ldy #255
     jsr wait
 
-loop:
+
     ldy #255
     jsr wait
 
     jsr dithers
-
+afterdithers:
     lda #<$9000
     sta $FB
     lda #>$9000
@@ -1937,7 +1860,119 @@ loop:
     */
 
 
-    jmp loop
+bols:
+    lda $d011
+    eor #%00010000 // on
+    sta $d011
+
+    // bols
+    lda #$11
+    sta $d011
+
+    lda #%00011000
+    sta $d018
+
+    lda #$02   // set vic bank #1 with the dkd loader way
+    and #$03
+    eor #$3f
+    sta $dd02
+
+    lda #0
+    sta $d020
+    lda #0
+    sta $d021
+
+    :copymem(bolchars,$6000,16)
+    :FillScreenMemory($d800,(1<<4) + 1) // color ram
+    :FillScreenMemory($4400, 1)
+
+    lda $F9 // bolframe
+blo:
+    lda #<$4400
+    sta $FB
+    lda #>$4400
+    sta $FC
+    lda #7       // 7 = 1st bolpic
+    clc
+    adc $F9
+    jsr loadfile 
+
+    inc $F9
+    lda $F9
+    cmp #8
+    bne no_null_bol
+    jmp nobols
+no_null_bol:
+    jmp blo
+
+    lda #0
+    sta $FC
+    sta $FD
+    sta $FB
+
+    fillloop1:
+    ldx #255
+    ldy #1
+    jsr wait
+    ldx #255
+
+fillloop:
+    lda $FB
+    beq doEor
+    asl
+    beq noEor
+    bcc noEor
+doEor:  
+    eor #$1d
+noEor:  
+    sta $FB
+
+    sta $43ff,x
+    sta $44ff,x
+    sta $45ff,x
+    sta $46ff,x
+
+    eor $FC
+    sta $d7ff,x
+    sta $d8ff,x
+    sta $d9ff,x
+    sta $daff,x
+    dex
+    bne fillloop
+
+    dex
+
+    inc $FD
+
+
+    lda $FD
+    cmp #32
+    bne no_incflasheor
+    lda #0
+    sta $FD
+    inc $FC
+no_incflasheor:
+    sta $4400,x
+    sta $4500,x
+    sta $4600,x
+    sta $4700,x
+
+    eor $FC
+
+    sta $d800,x
+    sta $d900,x
+    sta $da00,x
+    sta $db00,x
+
+    jmp fillloop1
+
+nobols:
+
+    // bols end
+
+endloop:
+    jmp endloop
+
 
 putpix16:
     lda #<$6000
@@ -2235,11 +2270,6 @@ waiter:
 
 */
 
-.pc = * "sintab"
-sintab:
- .fill 256,round(63*sin(toRadians(i*360/63)))
-costab:
- .fill 256,round(63*cos(toRadians(i*360/63)))
 
 nmi_nop:
     //
@@ -2316,13 +2346,14 @@ frame:
 frame2:
 .byte 0
 
+bolchars:
+.import binary "bolchars.raw"
+
 .pc = music.location "Music"
 .fill music.size, music.getData(i)
 
 :PNGtoKOALA("terminal.png", $6000, $4400, $9600, $a000)
 
-bolchars:
-.import binary "bolchars.raw"
 
 .pc = $8000 "crunchdata"
 
@@ -2331,6 +2362,12 @@ bolchars:
     :PNGtoHIRES("quadlogo.png", bitmap_address, screen_memory)
 }
 .pc = * "crunchdata end"
+
+.pc = $b000  "sintab"
+sintab:
+ .fill 256,round(63*sin(toRadians(i*360/63)))
+costab:
+ .fill 256,round(63*cos(toRadians(i*360/63)))
 
 
 .print "vic_bank: " + toHexString(vic_bank)
