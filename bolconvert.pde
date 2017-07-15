@@ -1,11 +1,11 @@
 PImage[] images;
 PGraphics pg;
 
-  int frames = 8;
+  int frames = 16;
 
 void setup() {
   size(400,300);
-  frameRate(1);
+  frameRate(10);
   images = new PImage[frames];
   images[0] = loadImage("bol0.png");
   images[1] = loadImage("bol1.png");
@@ -15,6 +15,14 @@ void setup() {
   images[5] = loadImage("bol5.png");
   images[6] = loadImage("bol6.png");
   images[7] = loadImage("bol7.png");
+  images[8] = loadImage("bol6.png");
+  images[9] = loadImage("bol5.png");
+  images[10] = loadImage("bol4.png");
+  images[11] = loadImage("bol3.png");
+  images[12] = loadImage("bol2.png");
+  images[13] = loadImage("bol1.png");
+  images[14] = loadImage("bol0.png");
+  images[15] = loadImage("bol1.png");
   pg = createGraphics(80, 50);
 }
 
@@ -24,7 +32,7 @@ void draw() {
   fill(0);
   rect(40,50,320,200);
   strokeWeight(1);
-  byte[] picdata = new byte[4002];
+  byte[] picdata = new byte[1002];
   int byteindex = 2;
   picdata[0] = (byte)0;
   picdata[1] = (byte)68;

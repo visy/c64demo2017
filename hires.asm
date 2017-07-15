@@ -1886,24 +1886,106 @@ bols:
     :FillScreenMemory($d800,(1<<4) + 1) // color ram
     :FillScreenMemory($4400, 1)
 
-    lda $F9 // bolframe
-blo:
-    lda #<$4400
-    sta $FB
-    lda #>$4400
-    sta $FC
-    lda #7       // 7 = 1st bolpic
-    clc
-    adc $F9
-    jsr loadfile 
+    // load bolscroll-data to 6800-c8000
 
-    inc $F9
+.for (var f = 0; f<16; f++) {
+    inc $d020
+    lda #<$6800+1000*f
+    sta $FB
+    lda #>$6800+1000*f
+    sta $FC
+    lda #f
+    clc
+    adc #7
+    jsr loadfile 
+}
+
+    lda #<$6800
+    sta $F9
+    lda #>$6800
+    sta $FA
+
     lda $F9
-    cmp #8
-    bne no_null_bol
-    jmp nobols
-no_null_bol:
-    jmp blo
+    sta $FB
+    lda $FA
+    sta $FC
+    lda #<$4400
+    sta $FD
+    lda #>$4400
+    sta $FE
+
+    
+bol_copyloop_y:
+    ldy #0
+
+bol_copyloop_x:
+
+    lda ($FB),y  // indirect index source memory address, starting at $00
+    sta ($FD),y  // indirect index dest memory address, starting at $00
+    iny
+    cpy #40
+    bne bol_copyloop_x // loop until our dest goes over 255
+
+    lda $FB
+    clc
+    adc #40
+    sta $FB
+    bcc bol_no_fb_up
+    inc $FC
+bol_no_fb_up:
+    lda $FD
+    clc
+    adc #40
+    sta $FD
+    bcc bol_no_fd_up
+    inc $FE
+bol_no_fd_up:
+    
+    inx
+    cpx #25
+    bne bol_copyloop_y
+
+    ldx #0
+    lda #<$4400
+    sta $FD
+    lda #>$4400
+    sta $FE
+
+    lda $F9
+    clc
+    adc #40
+    sta $F9
+    bcc bol_no_fb_up2
+    inc $FA
+bol_no_fb_up2:
+
+
+    lda $F9
+    sta $FB
+    lda $FA
+    sta $FC
+    cmp #$a2
+    beq boscroll_over
+
+
+    ldx #10
+    ldy #10
+    jsr wait
+
+    ldx #0
+
+    jmp bol_copyloop_y
+
+boscroll_over:
+
+    ldx #255
+    ldy #255
+    jsr wait
+    ldx #255
+    ldy #255
+    jsr wait
+
+// randbols
 
     lda #0
     sta $FC
@@ -2363,7 +2445,7 @@ bolchars:
 }
 .pc = * "crunchdata end"
 
-.pc = $b000  "sintab"
+.pc = $c000  "sintab"
 sintab:
  .fill 256,round(63*sin(toRadians(i*360/63)))
 costab:
