@@ -1885,7 +1885,6 @@ bols:
     :copymem(bolchars,$6000,16)
     :FillScreenMemory($d800,(1<<4) + 1) // color ram
     :FillScreenMemory($4400, 0)
-
     // load bolscroll-data to 6800-c8000
     lda #<$6800
     sta $FB
@@ -1893,6 +1892,11 @@ bols:
     sta $FC
     lda #7
     jsr loadfile 
+
+    :copymem($6800,$4400,4)
+    ldx #255
+    ldy #255
+    jsr wait
 /*
 .for (var f = 0; f<16; f++) {
     lda #<$6800+1000*f
@@ -1905,9 +1909,9 @@ bols:
     jsr loadfile 
 }
 */
-    lda #<$6800-1000
+    lda #<$6800
     sta $F9
-    lda #>$6800-1000
+    lda #>$6800
     sta $FA
 
     lda $F9
