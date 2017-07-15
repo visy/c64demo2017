@@ -1535,6 +1535,8 @@ start2:
 
     cli
 
+    jsr bols
+
 koalapic:
 
     lda #$d8
@@ -1923,7 +1925,54 @@ bols:
     lda #>$4400
     sta $FE
 
-    
+    lda #0
+    sta $F6
+    sta $F7
+    sta $F8
+
+fillloop1:
+    ldx #00
+
+fillloop:
+    lda $F6
+    beq doEor
+    asl
+    beq noEor
+    bcc noEor
+doEor:  
+    eor #$1d
+noEor:  
+    sta $F6
+    eor $F7
+    sta $d800,x
+    sta $d900,x
+    sta $da00,x
+    sta $db00,x
+    inx
+    bne fillloop
+
+    inc $F8
+
+    lda $F8
+    cmp #32
+    bne no_incflasheor
+    lda #0
+    sta $F8
+    inc $F7
+no_incflasheor:
+/*
+    sta $4400,x
+    sta $4500,x
+    sta $4600,x
+    sta $4700,x
+
+    eor $F7
+    sta $d800,x
+    sta $d900,x
+    sta $da00,x
+    sta $db00,x
+*/
+    ldx #0
 bol_copyloop_y:
     ldy #0
 
@@ -1983,7 +2032,7 @@ bol_no_fb_up2:
 
     ldx #0
 
-    jmp bol_copyloop_y
+    jmp fillloop1
 
 boscroll_over:
 
@@ -1995,7 +2044,7 @@ boscroll_over:
     jsr wait
 
 // randbols
-
+/*
     lda #0
     sta $FC
     sta $FD
@@ -2056,7 +2105,7 @@ no_incflasheor:
     sta $db00,x
 
     jmp fillloop1
-
+*/
 nobols:
 
     // bols end
