@@ -1535,9 +1535,6 @@ start2:
     ldx #255
     ldy #255
     jsr wait
-    ldx #255
-    ldy #255
-    jsr wait
 
     lda #$d8
     sta $d016
@@ -1567,11 +1564,37 @@ koalaloop:
     ldy #255
     jsr wait
 
+    ldx #255
+    ldy #255
+    jsr wait
+
     :centerwipeoutmc_trans(50)
+
+    lda $d011
+    eor #%00010000 // off
+    sta $d011
 
     ldx #255
     ldy #255
     jsr wait
+
+    lda #7
+    sta $FA
+fade_screen1:
+    ldx #255
+    ldy #45
+    jsr wait
+    ldx $FA
+    lda fade_border_tab,x
+    sta $d020
+    dex
+    stx $FA
+    cpx #0
+    bne fade_screen1
+
+    lda $d011
+    eor #%00010000 // on
+    sta $d011
 
 // 16x16
     lda #$11
