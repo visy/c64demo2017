@@ -1552,17 +1552,22 @@ start2:
     sta $d021
 
     :copymem(bolchars,$6000,16)
-    :FillScreenMemory($d800,(1<<4) + 1) // color ram
+    :FillScreenMemory($d800,(1<<4) + 11) // color ram
     :FillScreenMemory($4400, 0)
 
+    lda #0
+    sta $FC
+    sta $FD
+    sta $FB
+
     fillloop1:
-    ldx #2
-    ldy #2
+    ldx #255
+    ldy #1
     jsr wait
     ldx #255
 
 fillloop:
-    lda index16
+    lda $FB
     beq doEor
     asl
     beq noEor
@@ -1570,23 +1575,44 @@ fillloop:
 doEor:  
     eor #$1d
 noEor:  
-    sta index16
+    sta $FB
+
+    sta $43ff,x
+    sta $44ff,x
+    sta $45ff,x
+    sta $46ff,x
+
+    eor $FC
+    sta $d7ff,x
+    sta $d8ff,x
+    sta $d9ff,x
+    sta $daff,x
+    dex
+    bne fillloop
+
+    dex
+
+    inc $FD
+
+
+    lda $FD
+    cmp #32
+    bne no_incflasheor
+    lda #0
+    sta $FD
+    inc $FC
+no_incflasheor:
     sta $4400,x
     sta $4500,x
     sta $4600,x
     sta $4700,x
 
-    dex
-    bne fillloop
+    eor $FC
 
-    lda $4401
-    sta $4400
-    lda $4501
-    sta $4500
-    lda $4601
-    sta $4600
-    lda $4701
-    sta $4700
+    sta $d800,x
+    sta $d900,x
+    sta $da00,x
+    sta $db00,x
 
     jmp fillloop1
 
