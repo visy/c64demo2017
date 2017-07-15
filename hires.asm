@@ -1884,12 +1884,11 @@ bols:
 
     :copymem(bolchars,$6000,16)
     :FillScreenMemory($d800,(1<<4) + 1) // color ram
-    :FillScreenMemory($4400, 1)
+    :FillScreenMemory($4400, 0)
 
     // load bolscroll-data to 6800-c8000
 
 .for (var f = 0; f<16; f++) {
-    inc $d020
     lda #<$6800+1000*f
     sta $FB
     lda #>$6800+1000*f
