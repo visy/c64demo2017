@@ -1477,6 +1477,7 @@ start2:
     jsr dkdloader // init the dkd loader to $0100
 
     jsr generate_lookups
+
     sei
 
     // Turn off interrupts from the two CIA chips.
@@ -1532,9 +1533,64 @@ start2:
 
     cli
 
-    ldx #255
-    ldy #255
+    // bols
+
+    lda #%00011000
+    sta $d018
+
+    lda #$02   // set vic bank #1 with the dkd loader way
+    and #$03
+    eor #$3f
+    sta $dd02
+
+    lda #$02   // set vic bank #1
+    sta $dd00
+
+    lda #0
+    sta $d020
+    lda #0
+    sta $d021
+
+    :copymem(bolchars,$6000,16)
+    :FillScreenMemory($d800,(1<<4) + 1) // color ram
+    :FillScreenMemory($4400, 0)
+
+    fillloop1:
+    ldx #2
+    ldy #2
     jsr wait
+    ldx #255
+
+fillloop:
+    lda index16
+    beq doEor
+    asl
+    beq noEor
+    bcc noEor
+doEor:  
+    eor #$1d
+noEor:  
+    sta index16
+    sta $4400,x
+    sta $4500,x
+    sta $4600,x
+    sta $4700,x
+
+    dex
+    bne fillloop
+
+    lda $4401
+    sta $4400
+    lda $4501
+    sta $4500
+    lda $4601
+    sta $4600
+    lda $4701
+    sta $4700
+
+    jmp fillloop1
+
+    // bols end
 
     lda #$d8
     sta $d016
@@ -2237,7 +2293,10 @@ frame2:
 .pc = music.location "Music"
 .fill music.size, music.getData(i)
 
-    :PNGtoKOALA("terminal.png", $6000, $4400, $9600, $a000)
+:PNGtoKOALA("terminal.png", $6000, $4400, $9600, $a000)
+
+bolchars:
+.import binary "bolchars.raw"
 
 .pc = $8000 "crunchdata"
 
@@ -2245,7 +2304,6 @@ frame2:
 .modify B2() {
     :PNGtoHIRES("quadlogo.png", bitmap_address, screen_memory)
 }
-
 .pc = * "crunchdata end"
 
 
