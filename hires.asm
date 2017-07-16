@@ -1283,9 +1283,16 @@ hline_sto:
     stx hline_sto+1
     sty hline_sto+2
 hlineloop:
+    ldy hline_sto+1
+    ldx hline_sto+2
+    txa
+    tay
+    ldx hline_sto+1
+    lda #%00001000 // color, 0/8/136
+    jsr bolpix
+
     ldx hline_sto+1
     ldy hline_sto+2
-    :putpixel()
 
     inx
     stx hline_sto+1
@@ -1304,9 +1311,10 @@ hlineloop:
     jmp bhamdone
 no_hline:
 
-    ldx xb
-    ldy yb
-    :putpixel()    // s.Plot(x,y,colour);
+    ldy xb
+    ldx yb
+    lda #%10001000 // color, 0/8/136
+    jsr bolpix
 
     lda #$00        // initialise err
     sta err
@@ -1363,7 +1371,13 @@ bhamoverx:      // here the loop over x begins
     inx         // x++ )  {
     stx xa
     sty ya
-    :putpixel()    // s.Plot(x,y,colour);
+
+    txa
+    tay
+    ldx ya
+    lda #%10001000 // color, 0/8/136
+    jsr bolpix
+
     ldx xa
     ldy ya
     lda err     // eps += dy;
@@ -1399,7 +1413,12 @@ bhamyy:
     iny
     stx xa
     sty ya
-    :putpixel()
+    txa
+    tay
+    ldx ya
+    lda #%10001000 // color, 0/8/136
+    jsr bolpix
+
     ldx xa
     ldy ya
     lda err
@@ -1887,6 +1906,37 @@ bols:
     :copymem(bolchars,$6000,16)
     :FillScreenMemory($d800,(1<<4) + 1) // color ram
     :FillScreenMemory($4400, 0)
+
+    lda #5
+    sta $d020
+bolop:
+
+    ldx #32
+    ldy #32
+    jsr wait
+//    :FillScreenMemory($4400, 0)
+
+    // reversed coords, y = x, x = y
+
+    ldx #0
+    ldy #0
+
+    stx bres_x1
+    sty bres_y1
+
+    ldx frame
+    ldy #49
+
+    inc frame
+    stx bres_x2
+    sty bres_y2
+    :bresenham(bres_x1,bres_y1,bres_x2,bres_y2,bres_err,bres_cntr,bres_dx,bres_dy)
+
+
+
+    jmp bolop
+
+
     // load bolscroll-data to 6800-c8000
     lda #<$6800
     sta $FB
@@ -1931,6 +1981,7 @@ bols:
     sta $F8
 
 fillloop1:
+/*
     ldx #00
 
 fillloop:
@@ -1960,7 +2011,6 @@ noEor:
     sta $F8
     inc $F7
 no_incflasheor:
-/*
     sta $4400,x
     sta $4500,x
     sta $4600,x
@@ -2113,6 +2163,48 @@ nobols:
 endloop:
     jmp endloop
 
+bolpix: // params, a = 0, 8 or 136 
+    sta $F2
+
+    tya
+    lsr 
+    bcc bp1       
+    lsr $F2     //Point shifts right
+bp1:
+    tay         //if division has a
+    txa         //remainder
+    lsr
+    bcc bp2     
+    lsr $F2     //Point moves down
+    lsr $F2     //on remainder
+bp2:
+    tax     
+
+    lda #2
+    sta $F4
+    lda blotable,x   //Table holds the
+    sta $F5          //leftmost screen
+    lda bhitable,x   // address of row.
+    sta $F6
+    lda ($F5),y      // Get screen graphic
+    sta $F3
+
+    ora $F2          // mask in new value.
+    sta ($F5),y
+    rts
+
+blotable: 
+    .byte $00,$28,$50,$78,$a0,$c8,$f0
+    .byte $18,$40,$68,$90,$b8,$e0
+    .byte $08,$30,$58,$80,$a8,$d0,$f8
+    .byte $20,$48,$70,$98,$c0
+    
+bhitable:
+    .byte $44,$44,$44,$44,$44,$44,$44
+    .byte $45,$45,$45,$45,$45,$45
+    .byte $46,$46,$46,$46,$46,$46,$46
+    .byte $47,$47,$47,$47,$47
+    
 
 putpix16:
     lda #<$6000
@@ -2482,12 +2574,12 @@ mainirq:
     rti
 
 frame:
-.byte 64
-frame2:
 .byte 0
+frame2:
+.byte 2
 
 bolchars:
-.import binary "bolchars.raw"
+.import binary "bolchars_flip.raw"
 
 .pc = music.location "Music"
 .fill music.size, music.getData(i)
@@ -2503,12 +2595,27 @@ bolchars:
 }
 .pc = * "crunchdata end"
 
-.pc = $c000  "sintab"
+.pc = $bf00  "sintab"
 sintab:
  .fill 256,round(63*sin(toRadians(i*360/63)))
 costab:
  .fill 256,round(63*cos(toRadians(i*360/63)))
-
+sintababs:
+    .byte 0,  0, 1, 1, 2,3,4,5,7,9,11,14,17,20,24,28
+    .byte 33,38,43,47,49,50,50,49,47,43,38,33,28,24
+    .byte 20,17,14,11,9,7,5,4,3,2,1,1,0,0
+    .byte 0,  0, 1, 1, 2,3,4,5,7,9,11,14,17,20,24,28
+    .byte 33,38,43,47,49,50,50,49,47,43,38,33,28,24
+    .byte 20,17,14,11,9,7,5,4,3,2,1,1,0,0
+    .byte 0,  0, 1, 1, 2,3,4,5,7,9,11,14,17,20,24,28
+    .byte 33,38,43,47,49,50,50,49,47,43,38,33,28,24
+    .byte 20,17,14,11,9,7,5,4,3,2,1,1,0,0
+    .byte 0,  0, 1, 1, 2,3,4,5,7,9,11,14,17,20,24,28
+    .byte 33,38,43,47,49,50,50,49,47,43,38,33,28,24
+    .byte 20,17,14,11,9,7,5,4,3,2,1,1,0,0
+    .byte 0,  0, 1, 1, 2,3,4,5,7,9,11,14,17,20,24,28
+    .byte 33,38,43,47,49,50,50,49,47,43,38,33,28,24
+    .byte 20,17,14,11,9,7,5,4,3,2,1,1,0,0
 
 .print "vic_bank: " + toHexString(vic_bank)
 .print "vic_base: " + toHexString(vic_base)

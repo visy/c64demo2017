@@ -15,7 +15,7 @@ Memory Map
 Default-segment:
   $0801-$080c Basic
   $080e-$0cda Basic End
-  $0cdb-$3340 democode
+  $0cdb-$348d democode
   $4400-$47e7 KOALA - Character Color Data
   $6000-$7f3f KOALA - Bitmap Graphics
   $8000-$8f6d crunchdata
@@ -23,7 +23,7 @@ Default-segment:
   $9000-$957f dkdloader
   $9600-$99e7 KOALA - D800 Color Data
   $a000-$a000 KOALA - bg color
-  $c000-$c1ff sintab
+  $bf00-$c1db sintab
   $c200-$cf77 Music
 
 Writing prg file: /Users/visy/dev/kick/hires2/bin/hires_Compiled.prg
