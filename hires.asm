@@ -1594,9 +1594,41 @@ start2:
 
     cli
 
-    jmp bolscroll
-
 koalapic:
+
+    ldx #255
+    ldy #255
+    jsr wait
+    ldx #255
+    ldy #255
+    jsr wait
+
+    lda #$02   // set vic bank #1 with the dkd loader way
+    and #$03
+    eor #$3f
+    sta $dd02
+
+    // load from disk
+    lda #<$6000
+    sta $FB
+    lda #>$6000
+    sta $FC
+    lda #8
+    jsr loadfile // bit
+
+    lda #<$4400
+    sta $FB
+    lda #>$4400
+    sta $FC
+    lda #9
+    jsr loadfile // chr
+
+    lda #<$9600
+    sta $FB
+    lda #>$9600
+    sta $FC
+    lda #10
+    jsr loadfile // d80
 
     lda #$d8
     sta $d016
@@ -1606,7 +1638,7 @@ koalapic:
     sta $d011
     lda #0
     sta $d020
-    lda $a000 // bgcolor
+    lda #0 // bgcolor
     sta $d021
 
     ldx #0
@@ -1630,7 +1662,7 @@ koalaloop:
     ldy #255
     jsr wait
 
-    :centerwipeoutmc_trans(50)
+    :centerwipeoutmc_trans(10)
 
     lda $d011
     eor #%00010000 // off
@@ -2783,9 +2815,6 @@ bolchars:
 .pc = music.location "Music"
 .fill music.size, music.getData(i)
 
-:PNGtoKOALA("terminal.png", $6000, $4400, $9600, $a000)
-
-
 .pc = $8000 "crunchdata"
 
 .label crunch_logo = *
@@ -2803,6 +2832,7 @@ sintab2:
  .fill 256,90+round(90*sin(toRadians(i*360/255)))
 costab2:
  .fill 256,100+round(100*cos(toRadians(i*360/255)))
+
 
 .print "vic_bank: " + toHexString(vic_bank)
 .print "vic_base: " + toHexString(vic_base)
