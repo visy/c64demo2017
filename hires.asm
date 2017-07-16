@@ -2683,7 +2683,7 @@ clear_y:
 
 wait:
 waiter1:
-    lda #10
+    lda #8
     cmp $D012
     bne *-3
     dey
