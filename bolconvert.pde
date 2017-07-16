@@ -7,7 +7,7 @@ void setup() {
   size(400,900);
   frameRate(10);
   pg = createGraphics(80, 800);
-  greets = loadImage("c64greets.png");
+  greets = loadImage("pcnu.png");
 }
 
   int frame = 0;
@@ -38,9 +38,10 @@ void draw() {
       for (int y2=1; y2 >= 0; y2-=1) {
       for (int x2=1; x2 >= 0; x2-=1) {
       color c = pg.get(x+x2,y+y2);
+      println(c);
       int cc = 0;
       if (c == -16777216) cc = 0;
-      else if (c == -8355712) cc = 1;
+      else if (c == -12303292) cc = 1;
       else if (c == -1) cc = 2;
   
       if (cc == 0) { noStroke(); fill(0);  }
