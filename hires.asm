@@ -1594,6 +1594,8 @@ start2:
 
     cli
 
+    jmp bolscroll
+
 koalapic:
 
     lda #$d8
@@ -2173,12 +2175,13 @@ bolscroll:
     jsr loadfile 
 }
 */
-    lda #<$6800
+    lda #<$6828
     sta $F9
-    lda #>$6800
+    lda #>$6828
     sta $FA
 
     lda #0
+    sta $F4
     sta $F6
     sta $F7
     sta $F8
@@ -2188,16 +2191,70 @@ bolscroll:
     lda #%10010111
     sta $d011
 
+    lda #%00011000 // 4400
+    sta $d018
     lda #0
     sta $DB // dblbuf
 
+    ldy #5
+    jsr wait
+
 fillloop1:
+
+bol_copyloop_y:
+    lda $F4
+    cmp #4
+    beq copy_done
+
+    ldx #255
+bol_copyloop_x:
+    lda $6828,x
+bol_copyloop_target:
+    sta $4800,x 
+    dex
+    cpx #255
+    bne bol_copyloop_x // loop until our dest goes over 255
+
+    inc bol_copyloop_x+2
+    inc bol_copyloop_target+2
+    inc $F4 // pagecount
+
+copy_done:
+
+    lda #%10011000
+    clc
+    sbc $f5
+    sta $d011
+    inc $F5
+
+    ldy #1
+    jsr wait
+
+
+    lda $F5
+    cmp #7
+    bne no_finenull
+    lda #0
+    sta $F5
+    sta $F4
+
+    lda $F9
+    clc
+    adc #40
+    sta $F9
+    bcc bol_no_src_inc
+    inc $FA
+bol_no_src_inc:
+    lda $F9
+    sta bol_copyloop_x+1
+    lda $FA
+    sta bol_copyloop_x+2
 
     lda $DB
     cmp #0
     bne bolbuf1
 bolbuf0:
-    lda #%00101000 // 4400
+    lda #%00101000 // 4800
     sta $d018
     lda #<$4400
     sta bol_copyloop_target+1
@@ -2206,7 +2263,7 @@ bolbuf0:
 
     jmp bolbufflipped
 bolbuf1:
-    lda #%00011000 // 4800
+    lda #%00011000 // 4400
     sta $d018
     lda #<$4800
     sta bol_copyloop_target+1
@@ -2221,113 +2278,9 @@ bolbufflipped:
     lda #0
     sta $DB
 no_boldblres:
-    lda #0
-    sta $F5
-
-finescrbol:
-    ldy #1
-    jsr wait
-    
-    lda #%10011000
-    clc
-    sbc $f5
-    sta $d011
-
-    inc $F5
-    lda $F5
-    cmp #8
-    bne finescrbol
 
 
-//    2db2
-/*
-    ldx #00
-
-fillloop:
-    lda $F6
-    beq doEor
-    asl
-    beq noEor
-    bcc noEor
-doEor:  
-    eor #$1d
-noEor:  
-    sta $F6
-    eor $F7
-    sta $d800,x
-    sta $d900,x
-    sta $da00,x
-    sta $db00,x
-    inx
-    bne fillloop
-
-    inc $F8
-
-    lda $F8
-    cmp #32
-    bne no_incflasheor
-    lda #0
-    sta $F8
-    inc $F7
-no_incflasheor:
-    sta $4400,x
-    sta $4500,x
-    sta $4600,x
-    sta $4700,x
-
-    eor $F7
-    sta $d800,x
-    sta $d900,x
-    sta $da00,x
-    sta $db00,x
-*/
-
-    ldy #25
-bol_copyloop_y:
-    ldx #40
-
-bol_copyloop_x:
-    lda $6800,x
-bol_copyloop_target:
-    sta $4400,x 
-    dex
-    bne bol_copyloop_x // loop until our dest goes over 255
-
-
-    lda bol_copyloop_x+1
-    clc
-    adc #40
-    sta bol_copyloop_x+1
-    bcc bol_no_fb_up
-    inc bol_copyloop_x+2
-bol_no_fb_up:
-    lda bol_copyloop_target+1
-    clc
-    adc #40
-    sta bol_copyloop_target+1
-    bcc bol_no_fd_up
-    inc bol_copyloop_target+2
-bol_no_fd_up:
-    
-    dey
-    bne bol_copyloop_y
-
-    lda $F9
-    clc
-    adc #40
-    sta $F9
-    bcc bol_no_fb_up2
-    inc $FA
-bol_no_fb_up2:
-
-
-    lda $F9
-    sta bol_copyloop_x+1
-    lda $FA
-    sta bol_copyloop_x+2
-    cmp #$a3
-    beq boscroll_over
-
+no_finenull:
 
     jmp fillloop1
 
@@ -2683,10 +2636,11 @@ clear_y:
 
 wait:
 waiter1:
-    lda #8
+    lda #255
     cmp $D012
     bne *-3
     dey
+    cpy #0
     bne wait
     rts
 /*
