@@ -637,6 +637,45 @@ checkup:
 
     }
 
+    .macro copymem_eor_short(src,dst,size) {
+        lda #<src // set our source memory address to copy from, $6000
+        sta $FB
+        lda #>src 
+        sta $FC
+        lda #<dst // set our destination memory to copy to, $5000
+        sta $FD 
+        lda #>dst
+        sta $FE
+
+        ldx #size // size of copy
+        ldy #$00
+
+    copyloop:
+
+        lda ($FB),y  // indirect index source memory address, starting at $00
+        eor ($FD),y  // indirect index dest memory address, starting at $00
+        sta ($FD),y  // indirect index dest memory address, starting at $00
+        iny
+        bne copyloop // loop until our dest goes over 255
+
+        inc $FC // increment high order source memory address
+        inc $FE // increment high order dest memory address
+        dex
+        bne copyloop // if we're not there yet, loop
+
+        ldy #$00
+
+    copyloop2:
+
+        lda ($FB),y  // indirect index source memory address, starting at $00
+        eor ($FD),y  // indirect index dest memory address, starting at $00
+        sta ($FD),y  // indirect index dest memory address, starting at $00
+        iny
+        cpy #190
+        bne copyloop2 // loop until our dest goes over 255
+
+    }
+
     .macro copymem(src,dst,size) {
         lda #<src // set our source memory address to copy from, $6000
         sta $FB
@@ -1554,8 +1593,6 @@ start2:
 
     cli
 
-    jsr bols
-
 koalapic:
 
     lda #$d8
@@ -1886,6 +1923,93 @@ bols:
     eor #%00010000 // on
     sta $d011
 
+
+    // enable all sprites
+    lda #%11111111
+    sta $d015
+    // sprite 0 pos
+    lda #80
+    sta $d000
+    lda #230
+    sta $d001
+    
+    lda #120
+    sta $d002
+    lda #230
+    sta $d003
+    
+    lda #140
+    sta $d004
+    lda #230
+    sta $d005
+
+    lda #160
+    sta $d006
+    lda #230
+    sta $d007
+
+    lda #180
+    sta $d008
+    lda #230
+    sta $d009
+
+    lda #200
+    sta $d00a
+    lda #230
+    sta $d00b
+
+    lda #220
+    sta $d00c
+    lda #230
+    sta $d00d
+
+    lda #240
+    sta $d00e
+    lda #230
+    sta $d00f
+
+    lda #0
+    sta $d010
+    lda #$00
+
+    // sprite pointer
+    lda #$cc
+    sta $47f8
+    sta $47f9
+    sta $47fa
+    sta $47fb
+    sta $47fc
+    sta $47fd
+    sta $47fe
+    sta $47ff
+
+
+    // behind screen sprites
+    lda #$0
+    sta $d01b
+
+    // sprite color
+    lda #0
+    sta $d027
+    sta $d028
+    sta $d029
+    sta $d02a
+    sta $d02b
+    sta $d02c
+    sta $d02d
+    sta $d02e
+
+    // single color sprites
+    lda #0
+    sta $d01c
+
+    // stretch sprites
+    lda #$ff
+    sta $d01d
+    lda #$00
+    sta $d017
+
+
     // bols
     lda #$11
     sta $d011
@@ -1906,13 +2030,20 @@ bols:
     :copymem(bolchars,$6000,16)
     :FillScreenMemory($d800,(1<<4) + 1) // color ram
     :FillScreenMemory($4400, 0)
+    lda #0
+    sta $d020
+    lda #0
+    sta $d021
+
+// boleorring
 
     lda #0
     sta $ee
     sta $ef
     sta $f0
     lda #0
-    sta $d020
+    sta frame
+    sta frame2
 bolop:
 
 //    :FillScreenMemory($4400, 0)
@@ -1946,14 +2077,21 @@ bolop:
 
     inc $ee
     lda $ee
-    cmp #1
+    cmp #3
     bne no_bloslow
     lda #0
     sta $ee
     ldx #3
     ldy #3
     jsr wait
-    :copymem_eor($4400,$4400+40,4)
+    :copymem_eor_short($4400,$4400+40,3)
+
+    inc frame2
+    lda frame2
+    cmp #255
+    bne cont_boleor
+    jmp bolscroll
+cont_boleor:
 
 no_bloslow:
 
@@ -1982,9 +2120,34 @@ nobf:
     :bresenham(bres_x1,bres_y1,bres_x2,bres_y2,bres_err,bres_cntr,bres_dx,bres_dy)
 */
 
-
     jmp bolop
+bolscroll:
+    lda #$10
+    sta $d011
 
+    lda #$02   // set vic bank #1 with the dkd loader way
+    and #$03
+    eor #$3f
+    sta $dd02
+
+    lda #0
+    sta $d020
+    lda #0
+    sta $d021
+
+    :copymem(bolchars,$6000,16)
+    :FillScreenMemory($d800,(1<<4) + 1) // color ram
+    :FillScreenMemory($4400, 0)
+
+
+    lda #0 // disable sprites
+    sta $d015
+
+    centerwipeoutmc_trans(30)
+
+    :FillScreenMemory($d800,(1<<4) + 1) // color ram
+    lda #0
+    sta $d021
 
     // load bolscroll-data to 6800-c8000
     lda #<$6800
@@ -1994,10 +2157,9 @@ nobf:
     lda #7
     jsr loadfile 
 
+    :FillScreenMemory($d800,(1<<4) + 1) // color ram
+
     :copymem($6800,$4400,4)
-    ldx #255
-    ldy #255
-    jsr wait
 /*
 .for (var f = 0; f<16; f++) {
     lda #<$6800+1000*f
@@ -2029,7 +2191,69 @@ nobf:
     sta $F7
     sta $F8
 
+    lda #0
+    sta $F5
+    lda #%10010111
+    sta $d011
+
+    lda #0
+    sta $DB // dblbuf
+
 fillloop1:
+
+    lda $DB
+    cmp #0
+    bne bolbuf1
+bolbuf0:
+    lda #%00101000 // 4400
+    sta $d018
+    ldx #0
+    lda #<$4400
+    sta $FD
+    lda #>$4400
+    sta $FE
+
+    jmp bolbufflipped
+bolbuf1:
+    lda #%00011000 // 4800
+    sta $d018
+    ldx #0
+    lda #<$4800
+    sta $FD
+    lda #>$4800
+    sta $FE
+
+bolbufflipped:
+    inc $DB
+    lda $DB
+    cmp #2
+    bne no_boldblres
+    lda #0
+    sta $DB
+no_boldblres:
+
+
+    lda #0
+    sta $F5
+
+finescrbol:
+    
+    lda #%10011000
+    clc
+    sbc $f5
+    sta $d011
+    ldy #1
+    jsr wait
+
+    inc $F5
+    lda $F5
+    cmp #8
+    bne finescrbol
+
+    lda #0
+    sta $F5
+
+//    2db2
 /*
     ldx #00
 
@@ -2102,11 +2326,8 @@ bol_no_fd_up:
     cpx #25
     bne bol_copyloop_y
 
-    ldx #0
-    lda #<$4400
-    sta $FD
-    lda #>$4400
-    sta $FE
+
+
 
     lda $F9
     clc
@@ -2125,10 +2346,6 @@ bol_no_fb_up2:
     beq boscroll_over
 
 
-    ldx #10
-    ldy #10
-    jsr wait
-
     ldx #0
 
     jmp fillloop1
@@ -2142,28 +2359,30 @@ boscroll_over:
     ldy #255
     jsr wait
 
+randbols:
+
 // randbols
-/*
+
     lda #0
     sta $FC
     sta $FD
     sta $FB
 
-    fillloop1:
+fillloop2:
     ldx #255
     ldy #1
     jsr wait
     ldx #255
 
-fillloop:
+fillloop3:
     lda $FB
-    beq doEor
+    beq doEor2
     asl
-    beq noEor
-    bcc noEor
-doEor:  
+    beq noEor2
+    bcc noEor2
+doEor2:  
     eor #$1d
-noEor:  
+noEor2:  
     sta $FB
 
     sta $43ff,x
@@ -2177,7 +2396,7 @@ noEor:
     sta $d9ff,x
     sta $daff,x
     dex
-    bne fillloop
+    bne fillloop3
 
     dex
 
@@ -2186,11 +2405,11 @@ noEor:
 
     lda $FD
     cmp #32
-    bne no_incflasheor
+    bne no_incflasheor2
     lda #0
     sta $FD
     inc $FC
-no_incflasheor:
+no_incflasheor2:
     sta $4400,x
     sta $4500,x
     sta $4600,x
@@ -2203,14 +2422,15 @@ no_incflasheor:
     sta $da00,x
     sta $db00,x
 
-    jmp fillloop1
-*/
+    jmp fillloop2
+
 nobols:
 
     // bols end
 
 endloop:
     jmp endloop
+
 
 bolpix: // params, a = 0, 8 or 136 
     sta $F2
@@ -2593,7 +2813,7 @@ mainirq:
 
     //
     // Stabilize raster using double irq's.
-    StabilizeRaster()
+//    StabilizeRaster()
 
     jsr music.play 
 
