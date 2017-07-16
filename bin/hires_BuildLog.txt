@@ -15,7 +15,7 @@ Memory Map
 Default-segment:
   $0801-$080c Basic
   $080e-$0cda Basic End
-  $0cdb-$39f3 democode
+  $0cdb-$39c9 democode
   $4400-$47e7 KOALA - Character Color Data
   $6000-$7f3f KOALA - Bitmap Graphics
   $8000-$8f6d crunchdata

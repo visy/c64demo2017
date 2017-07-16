@@ -1026,10 +1026,11 @@ stabilizedirq:
     // Configure line to trigger interrupt at
     //
     /* .if(line > $ff) { */
+/*
         lda $d011
         ora #%10000000
         sta $d011
-
+*/
         lda #>line
         sta $d012
     /* } else { */
@@ -2177,15 +2178,6 @@ bolscroll:
     lda #>$6800
     sta $FA
 
-    lda $F9
-    sta $FB
-    lda $FA
-    sta $FC
-    lda #<$4400
-    sta $FD
-    lda #>$4400
-    sta $FE
-
     lda #0
     sta $F6
     sta $F7
@@ -2207,21 +2199,19 @@ fillloop1:
 bolbuf0:
     lda #%00101000 // 4400
     sta $d018
-    ldx #0
     lda #<$4400
-    sta $FD
+    sta bol_copyloop_target+1
     lda #>$4400
-    sta $FE
+    sta bol_copyloop_target+2
 
     jmp bolbufflipped
 bolbuf1:
     lda #%00011000 // 4800
     sta $d018
-    ldx #0
     lda #<$4800
-    sta $FD
+    sta bol_copyloop_target+1
     lda #>$4800
-    sta $FE
+    sta bol_copyloop_target+2
 
 bolbufflipped:
     inc $DB
@@ -2231,27 +2221,23 @@ bolbufflipped:
     lda #0
     sta $DB
 no_boldblres:
-
-
     lda #0
     sta $F5
 
 finescrbol:
+    ldy #1
+    jsr wait
     
     lda #%10011000
     clc
     sbc $f5
     sta $d011
-    ldy #1
-    jsr wait
 
     inc $F5
     lda $F5
     cmp #8
     bne finescrbol
 
-    lda #0
-    sta $F5
 
 //    2db2
 /*
@@ -2295,39 +2281,36 @@ no_incflasheor:
     sta $da00,x
     sta $db00,x
 */
-    ldx #0
+
+    ldy #25
 bol_copyloop_y:
-    ldy #0
+    ldx #40
 
 bol_copyloop_x:
-
-    lda ($FB),y  // indirect index source memory address, starting at $00
-    sta ($FD),y  // indirect index dest memory address, starting at $00
-    iny
-    cpy #40
+    lda $6800,x
+bol_copyloop_target:
+    sta $4400,x 
+    dex
     bne bol_copyloop_x // loop until our dest goes over 255
 
-    lda $FB
+
+    lda bol_copyloop_x+1
     clc
     adc #40
-    sta $FB
+    sta bol_copyloop_x+1
     bcc bol_no_fb_up
-    inc $FC
+    inc bol_copyloop_x+2
 bol_no_fb_up:
-    lda $FD
+    lda bol_copyloop_target+1
     clc
     adc #40
-    sta $FD
+    sta bol_copyloop_target+1
     bcc bol_no_fd_up
-    inc $FE
+    inc bol_copyloop_target+2
 bol_no_fd_up:
     
-    inx
-    cpx #25
+    dey
     bne bol_copyloop_y
-
-
-
 
     lda $F9
     clc
@@ -2339,14 +2322,12 @@ bol_no_fb_up2:
 
 
     lda $F9
-    sta $FB
+    sta bol_copyloop_x+1
     lda $FA
-    sta $FC
+    sta bol_copyloop_x+2
     cmp #$a3
     beq boscroll_over
 
-
-    ldx #0
 
     jmp fillloop1
 
@@ -2701,14 +2682,12 @@ clear_y:
 
 
 wait:
-    tya
-    tax
 waiter1:
-waiter: 
-    cpx $d012 
-    bne waiter 
+    lda #10
+    cmp $D012
+    bne *-3
     dey
-    bne waiter1
+    bne wait
     rts
 /*
 .macro drawlinetri() {
@@ -2805,12 +2784,11 @@ mainirq:
     // restorey: ldy #$00
     // rti
     //
-    pha
-    txa
-    pha
-    tya
-    pha
 
+    sta restorea+1
+    stx restorex+1
+    sty restorey+1
+    
     //
     // Stabilize raster using double irq's.
 //    StabilizeRaster()
@@ -2823,7 +2801,7 @@ mainirq:
     // We can also register another irq for something further down the screen
     // or at next frame.
     //
-    RasterInterrupt(mainirq, $35)
+//    RasterInterrupt(mainirq, $35)
 
     //
     // Restore the interrupt condition so that we can get
@@ -2835,11 +2813,9 @@ mainirq:
     //
     // Restore the values of the registers and return.
     //
-    pla
-    tay
-    pla
-    tax
-    pla
+restorea: lda #$00
+restorex: ldx #$00
+restorey: ldy #$00
     rti
 
 frame:
