@@ -1907,17 +1907,66 @@ bols:
     :FillScreenMemory($d800,(1<<4) + 1) // color ram
     :FillScreenMemory($4400, 0)
 
-    lda #5
+    lda #0
+    sta $ee
+    sta $ef
+    sta $f0
+    lda #0
     sta $d020
 bolop:
 
-    ldx #32
-    ldy #32
-    jsr wait
 //    :FillScreenMemory($4400, 0)
 
     // reversed coords, y = x, x = y
 
+    lda frame
+    clc
+    adc $f0
+    tax
+    lda costab2,x
+    clc
+    ror
+    clc
+    ror
+    adc #15
+    tay
+
+    ldx frame
+    lda sintab2,x
+    clc
+    ror
+    clc
+    ror
+    adc #2
+    tax
+
+    lda #%10001000
+    jsr bolpix
+    inc frame
+
+    inc $ee
+    lda $ee
+    cmp #1
+    bne no_bloslow
+    lda #0
+    sta $ee
+    ldx #3
+    ldy #3
+    jsr wait
+    :copymem_eor($4400,$4400+40,4)
+
+no_bloslow:
+
+    inc $ef
+    lda $ef
+    cmp $f0
+    bne nobf
+
+    lda #0
+    sta $ef
+    inc $f0
+nobf:
+/*
     ldx #0
     ldy #0
 
@@ -1931,7 +1980,7 @@ bolop:
     stx bres_x2
     sty bres_y2
     :bresenham(bres_x1,bres_y1,bres_x2,bres_y2,bres_err,bres_cntr,bres_dx,bres_dy)
-
+*/
 
 
     jmp bolop
@@ -2595,27 +2644,15 @@ bolchars:
 }
 .pc = * "crunchdata end"
 
-.pc = $bf00  "sintab"
+.pc = $be00  "sintab"
 sintab:
  .fill 256,round(63*sin(toRadians(i*360/63)))
 costab:
  .fill 256,round(63*cos(toRadians(i*360/63)))
-sintababs:
-    .byte 0,  0, 1, 1, 2,3,4,5,7,9,11,14,17,20,24,28
-    .byte 33,38,43,47,49,50,50,49,47,43,38,33,28,24
-    .byte 20,17,14,11,9,7,5,4,3,2,1,1,0,0
-    .byte 0,  0, 1, 1, 2,3,4,5,7,9,11,14,17,20,24,28
-    .byte 33,38,43,47,49,50,50,49,47,43,38,33,28,24
-    .byte 20,17,14,11,9,7,5,4,3,2,1,1,0,0
-    .byte 0,  0, 1, 1, 2,3,4,5,7,9,11,14,17,20,24,28
-    .byte 33,38,43,47,49,50,50,49,47,43,38,33,28,24
-    .byte 20,17,14,11,9,7,5,4,3,2,1,1,0,0
-    .byte 0,  0, 1, 1, 2,3,4,5,7,9,11,14,17,20,24,28
-    .byte 33,38,43,47,49,50,50,49,47,43,38,33,28,24
-    .byte 20,17,14,11,9,7,5,4,3,2,1,1,0,0
-    .byte 0,  0, 1, 1, 2,3,4,5,7,9,11,14,17,20,24,28
-    .byte 33,38,43,47,49,50,50,49,47,43,38,33,28,24
-    .byte 20,17,14,11,9,7,5,4,3,2,1,1,0,0
+sintab2:
+ .fill 256,90+round(90*sin(toRadians(i*360/255)))
+costab2:
+ .fill 256,100+round(100*cos(toRadians(i*360/255)))
 
 .print "vic_bank: " + toHexString(vic_bank)
 .print "vic_base: " + toHexString(vic_base)
