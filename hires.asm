@@ -797,11 +797,13 @@ start:
     // Set up raster interrupt.
     lda     #$3b
     sta     $d011
-    lda     #$ff
+    lda     #200
     sta     $d012
     lda     #$01
     sta     $d01a
+
     lsr     $d019
+
     // This causes the CPU to see RAM instead of KERNAL and
     // BASIC ROM at $E000-$FFFF and $A000-$BFFF respectively.
     //
@@ -1347,7 +1349,7 @@ bolscroll:
     sta $DB // dblbuf
 
 fillloop1:
-
+    
 bol_copyloop_y:
     lda $F4
     cmp #4
@@ -1425,7 +1427,6 @@ bolbufflipped:
     lda #0
     sta $DB
 no_boldblres:
-
 
 no_finenull:
 
