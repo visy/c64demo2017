@@ -861,21 +861,19 @@ koalaloop:
     inx
     bne koalaloop
 
-    ldx #100
-    ldy #100
+    ldx #200
+    ldy #200
+    jsr wait
+    ldx #200
+    ldy #200
     jsr wait
 
-    :centerwipeoutmc_trans(3)
-
-    lda $d011
-    eor #%00010000 // off
-    sta $d011
+    :centerwipeoutmc_trans(10)
 
     lda #7
     sta $FA
 fade_screen1:
-    ldx #255
-    ldy #7
+    ldy #20
     jsr wait
     ldx $FA
     lda fade_border_tab,x
@@ -885,9 +883,11 @@ fade_screen1:
     cpx #0
     bne fade_screen1
 
-    lda $d011
-    eor #%00010000 // on
-    sta $d011
+    lda #$02   // set vic bank #1 with the dkd loader way
+    and #$03
+    eor #$3f
+    sta $dd02
+
 
 dotball:
 
@@ -907,11 +907,6 @@ dotball:
     :FillScreenMemory($63e8+$3e8*2, 0) // character mem
     lda #%00011000
     sta $d018
-
-    lda #$02   // set vic bank #1 with the dkd loader way
-    and #$03
-    eor #$3f
-    sta $dd02
 
 
 loop16:
@@ -1062,8 +1057,8 @@ dithersandpics:
     SetScreenMemory(screen_memory - vic_base)
     SetBitmapAddress(bitmap_address - vic_base)
 
-    ldx #100
-    ldy #100
+    ldx #250
+    ldy #250
     jsr wait
 
     jsr dithers
@@ -1074,36 +1069,36 @@ afterdithers:
 
     jsr $c90 // load fox
 
-    :centerwipein_trans(5)
+    :centerwipein_trans(10)
 
     ldx #32
     ldy #32
     jsr wait
 
-    :centerwipeout_trans(5)
+    :centerwipeout_trans(10)
 
     jsr $c90 // load broke
 
-    :centerwipein_trans(5)
+    :centerwipein_trans(10)
 
     ldx #32
     ldy #32
     jsr wait
 
-    :centerwipeout_trans(5)
+    :centerwipeout_trans(10)
 
     jsr $c90 // load spacebunny
 
     lda #6
     sta $d020
 
-    :centerwipein_trans(5)
+    :centerwipein_trans(10)
 
     ldx #32
     ldy #32
     jsr wait
 
-    :centerwipeout_trans(5)
+    :centerwipeout_trans(10)
 
     lda #0
     sta $d020
