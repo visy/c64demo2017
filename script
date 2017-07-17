@@ -40,9 +40,12 @@ d_broke.bit		a000	2
 d_bune.clr		9000	2
 d_bune.bit		a000	2
 
-# bolscroller
+# bols / bolscroller
 bolgreets.bin	6800	2
 bolcolors.bin   d800!   
+
+#actual text scroller part colors
+bolcolor2.bin   d800!   
 
 # boleye
 boleye.bin		4800	2		3E8

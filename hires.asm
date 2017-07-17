@@ -1318,8 +1318,6 @@ bolscroll:
     lda #0 // disable sprites
     sta $d015
 
-    :FillScreenMemory($d800,(1<<4) + 1) // color ram
-
     lda #<$6828
     sta $F9
     lda #>$6828
@@ -1343,6 +1341,8 @@ bolscroll:
     sta $DB // bytelbuf
     lda #15
     sta $d020
+
+    jsr $c90
 
     jsr $c90
     lda #%00101000
