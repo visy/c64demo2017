@@ -1,7 +1,11 @@
 parsing
-Got 2 errors while executing:
+Got 10 errors while executing:
   (/Users/visy/dev/kick/hires2/makedisk.sh 1:2) Token must be an identifer
-  (/Users/visy/dev/kick/hires2/makedisk.sh 2:1) Invalid token
+  (/Users/visy/dev/kick/hires2/makedisk.sh 3:1) Unknown preprocessor directive #exomizer
+  (/Users/visy/dev/kick/hires2/makedisk.sh 4:1) Unknown preprocessor directive #cp
+  (/Users/visy/dev/kick/hires2/makedisk.sh 2:27) Syntax error
+  (/Users/visy/dev/kick/hires2/makedisk.sh 5:1) Invalid token
+  ...
 
 #!/bin/sh
  ^

@@ -1,51 +1,3 @@
-//
-// Switch bank in VIC-II
-//
-// Args:
-//    bank: bank number to switch to. Valid values: 0-3.
-//
-.macro SwitchVICBank(bank) {
-    //
-    // The VIC-II chip can only access 16K bytes at a time. In order to
-    // have it access all of the 64K available, we have to tell it to look
-    // at one of four banks.
-    //
-    // This is controller by bits 0 and 1 in $dd00 (PORT A of CIA #2).
-    //
-    //  +------+-------+----------+-------------------------------------+
-    //  | BITS |  BANK | STARTING |  VIC-II CHIP RANGE                  |
-    //  |      |       | LOCATION |                                     |
-    //  +------+-------+----------+-------------------------------------+
-    //  |  00  |   3   |   49152  | ($C000-$FFFF)*                      |
-    //  |  01  |   2   |   32768  | ($8000-$BFFF)                       |
-    //  |  10  |   1   |   16384  | ($4000-$7FFF)*                      |
-    //  |  11  |   0   |       0  | ($0000-$3FFF) (DEFAULT VALUE)       |
-    //  +------+-------+----------+-------------------------------------+
-    .var bits=%11
-
-    .if (bank==0) .eval bits=%11
-    .if (bank==1) .eval bits=%10
-    .if (bank==2) .eval bits=%01
-    .if (bank==3) .eval bits=%00
-
-    .print "bits=%" + toBinaryString(bits)
-
-    //
-    // Set Data Direction for CIA #2, Port A to output
-    //
-    lda $dd02
-    and #%11111100  // Mask the bits we're interested in.
-    ora #$03        // Set bits 0 and 1.
-    sta $dd02
-
-    //
-    // Tell VIC-II to switch to bank
-    //
-    lda $dd00
-    and #%11111100
-    ora #bits
-    sta $dd00
-}
 
 .macro SetMultiColorMode() {
     lda $d016
@@ -53,9 +5,6 @@
     sta $d016   
 }
 
-
-
-    // VICE C64 PALETTE
 
         .const Black   = 000 * 65536 + 000 * 256 + 000   
         .const White   = 255 * 65536 + 255 * 256 + 255
@@ -294,9 +243,6 @@
             .eval AllData.set(9000+BlockNumber,D800Color)
         }
 
-
-
-
         .pc = BMPData "KOALA - Bitmap Graphics"
         .fill 8000,AllData.get(i)
         .pc = Chardata "KOALA - Character Color Data"
@@ -335,14 +281,6 @@
     sta $d011
 }
 
-//
-// Set location of bitmap.
-//
-// Args:
-//    address: Address relative to VIC-II bank address.
-//             Valid values: $0000 (bitmap at $0000-$1FFF)
-//                           $2000 (bitmap at $2000-$3FFF)
-//
 .macro SetBitmapAddress(address) {
     //
     // In standard bitmap mode the location of the bitmap area can
@@ -406,41 +344,8 @@
     bne !loop-
 }
 
-//
-// Switch location of screen memory.
-//
-// Args:
-//   address: Address relative to current VIC-II bank base address.
-//            Valid values: $0000-$3c00. Must be a multiple of $0400.
-//
 .macro SetScreenMemory(address) {
-    // 
-    // The most significant nibble of $D018 selects where the screen is
-    // located in the current VIC-II bank.
-    //
-    //  +------------+-----------------------------+
-    //  |            |         LOCATION*           |
-    //  |    BITS    +---------+-------------------+
-    //  |            | DECIMAL |        HEX        |
-    //  +------------+---------+-------------------+
-    //  |  0000XXXX  |      0  |  $0000            |
-    //  |  0001XXXX  |   1024  |  $0400 (DEFAULT)  |
-    //  |  0010XXXX  |   2048  |  $0800            |
-    //  |  0011XXXX  |   3072  |  $0C00            |
-    //  |  0100XXXX  |   4096  |  $1000            |
-    //  |  0101XXXX  |   5120  |  $1400            |
-    //  |  0110XXXX  |   6144  |  $1800            |
-    //  |  0111XXXX  |   7168  |  $1C00            |
-    //  |  1000XXXX  |   8192  |  $2000            |
-    //  |  1001XXXX  |   9216  |  $2400            |
-    //  |  1010XXXX  |  10240  |  $2800            |
-    //  |  1011XXXX  |  11264  |  $2C00            |
-    //  |  1100XXXX  |  12288  |  $3000            |
-    //  |  1101XXXX  |  13312  |  $3400            |
-    //  |  1110XXXX  |  14336  |  $3800            |
-    //  |  1111XXXX  |  15360  |  $3C00            |
-    //  +------------+---------+-------------------+
-    //
+
     .var bits = (address / $0400) << 4
 
     lda $d018
@@ -491,54 +396,6 @@ checkup:
     cmp #$ef
     beq checkup
 }
-
-/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    PNGtoHIRES
-    ~~~~~~~~~~
-
-        By: TWW/CTR
-
-    USAGE
-    ~~~~~
-
-        :PNGtoHIRES("Filename.png", BitmapMemoryAddress, ScreenMemoryColors)
-
-        @SIGNATURE      void PNGtoHIRES (STR Filename.png ,U16 BitmapMemoryAddress, U16 ScreenMemoryColors)
-        @AUTHOR         tww@creators.no
-
-        @PARAM          Filename.png        - Filename & path to picture file
-        @PARAM          BitmapMemoryAddress - Memorylocation for output of bmp-data
-        @PARAM          ScreenMemoryColors  - Memorylocation for output of Char-data
-
-
-    EXAMPLES
-    ~~~~~~~~
-
-        :PNGtoHIRES("something.png", $2000, $2000+8000)
-
-
-    NOTES
-    ~~~~~
-
-        For now, only handles 320x200
-
-
-    IMPROVEMENTS
-    ~~~~~~~~~~~~
-
-        Add variable picture sizes
-        Handle assertions if the format is unsupported (size, color restrictions etc.)
-
-    TODO
-    ~~~~
-
-
-    BUGS
-    ~~~~
-
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
     .macro PNGtoHIRES(PNGpicture,BMPData,ColData) {
 
@@ -911,138 +768,6 @@ checkup:
     }
 
 
-//
-// Stabilize the IRQ so that the handler function is called exactly when the
-// line scan begins.
-//
-// If an interrupt is registered when the raster reaches a line, an IRQ is
-// triggered on the first cycle of that line scan. This means that the code we
-// want to esecute at that line will not be called immediately. There's quite
-// a lot of housekeeping that needs to be done before we get called.
-//
-// What's worse is that it isn't deterministic how many cycles will pass from
-// when the raster starts at the current line untill we get the call.
-//
-// First, the CPU needs to finish its current operation. This can mean a delay
-// of 0 to 7 cycles, depending on what operation is currently running.
-//
-// Then we spend 7+13 cycles invoking the interrupt handler and pushing stuff to
-// the stack.
-//
-// So all in all we're being called between 20 and 27 cycles after the current line
-// scan begins.
-//
-// This macro removes that uncertainty by registering a new irq on the next line,
-// after that second interrupt is registered, it calls nop's until a line change
-// should occur.
-//
-// Now we know that the cycle type of the current op is only one cycle, so the only
-// uncertainty left is wether ran one extra cycle or not. We can determine that by
-// loading and comparing the current raster line ($d012) with itself. If they're not
-// equal, we switched raster line between the load and the compare -> we're ready to go.
-//
-// If they're equal, we haven't switched yet but we know we'll switch at the next cycle.
-// So we just wait an extra cycle in this case.
-//
-.macro StabilizeRaster() {
-    //
-    // Register a new irq handler for the next line.
-    //
-    lda #<stabilizedirq
-    sta $fffe
-    lda #>stabilizedirq
-    sta $ffff
-    inc $d012
-
-    //
-    // ACK the current IRQ
-    //
-    lda #$ff
-    sta $d019
-
-    // Save the old stack pointer so we can just restore the stack as it was
-    // before the stabilizing got in the way.
-    tsx
-
-    // Enable interrupts and call nop's until the end of the current line
-    // should be reached
-    cli
-
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    // Add one more nop if NTSC
-
-    // Here's or second irq handler
-stabilizedirq:
-
-    // Reset the SP so it looks like the extra irq stuff never happened
-    txs
-
-    //
-    // Wait for line to finish.
-    //
-
-    // PAL-63  // NTSC-64    // NTSC-65
-    //---------//------------//-----------
-    ldx #$08   // ldx #$08   // ldx #$09
-    dex        // dex        // dex
-    bne *-1    // bne *-1    // bne *-1
-    bit $00    // nop
-               // nop
-
-    //
-    // Check at exactly what point we go to the next line
-    //
-    lda $d012
-    cmp $d012
-    beq *+2 // If we haven't changed line yet, wait an extra cycle.
-
-    // Here our real logic can start running.
-}
-
-.macro RasterInterrupt(address, line) {
-    //
-    // Address to jump to when raster reaches line.
-    // Since we have the kernal banked out, we set the address
-    // of our interrupt routine directly in $fffe-$ffff instead
-    // of in $0314-$0315.
-    //
-    // If the kernal isn't banked out, it will push registers on the stack,
-    // check if the interrupt is caused by a brk instruction, and eventually
-    // call the interrupt function stored in the $0134-$0315 vector.
-    //
-    lda #<address
-    sta $fffe       // Instead of $0314 as we have no kernal rom
-    lda #>address
-    sta $ffff       // Instead of $0315 as we have no kernal rom
-
-    //
-    // Configure line to trigger interrupt at
-    //
-    /* .if(line > $ff) { */
-/*
-        lda $d011
-        ora #%10000000
-        sta $d011
-*/
-        lda #>line
-        sta $d012
-    /* } else { */
-    /*     lda $d011 */
-    /*     and #%01111111 */
-    /*     sta $d011 */
-    /*  */
-    /*     lda #line */
-    /*     sta $d012 */
-    /* } */
-}
-
 .plugin "se.triad.kickass.CruncherPlugins"
 
 
@@ -1052,514 +777,31 @@ stabilizedirq:
 .var screen_memory=$1000 + vic_base
 .var bitmap_address=$2000 + vic_base
 
-.var music = LoadSid("nightre.sid")
-
-
-BasicUpstart2(start)
+.pc = $f00 "democode"
 
 start:
-    jmp start2
 
+    lda $d011
+    eor #%00010000 // off
+    sta $d011
 
-// decruncher
-
-.const B2_ZP_BASE = $03
-// ByteBoozer Decruncher    /HCL May.2003
-// B2 Decruncher            December 2014
-
-.label zp_base  = B2_ZP_BASE
-.label bits     = zp_base
-.label put      = zp_base + 2
-
-.macro B2_DECRUNCH(addr) {
-    ldy #<addr
-    ldx #>addr
-    jsr Decrunch
-}
-
-.macro  GetNextBit() {
-    asl bits
-    bne DgEnd
-    jsr GetNewBits
-DgEnd:
-}
-
-.macro  GetLen() {
-    lda #1
-GlLoop:
-    :GetNextBit()
-    bcc GlEnd
-    :GetNextBit()
-    rol
-    bpl GlLoop
-GlEnd:
-}
-
-Decrunch:
-    sty Get1+1
-    sty Get2+1
-    sty Get3+1
-    stx Get1+2
-    stx Get2+2
-    stx Get3+2
-
-    ldx #0
-    jsr GetNewBits
-    sty put-1,x
-    cpx #2
-    bcc *-7
-    lda #$80
-    sta bits
-DLoop:
-    :GetNextBit()
-    bcs Match
-Literal:
-    // Literal run.. get length.
-    :GetLen()
-    sta LLen+1
-
-    ldy #0
-LLoop:
-Get3:
-    lda $feed,x
-    inx
-    bne *+5
-    jsr GnbInc
-L1: sta (put),y
-    iny
-LLen:
-    cpy #0
-    bne LLoop
-
-    clc
-    tya
-    adc put
-    sta put
-    bcc *+4
-    inc put+1
-
-    iny
-    beq DLoop
-
-    // Has to continue with a match..
-
-Match:
-    // Match.. get length.
-    :GetLen()
-    sta MLen+1
-
-    // Length 255 -> EOF
-    cmp #$ff
-    beq End
-
-    // Get num bits
-    cmp #2
-    lda #0
-    rol
-    :GetNextBit()
-    rol
-    :GetNextBit()
-    rol
-    tay
-    lda Tab,y
-    beq M8
-
-    // Get bits < 8
-M_1: 
-    :GetNextBit()
-    rol
-    bcs M_1
-    bmi MShort
-M8:
-    // Get byte
-    eor #$ff
-    tay
-Get2:
-    lda $feed,x
-    inx
-    bne *+5
-    jsr GnbInc
-    jmp Mdone
-MShort:
-    ldy #$ff
-Mdone:
-    //clc
-    adc put
-    sta MLda+1
-    tya
-    adc put+1
-    sta MLda+2
-
-    ldy #$ff
-MLoop:
-    iny
-MLda:
-    lda $beef,y
-    sta (put),y
-MLen:
-    cpy #0
-    bne MLoop
-
-    //sec
-    tya
-    adc put
-    sta put
-    bcc *+4
-    inc put+1
-
-    jmp DLoop
-
-End:
-
-    rts
-
-GetNewBits:
-Get1:
-    ldy $feed,x
-    sty bits
-    rol bits
-    inx
-    bne GnbEnd
-GnbInc: 
-    inc Get1+2
-    inc Get2+2
-    inc Get3+2
-GnbEnd:
-    rts
-
-Tab:
-    // Short offsets
-    .byte %11011111 // 3
-    .byte %11111011 // 6
-    .byte %00000000 // 8
-    .byte %10000000 // 10
-    // Long offsets
-    .byte %11101111 // 4
-    .byte %11111101 // 7
-    .byte %10000000 // 10
-    .byte %11110000 // 13
-
-generate_lookups:
-    ldx #$00
-genloop:
-    txa
-    and #$07
-    asl
-    asl
-    sta $FC
-    txa
-    lsr
-    lsr
-    lsr
-    sta $FD
-    lsr
-    ror $FC
-    lsr
-    ror $FC
-    adc $FD
-    ora #$60 // bitmap address $6000
-    sta YTABHI,x
-    lda $FC
-    sta YTABLO,x
-    inx
-    cpx #200
-    bne genloop
-
-    lda #$80
-    sta $FC
-    ldx #$00
-genloop2:
-    txa
-    and #$F8
-    sta XTAB,x
-    lda $FC
-    sta BITTAB,x
-    lsr
-    bcc genskip
-    lda #$80
-genskip:
-    sta $FC
-    inx
-    bne genloop2
-
-    rts
-
-YTABHI:
-.fill 200,0
-
-YTABLO:
-.fill 200,0
-
-BITTAB:
-.fill 256,0
-
-XTAB:
-.fill 256,0
-
-.macro putpixel() {
-    lda YTABLO,y
-    sta $FC
-    lda YTABHI,y
-    sta $FD
-    ldy XTAB,x
-    lda ($FC),y
-    ora BITTAB,x
-    sta ($FC),y
-}
-
-.var bres_x1 = $50
-.var bres_y1 = $51
-.var bres_x2 = $60
-.var bres_y2 = $61
-.var bres_err = $62
-.var bres_cntr = $63
-.var bres_dx = $64
-.var bres_dy = $65
-
-hline_sto:
-    .byte 0,0,0
-.macro hline() {
-    sta hline_sto
-    stx hline_sto+1
-    sty hline_sto+2
-hlineloop:
-    ldy hline_sto+1
-    ldx hline_sto+2
-    txa
-    tay
-    ldx hline_sto+1
-    lda #%00001000 // color, 0/8/136
-    jsr bolpix
-
-    ldx hline_sto+1
-    ldy hline_sto+2
-
-    inx
-    stx hline_sto+1
-    cpx hline_sto
-    bne hlineloop
-
-}
-
-.macro bresenham(xa,ya,xb,yb,err,cntr,dx,dy) {
-    ldy ya
-    cpy yb
-    bne no_hline
-    ldx xa
-    lda xb
-    :hline()
-    jmp bhamdone
-no_hline:
-
-    ldy xb
-    ldx yb
-    lda #%10001000 // color, 0/8/136
-    jsr bolpix
-
-    lda #$00        // initialise err
-    sta err
-    lda xb      // check if the line is going right or left (delta x is positive or negative)
-    sec
-    sbc xa
-    bpl dxpos
-    lda ya      // if the line is going leftward, swap xa/ya and xb/yb around so it goes rightward
-    ldx yb
-    sta yb
-    stx ya
-    lda xa
-    ldx xb
-    sta xb
-    stx xa
-    sec
-    sbc xa
-dxpos:          // here we have secured a rightward line, accumulator is filled with delta xa/xb
-    sta dx      // save the delta
-    sta cntr        // use the delta as counter for the loop
-    inc cntr        // and increment by one to prevent off-by-one when we compare with 0
-
-    lda yb      // now we check for y
-    sec
-    sbc ya
-    bmi dyneg       // check if the line is going up or downward (delta ya/yb is negative)
-    sta dy
-    cmp dx      // compare delta ya/yb with delta xa/xy to see if we loop over x or y axis
-    lda #$c8        // c8 is the opcode iny
-    sta bhamyloop   // because delta ya/yb was positive, we increment y in this loop
-    sta bhamyy      // and also in the loop over y
-    bcc blup
-    jmp bremenovery // and into the loop over y
-blup:
-    jmp dypos       // or loop over x, knowing that delta ya/yb is positive 
-dyneg:
-    lda #$88        // 88 is the opcode for dey
-    sta bhamyloop   // because delta ya/yb was negative, we decrement y in this loop
-    sta bhamyy
-    lda ya      // calculate and store delta ya/yb again (this time ya-yb instead of yb-ya)
-    sec
-    sbc yb
-    sta dy
-    cmp dx
-    bcs bremenovery // if delta ya/yb is larger then delta xa/xb, we loop over y
-dypos:
-
-    ldx xa      // see the C++ implementation at https://www.cs.helsinki.fi/group/goa/mallinnus/lines/bresenh.html
-    ldy ya      // this is for ( int x = x1; x <= x2; 
-
-bhamoverx:      // here the loop over x begins
-    dec cntr        // first we check if we're done
-    beq bhamxdone
-    inx         // x++ )  {
-    stx xa
-    sty ya
-
-    txa
-    tay
-    ldx ya
-    lda #%10001000 // color, 0/8/136
-    jsr bolpix
-
-    ldx xa
-    ldy ya
-    lda err     // eps += dy;
-    clc
-    adc dy
-    sta err
-    bvs bhamyloop   // if ( (eps << 1) >= dx )  {
-    cmp dx
-    bcc bhamoverx
-bhamyloop:
-    iny         // y++; 
-                // or y-- if the delta ya/yb was negative
-    lda err     // eps -= dx;
-    sec
-    sbc dx
-    sta err
-    jmp bhamoverx
-
-bhamxdone:
-    jmp bhamdone
-
-bremenovery:
-    lda dy
-    sta cntr
-    inc cntr
-    ldx xa
-    ldy ya
-
-bhamovery:
-    dec cntr
-    beq bhamdone
-bhamyy:
-    iny
-    stx xa
-    sty ya
-    txa
-    tay
-    ldx ya
-    lda #%10001000 // color, 0/8/136
-    jsr bolpix
-
-    ldx xa
-    ldy ya
-    lda err
-    clc
-    adc dx
-    sta err
-    bvs bhamxloop
-    cmp dy
-    bcc bhamovery
-bhamxloop:
-    inx
-    lda err
-    sec
-    sbc dy
-    sta err
-    jmp bhamovery
-
-bhamdone:
-}
-
-.macro drawtri(xx,yy) {
-    lda #64
-    sta frame
-triloop:
-    ldx #160
-    lda #0
-    clc
-    adc yy
-    tay
-    stx bres_x1
-    sty bres_y1
-    lda frame
-    clc
-    adc xx
-    tax
-    lda #100
-    clc
-    adc yy
-    tay
-    stx bres_x2
-    sty bres_y2
-    :bresenham(bres_x1,bres_y1,bres_x2,bres_y2,bres_err,bres_cntr,bres_dx,bres_dy)
-
-    inc frame
-    lda frame
-    cmp #200
-    bcc no_nullframe
-    jmp tri_done
-no_nullframe:
-    jmp triloop
-tri_done:
-}
-
-.pc = $9000 "dkdloader" // will be overwritten with gfx runtime
-
-dkdloader:
-.import c64 "dkdload.prg"
-
-.pc = $0cdb "democode"
-
-loadfile:
-    ldx $FB
-    ldy $FC
-    jsr $0100
-    rts
-
-start2:
     lda #0
     sta $d020
     sta $d021
 
-    SwitchVICBank(1)
+    lda #0
+    jsr $c200
 
-    lda #$36
-    sta $01
-    lda #$01
-    jsr dkdloader // init the dkd loader to $0100
 
-    jsr generate_lookups
 
-    sei
-
-    // Turn off interrupts from the two CIA chips.
-    // Used by the kernal to flash cursor and scan 
-    // keyboard.
-    lda #$7f
-    sta $dc0d //Turn off CIA 1 interrupts
-    sta $dd0d //Turn off CIA 2 interrupts
-
-    lda #<nmi_nop
-    sta $fffa
-    lda #>nmi_nop
-    sta $fffb
-    // Reading these registers we ack any pending CIA interrupts.
-    // Otherwise, we might get a trailing interrupt after setup.
-
-    // Tell VIC-II to start generating raster interrupts
-    lda #$01
-    sta $d01a //Turn on raster interrupts
-
-    // Bank out BASIC and KERNAL.
+    // Set up raster interrupt.
+    lda     #$3b
+    sta     $d011
+    lda     #$ff
+    sta     $d012
+    lda     #$01
+    sta     $d01a
+    lsr     $d019
     // This causes the CPU to see RAM instead of KERNAL and
     // BASIC ROM at $E000-$FFFF and $A000-$BFFF respectively.
     //
@@ -1569,38 +811,24 @@ start2:
     lda #$35
     sta $01
 
-    lda #<nmi_nop
-    sta $fffa
-    lda #>nmi_nop
-    sta $fffb
-
-    lda #$00
-    sta $dd0e       // Stop timer A
-    sta $dd04       // Set timer A to 0, NMI will occure immediately after start
-    sta $dd0e
-
-    lda #$81
-    sta $dd0d       // Set timer A as source for NMI
-
-    lda #$01
-    sta $dd0e       // Start timer A -> NMI
-
     ldx #0
     ldy #0
-    lda #music.startSong                      //<- Here we get the startsong and init address from the sid file
-    jsr music.init  
 
-    RasterInterrupt(mainirq, $35)
+
+    ldx #<$c203
+    ldy #>$c203
+    jsr $c10 // music playroutine register
 
     cli
 
+    lda $d011
+    eor #%00010000 // on
+    sta $d011
+
 koalapic:
 
-    ldx #255
-    ldy #255
-    jsr wait
-    ldx #255
-    ldy #255
+    ldx #32
+    ldy #32
     jsr wait
 
     lda #$02   // set vic bank #1 with the dkd loader way
@@ -1608,27 +836,7 @@ koalapic:
     eor #$3f
     sta $dd02
 
-    // load from disk
-    lda #<$6000
-    sta $FB
-    lda #>$6000
-    sta $FC
-    lda #8
-    jsr loadfile // bit
-
-    lda #<$4400
-    sta $FB
-    lda #>$4400
-    sta $FC
-    lda #9
-    jsr loadfile // chr
-
-    lda #<$9600
-    sta $FB
-    lda #>$9600
-    sta $FC
-    lda #10
-    jsr loadfile // d80
+    jsr $c90 // load from disk (bit,chr,d80)
 
     lda #$d8
     sta $d016
@@ -1651,32 +859,21 @@ koalaloop:
     inx
     bne koalaloop
 
-    ldx #255
-    ldy #255
-    jsr wait
-    ldx #255
-    ldy #255
+    ldx #100
+    ldy #100
     jsr wait
 
-    ldx #255
-    ldy #255
-    jsr wait
-
-    :centerwipeoutmc_trans(10)
+    :centerwipeoutmc_trans(3)
 
     lda $d011
     eor #%00010000 // off
     sta $d011
 
-    ldx #255
-    ldy #255
-    jsr wait
-
     lda #7
     sta $FA
 fade_screen1:
     ldx #255
-    ldy #45
+    ldy #7
     jsr wait
     ldx $FA
     lda fade_border_tab,x
@@ -1713,9 +910,6 @@ dotball:
     and #$03
     eor #$3f
     sta $dd02
-
-    lda #$02   // set vic bank #1
-    sta $dd00
 
 
 loop16:
@@ -1834,14 +1028,14 @@ fade_border_tab:
 
 exit16:
 
-    :centerwipeout16_trans(30)
+    :centerwipeout16_trans(3)
 
     lda #0
     sta $FA
 // hires part
 fade_border1:
     ldx #255
-    ldy #45
+    ldy #7
     jsr wait
     ldx $FA
     lda fade_border_tab,x
@@ -1855,93 +1049,59 @@ fade_border1:
     sta $d020
     sta $d021
 
-    ldy #255
+    ldy #32
     jsr wait
 
 dithersandpics:
 
-    lda $d011
-    eor #%00010000 // off
-    sta $d011
-
-    lda #$02   // set vic bank #1 with the dkd loader way
-    and #$03
-    eor #$3f
-    sta $dd02
+    jsr $c90 // load quadtrip logo
 
     SetHiresBitmapMode()
     SetScreenMemory(screen_memory - vic_base)
     SetBitmapAddress(bitmap_address - vic_base)
 
-    lda #0
-    sta $d020
-
-    :B2_DECRUNCH(crunch_logo)
-
-    lda $d011
-    eor #%00010000 // on
-    sta $d011
-
-    ldy #255
-    jsr wait
-    ldy #255
-    jsr wait
-    ldy #255
-    jsr wait
-    ldy #255
-    jsr wait
-
-
-    ldy #255
+    ldx #100
+    ldy #100
     jsr wait
 
     jsr dithers
 afterdithers:
-    lda #<$9000
-    sta $FB
-    lda #>$9000
-    sta $FC
-    lda #1
-    jsr loadfile 
 
-    :centerwipein_trans(30)
+    ldy #32
+    jsr wait
 
+    jsr $c90 // load fox
 
-    lda #<$9000
-    sta $FB
-    lda #>$9000
-    sta $FC
-    lda #2
-    jsr loadfile 
+    :centerwipein_trans(5)
 
-    :centerwipeout_trans(30)
+    ldx #32
+    ldy #32
+    jsr wait
 
-    :centerwipein_trans(30)
+    :centerwipeout_trans(5)
 
+    jsr $c90 // load broke
 
-    lda #<$9000
-    sta $FB
-    lda #>$9000
-    sta $FC
-    lda #6
-    jsr loadfile 
+    :centerwipein_trans(5)
 
-    :centerwipeout_trans(30)
+    ldx #32
+    ldy #32
+    jsr wait
+
+    :centerwipeout_trans(5)
+
+    jsr $c90 // load spacebunny
 
     lda #6
     sta $d020
 
-    :centerwipein_trans(30)
+    :centerwipein_trans(5)
 
-    ldx #255
-    ldy #255
-    jsr wait
-    ldy #255
-    jsr wait
-    ldy #255
+    ldx #32
+    ldy #32
     jsr wait
 
-    :centerwipeout_trans(30)
+    :centerwipeout_trans(5)
 
     lda #0
     sta $d020
@@ -1954,6 +1114,9 @@ afterdithers:
 
 
 bols:
+    jsr $c90
+
+
     lda $d011
     eor #%00010000 // on
     sta $d011
@@ -2062,7 +1225,7 @@ bols:
     lda #0
     sta $d021
 
-    :copymem(bolchars,$6000,16)
+    :copymem(bolchars,$6000,8)
     :FillScreenMemory($d800,(1<<4) + 1) // color ram
     :FillScreenMemory($4400, 0)
     lda #0
@@ -2116,8 +1279,8 @@ bolop:
     bne no_bloslow
     lda #0
     sta $ee
-    ldx #3
-    ldy #3
+    ldx #1
+    ldy #1
     jsr wait
     :copymem_eor_short($4400,$4400+40,3)
 
@@ -2157,56 +1320,11 @@ nobf:
 
     jmp bolop
 bolscroll:
-    lda #$10
-    sta $d011
-
-    lda #$02   // set vic bank #1 with the dkd loader way
-    and #$03
-    eor #$3f
-    sta $dd02
-
-    lda #0
-    sta $d020
-    lda #0
-    sta $d021
-
-    :copymem(bolchars,$6000,16)
-    :FillScreenMemory($d800,(1<<4) + 1) // color ram
-    :FillScreenMemory($4400, 0)
-
-
     lda #0 // disable sprites
     sta $d015
 
-    centerwipeoutmc_trans(30)
-
-    :FillScreenMemory($d800,(1<<4) + 1) // color ram
-    lda #0
-    sta $d021
-
-    // load bolscroll-data to 6800-c8000
-    lda #<$6800
-    sta $FB
-    lda #>$6800
-    sta $FC
-    lda #7
-    jsr loadfile 
-
-    :FillScreenMemory($d800,(1<<4) + 1) // color ram
-
     :copymem($6800,$4400,4)
-/*
-.for (var f = 0; f<16; f++) {
-    lda #<$6800+1000*f
-    sta $FB
-    lda #>$6800+1000*f
-    sta $FC
-    lda #f
-    clc
-    adc #7
-    jsr loadfile 
-}
-*/
+
     lda #<$6828
     sta $F9
     lda #>$6828
@@ -2220,16 +1338,13 @@ bolscroll:
 
     lda #0
     sta $F5
-    lda #%10010111
+    lda #%00011111
     sta $d011
 
     lda #%00011000 // 4400
     sta $d018
     lda #0
     sta $DB // dblbuf
-
-    ldy #5
-    jsr wait
 
 fillloop1:
 
@@ -2253,7 +1368,7 @@ bol_copyloop_target:
 
 copy_done:
 
-    lda #%10011000
+    lda #%00011111
     clc
     sbc $f5
     sta $d011
@@ -2503,86 +1618,56 @@ dithers:
     :FillBitmap($6000,0)
     :FillScreenMemory($5000,(11<<4) + 0)
 
-    lda #<$9000
-    sta $FB
-    lda #>$9000
-    sta $FC
-    lda #5 
-    jsr loadfile 
+    jsr $c90
 
     :copymem_eor($9000,$6000,40)
 
-    ldy #255
+    ldy #32
     jsr wait
 
-    lda #<$9000
-    sta $FB
-    lda #>$9000
-    sta $FC
-    lda #3 
-    jsr loadfile 
+    jsr $c90
 
     :FillScreenMemory($5000,(12<<4) + 0)
 
     :copymem_eor($9000,$6000,40)
 
-    ldy #255
+    ldy #32
     jsr wait
 
-    lda #<$9000
-    sta $FB
-    lda #>$9000
-    sta $FC
-    lda #4
-    jsr loadfile 
+    jsr $c90
 
     :FillScreenMemory($5000,(15<<4) + 0)
 
     :copymem_eor($9000,$6000,40)
 
-    ldy #255
+    ldy #32
     jsr wait
 
-    lda #<$9000
-    sta $FB
-    lda #>$9000
-    sta $FC
-    lda #5
-    jsr loadfile 
+    jsr $c90
 
     :FillScreenMemory($5000,(1<<4) + 0)
 
     :copymem_eor($9000,$6000,40)
 
-    ldy #255
+    ldy #32
     jsr wait
 
-    lda #<$9000
-    sta $FB
-    lda #>$9000
-    sta $FC
-    lda #3
-    jsr loadfile 
+    jsr $c90
 
     :FillScreenMemory($5000,(15<<4) + 0)
 
     :copymem_eor($9000,$6000,40)
 
-    ldy #255
+    ldy #32
     jsr wait
 
-    lda #<$9000
-    sta $FB
-    lda #>$9000
-    sta $FC
-    lda #4
-    jsr loadfile 
+    jsr $c90
 
     :FillScreenMemory($5000,(12<<4) + 0)
 
     :copymem_eor($9000,$6000,40)
 
-    ldy #255
+    ldy #32
     jsr wait
 
     :FillScreenMemory($5000,(11<<4) + 0)
@@ -2675,6 +1760,216 @@ waiter1:
     cpy #0
     bne wait
     rts
+
+
+.var bres_x1 = $50
+.var bres_y1 = $51
+.var bres_x2 = $60
+.var bres_y2 = $61
+.var bres_err = $62
+.var bres_cntr = $63
+.var bres_dx = $64
+.var bres_dy = $65
+
+hline_sto:
+    .byte 0,0,0
+.macro hline() {
+    sta hline_sto
+    stx hline_sto+1
+    sty hline_sto+2
+hlineloop:
+    ldy hline_sto+1
+    ldx hline_sto+2
+    txa
+    tay
+    ldx hline_sto+1
+    lda #%00001000 // color, 0/8/136
+    jsr bolpix
+
+    ldx hline_sto+1
+    ldy hline_sto+2
+
+    inx
+    stx hline_sto+1
+    cpx hline_sto
+    bne hlineloop
+
+}
+
+.macro bresenham(xa,ya,xb,yb,err,cntr,dx,dy) {
+    ldy ya
+    cpy yb
+    bne no_hline
+    ldx xa
+    lda xb
+    :hline()
+    jmp bhamdone
+no_hline:
+
+    ldy xb
+    ldx yb
+    lda #%10001000 // color, 0/8/136
+    jsr bolpix
+
+    lda #$00        // initialise err
+    sta err
+    lda xb      // check if the line is going right or left (delta x is positive or negative)
+    sec
+    sbc xa
+    bpl dxpos
+    lda ya      // if the line is going leftward, swap xa/ya and xb/yb around so it goes rightward
+    ldx yb
+    sta yb
+    stx ya
+    lda xa
+    ldx xb
+    sta xb
+    stx xa
+    sec
+    sbc xa
+dxpos:          // here we have secured a rightward line, accumulator is filled with delta xa/xb
+    sta dx      // save the delta
+    sta cntr        // use the delta as counter for the loop
+    inc cntr        // and increment by one to prevent off-by-one when we compare with 0
+
+    lda yb      // now we check for y
+    sec
+    sbc ya
+    bmi dyneg       // check if the line is going up or downward (delta ya/yb is negative)
+    sta dy
+    cmp dx      // compare delta ya/yb with delta xa/xy to see if we loop over x or y axis
+    lda #$c8        // c8 is the opcode iny
+    sta bhamyloop   // because delta ya/yb was positive, we increment y in this loop
+    sta bhamyy      // and also in the loop over y
+    bcc blup
+    jmp bremenovery // and into the loop over y
+blup:
+    jmp dypos       // or loop over x, knowing that delta ya/yb is positive 
+dyneg:
+    lda #$88        // 88 is the opcode for dey
+    sta bhamyloop   // because delta ya/yb was negative, we decrement y in this loop
+    sta bhamyy
+    lda ya      // calculate and store delta ya/yb again (this time ya-yb instead of yb-ya)
+    sec
+    sbc yb
+    sta dy
+    cmp dx
+    bcs bremenovery // if delta ya/yb is larger then delta xa/xb, we loop over y
+dypos:
+
+    ldx xa      // see the C++ implementation at https://www.cs.helsinki.fi/group/goa/mallinnus/lines/bresenh.html
+    ldy ya      // this is for ( int x = x1; x <= x2; 
+
+bhamoverx:      // here the loop over x begins
+    dec cntr        // first we check if we're done
+    beq bhamxdone
+    inx         // x++ )  {
+    stx xa
+    sty ya
+
+    txa
+    tay
+    ldx ya
+    lda #%10001000 // color, 0/8/136
+    jsr bolpix
+
+    ldx xa
+    ldy ya
+    lda err     // eps += dy;
+    clc
+    adc dy
+    sta err
+    bvs bhamyloop   // if ( (eps << 1) >= dx )  {
+    cmp dx
+    bcc bhamoverx
+bhamyloop:
+    iny         // y++; 
+                // or y-- if the delta ya/yb was negative
+    lda err     // eps -= dx;
+    sec
+    sbc dx
+    sta err
+    jmp bhamoverx
+
+bhamxdone:
+    jmp bhamdone
+
+bremenovery:
+    lda dy
+    sta cntr
+    inc cntr
+    ldx xa
+    ldy ya
+
+bhamovery:
+    dec cntr
+    beq bhamdone
+bhamyy:
+    iny
+    stx xa
+    sty ya
+    txa
+    tay
+    ldx ya
+    lda #%10001000 // color, 0/8/136
+    jsr bolpix
+
+    ldx xa
+    ldy ya
+    lda err
+    clc
+    adc dx
+    sta err
+    bvs bhamxloop
+    cmp dy
+    bcc bhamovery
+bhamxloop:
+    inx
+    lda err
+    sec
+    sbc dy
+    sta err
+    jmp bhamovery
+
+bhamdone:
+}
+
+.macro drawtri(xx,yy) {
+    lda #64
+    sta frame
+triloop:
+    ldx #160
+    lda #0
+    clc
+    adc yy
+    tay
+    stx bres_x1
+    sty bres_y1
+    lda frame
+    clc
+    adc xx
+    tax
+    lda #100
+    clc
+    adc yy
+    tay
+    stx bres_x2
+    sty bres_y2
+    :bresenham(bres_x1,bres_y1,bres_x2,bres_y2,bres_err,bres_cntr,bres_dx,bres_dy)
+
+    inc frame
+    lda frame
+    cmp #200
+    bcc no_nullframe
+    jmp tri_done
+no_nullframe:
+    jmp triloop
+tri_done:
+}
+
+loadfile:
+    rts
+
 /*
 .macro drawlinetri() {
         ldx frame2
@@ -2736,74 +2031,6 @@ waiter1:
 
 */
 
-
-nmi_nop:
-    //
-    // This is the irq handler for the NMI. Just returns without acknowledge.
-    // This prevents subsequent NMI's from interfering.
-    //
-    rti
-
-
-mainirq:
-    //
-    // Since the kernal is switced off, we need to push the
-    // values of the registers to the stack ourselves so
-    // that they're restored when we're done.
-    //
-    // If we don't do anything advanced like calling cli to let another
-    // irq occur, we don't need to use the stack.
-    //
-    // In that case it's faster to:
-    //
-    // sta restorea+1
-    // stx restorex+1
-    // sty restorey+1
-    //
-    // ... do stuff ...
-    //
-    // lda #$ff
-    // sta $d019
-    //
-    // restorea: lda #$00
-    // restorex: ldx #$00
-    // restorey: ldy #$00
-    // rti
-    //
-
-    sta restorea+1
-    stx restorex+1
-    sty restorey+1
-    
-    //
-    // Stabilize raster using double irq's.
-//    StabilizeRaster()
-
-    jsr music.play 
-
-    //
-    // Reset the raster interrupt since the stabilizing registered another
-    // function. 
-    // We can also register another irq for something further down the screen
-    // or at next frame.
-    //
-//    RasterInterrupt(mainirq, $35)
-
-    //
-    // Restore the interrupt condition so that we can get
-    // another one.
-    //
-    lda #$ff
-    sta $d019   //ACK interrupt so it can be called again
-
-    //
-    // Restore the values of the registers and return.
-    //
-restorea: lda #$00
-restorex: ldx #$00
-restorey: ldy #$00
-    rti
-
 frame:
 .byte 0
 frame2:
@@ -2812,18 +2039,7 @@ frame2:
 bolchars:
 .import binary "bolchars_flip.raw"
 
-.pc = music.location "Music"
-.fill music.size, music.getData(i)
-
-.pc = $8000 "crunchdata"
-
-.label crunch_logo = *
-.modify B2() {
-    :PNGtoHIRES("quadlogo.png", bitmap_address, screen_memory)
-}
-.pc = * "crunchdata end"
-
-.pc = $be00  "sintab"
+.pc = $e000  "sintab"
 sintab:
  .fill 256,round(63*sin(toRadians(i*360/63)))
 costab:

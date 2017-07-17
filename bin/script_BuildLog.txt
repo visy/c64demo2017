@@ -1,0 +1,16 @@
+parsing
+Got 41 errors while executing:
+  (/Users/visy/dev/kick/hires2/script 1:2) Token must be an identifer
+  (/Users/visy/dev/kick/hires2/script 2:2) Token must be an identifer
+  (/Users/visy/dev/kick/hires2/script 3:2) Token must be an identifer
+  (/Users/visy/dev/kick/hires2/script 5:5) Syntax error
+  (/Users/visy/dev/kick/hires2/script 8:2) Token must be an identifer
+  ...
+
+# First part contains the master demo routine and the music.
+ ^
+
+Error: Token must be an identifer
+at line 1, column 2 in script
+
+

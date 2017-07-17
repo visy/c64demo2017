@@ -1,0 +1,64 @@
+# First part contains the master demo routine and the music.
+# Spindle automatically jumps to the load address of the first file listed
+# here, unless you specify an entry point with the -e option.
+
+demo.prg
+nightre.sid		c200!	7e
+
+# The "!" indicates that this part should be written directly into I/O space, and hence
+# colour RAM. Without the exclamation mark, the data would go into shadow RAM. 
+
+#mc terminal pic
+terminal.bit
+terminal.chr
+terminal.d80
+
+# quadtrip logo
+quadtrip.bit
+quadtrip.clr
+
+# dithers
+d_dither3.bin 	9000	2
+
+d_dither1.bin	9000	2
+
+d_dither2.bin	9000	2
+
+d_dither3.bin	9000	2
+
+d_dither1.bin	9000	2
+
+d_dither2.bin	9000	2
+
+# hires pics
+d_fox.clr		9000	2
+d_fox.bit		a000	2
+
+d_broke.clr		9000	2
+d_broke.bit		a000	2
+
+d_bune.clr		9000	2
+d_bune.bit		a000	2
+
+# bolscroller
+bolgreets.bin	6800	2
+
+
+
+
+
+
+# pic1.kla			6000	2	1f40
+# pic1.kla			4000	1f42	3e8
+# pic1.kla			d800!	232a	3e8
+# pic1.kla			d021!	2712	1
+
+# pic2.kla			6000	2	1f40
+# pic2.kla			4000	1f42	3e8
+# pic2.kla			d800!	232a	3e8
+# pic2.kla			d021!	2712	1
+
+# pic3.kla			6000	2	1f40
+# pic3.kla			4000	1f42	3e8
+# pic3.kla			d800!	232a	3e8
+# pic3.kla			d021!	2712	1
