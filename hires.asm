@@ -275,7 +275,7 @@
     sta $d016
 }
 
-.macro ResetStandardBitMapMode() {
+.macro ResetStandarbyteitMapMode() {
     lda $d011
     and #%11011111
     sta $d011
@@ -1013,11 +1013,11 @@ no_index_clear:
     beq exit16
 
 no_fres:
-    jsr feedback16
+    jsr feebyteack16
 
     jmp loop16
 
-feedback16:
+feebyteack16:
 //    copymem_eor($6000,$6081,4) // sierpinski
 
     copymem_eor($6000,$6081,4)
@@ -1116,8 +1116,7 @@ afterdithers:
 
 
 bols:
-    jsr $c90
-
+    jsr $c90 // preload scroller bitmap & load colormap
 
     lda $d011
     eor #%00010000 // on
@@ -1228,7 +1227,6 @@ bols:
     sta $d021
 
     :copymem(bolchars,$6000,8)
-    :FillScreenMemory($d800,(1<<4) + 1) // color ram
     :FillScreenMemory($4400, 0)
     lda #0
     sta $d020
@@ -1325,7 +1323,7 @@ bolscroll:
     lda #0 // disable sprites
     sta $d015
 
-    :copymem($6800,$4400,4)
+    :FillScreenMemory($d800,(1<<4) + 1) // color ram
 
     lda #<$6828
     sta $F9
@@ -1340,13 +1338,76 @@ bolscroll:
 
     lda #0
     sta $F5
-    lda #%00011111
+    lda #%00011011
     sta $d011
 
     lda #%00011000 // 4400
     sta $d018
+
     lda #0
-    sta $DB // dblbuf
+    sta $DB // bytelbuf
+    lda #15
+    sta $d020
+
+    jsr $c90
+    lda #%00101000
+    sta $d018
+    ldy #100
+    jsr wait
+    jsr $c90
+    lda #%00011000
+    sta $d018
+    jsr $c90
+    lda #%00101000
+    sta $d018
+    jsr $c90
+    lda #%00011000
+    sta $d018
+    jsr $c90
+    lda #%00101000
+    sta $d018
+    jsr $c90
+    lda #%00011000
+    sta $d018
+    jsr $c90
+    lda #%00101000
+    sta $d018
+    jsr $c90
+    lda #%00011000
+    sta $d018
+    jsr $c90
+    lda #%00101000
+    sta $d018
+    jsr $c90
+    lda #%00011000
+    sta $d018
+    jsr $c90
+    lda #%00101000
+    sta $d018
+    jsr $c90
+    lda #%00011000
+    sta $d018
+    jsr $c90
+    lda #%00101000
+    sta $d018
+    jsr $c90
+    lda #%00011000
+    sta $d018
+    jsr $c90
+    lda #%00101000
+    sta $d018
+    jsr $c90
+    lda #%00011000
+    sta $d018
+    ldy #200
+    jsr wait
+    lda #0
+    sta $d020
+
+    :copymem($6800,$4400,4)
+    ldy #200
+    jsr wait
+
 
 fillloop1:
     
@@ -1399,7 +1460,7 @@ bol_no_src_inc:
     lda $FA
     sta bol_copyloop_x+2
 
-    lda $DB
+    lda $db
     cmp #0
     bne bolbuf1
 bolbuf0:
@@ -1420,13 +1481,13 @@ bolbuf1:
     sta bol_copyloop_target+2
 
 bolbufflipped:
-    inc $DB
-    lda $DB
+    inc $db
+    lda $db
     cmp #2
-    bne no_boldblres
+    bne no_bolbytelres
     lda #0
-    sta $DB
-no_boldblres:
+    sta $db
+no_bolbytelres:
 
 no_finenull:
 
@@ -1441,9 +1502,9 @@ boscroll_over:
     ldy #255
     jsr wait
 
-randbols:
+ranbyteols:
 
-// randbols
+// ranbyteols
 
     lda #0
     sta $FC
@@ -2041,6 +2102,7 @@ bolchars:
 .import binary "bolchars_flip.raw"
 
 .pc = $e000  "sintab"
+
 sintab:
  .fill 256,round(63*sin(toRadians(i*360/63)))
 costab:

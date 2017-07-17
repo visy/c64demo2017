@@ -42,10 +42,40 @@ d_bune.bit		a000	2
 
 # bolscroller
 bolgreets.bin	6800	2
+bolcolors.bin   d800!   
 
+# boleye
+boleye.bin		4800	2		3E8
 
+boleye.bin		4400	3EA		3E8
 
+boleye.bin		4800	7D2		3E8
 
+boleye.bin		4400	BBA		3E8
+
+boleye.bin		4800	FA2		3E8
+
+boleye.bin		4400	138A	3E8
+
+boleye.bin		4800	1772	3E8
+
+boleye.bin		4400	1B5A	3E8
+
+boleye.bin		4800	1F42	3E8
+
+boleye.bin		4400	232A	3E8
+
+boleye.bin		4800	2712	3E8
+
+boleye.bin		4400	2AFA	3E8
+
+boleye.bin		4800	2EE2	3E8
+
+boleye.bin		4400	32CA	3E8
+
+boleye.bin		4800	36B2	3E8
+
+boleye.bin		4400	3A9A	3E8
 
 
 # pic1.kla			6000	2	1f40
