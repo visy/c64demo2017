@@ -8,10 +8,10 @@ nightre.sid		c200!	7e
 # The "!" indicates that this part should be written directly into I/O space, and hence
 # colour RAM. Without the exclamation mark, the data would go into shadow RAM. 
 
-#mc terminal pic
-terminal.bit
-terminal.chr
-terminal.d80
+#smoky pic
+smoky3.bit
+smoky3.chr
+smoky3.d80
 
 # quadtrip logo
 quadtrip.bit
@@ -76,6 +76,11 @@ boleye.bin		4400	32CA	3E8
 boleye.bin		4800	36B2	3E8
 
 boleye.bin		4400	3A9A	3E8
+
+#mc terminal pic
+terminal.bit
+terminal.chr
+terminal.d80
 
 
 # pic1.kla			6000	2	1f40

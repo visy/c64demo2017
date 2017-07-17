@@ -1454,6 +1454,8 @@ bol_no_src_inc:
     sta bol_copyloop_x+1
     lda $FA
     sta bol_copyloop_x+2
+    cmp #$98
+    beq boscroll_over
 
     lda $db
     cmp #0
@@ -1490,18 +1492,19 @@ no_finenull:
 
 boscroll_over:
 
-    ldx #255
-    ldy #255
+    ldx #100
+    ldy #100
     jsr wait
-    ldx #255
-    ldy #255
-    jsr wait
+
+    lda #%00011000 // 4400
+    sta $d018
 
 ranbyteols:
 
 // ranbyteols
 
     lda #0
+    sta $FA
     sta $FC
     sta $FD
     sta $FB
@@ -1547,6 +1550,10 @@ noEor2:
     lda #0
     sta $FD
     inc $FC
+    inc $FA
+    lda $FA
+    cmp #20
+    beq nobols
 no_incflasheor2:
     sta $4400,x
     sta $4500,x
@@ -1566,8 +1573,7 @@ nobols:
 
     // bols end
 
-endloop:
-    jmp endloop
+    jmp koalapic
 
 
 bolpix: // params, a = 0, 8 or 136 
@@ -2097,6 +2103,8 @@ bolchars:
 .import binary "bolchars_flip.raw"
 
 .pc = $e000  "sintab"
+
+
 
 sintab:
  .fill 256,round(63*sin(toRadians(i*360/63)))
