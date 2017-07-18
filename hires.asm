@@ -785,7 +785,119 @@ checkup:
 .pc = $f00 "democode"
 
 start:
+    lda #0
+    sta $d020
+    sta $d021
 
+    sei
+loop1:
+
+    bit $d011 // Wait for new frame
+    bpl *-3
+    bit $d011
+    bmi *-3
+
+
+
+    lda #$1b // Set y-scroll to normal position (because we do FLD later on..)
+    sta $d011
+
+    jsr CalcNumLines // Call sinus substitute routine
+
+    lda #$30 // Wait for position where we want FLD to start
+    cmp $d012
+    bne *-3
+
+    ldx NumFLDLines
+    beq loop1 // Skip if we want 0 lines FLD
+loop2:
+    lda $d012 // Wait for beginning of next line
+    cmp $d012
+    beq *-3
+
+    clc // Do one line of FLD
+    lda $d011
+    adc #1
+    and #7
+    ora #$18
+    sta $d011
+
+    dex // Decrease counter
+    bne loop2 // Branch if counter not 0
+
+    jmp loop1 // Next frame
+
+CalcNumLines:
+    lda no_new_fld_calc
+    cmp #1
+    bne do_calc_fld
+    rts
+do_calc_fld:
+    inc fldframe
+    lda fldframe
+    cmp #2
+    bne no_incfldframe
+    lda #0
+    sta fldframe
+    inc fldframe+1
+no_incfldframe:
+CalcNumLines2:
+    ldx #0
+    lda sinus,x
+    clc
+    adc fldframe+1
+    sta NumFLDLines
+    cmp #200
+    bcc no_stop_fld
+    bne real_start0
+no_stop_fld:
+    inc CalcNumLines2+1
+    rts
+real_start0:
+    jmp real_start
+
+no_new_fld_calc:
+    .byte 0
+NumFLDLines:
+    .byte 0
+
+fldframe:
+    .byte 0,0
+.align $100
+sinus:
+    .fill 256, 64.5*abs(sin(toRadians(i*360/128))) // Generates a sine curve
+
+fadetab:
+    .byte $00, $06, $0b, $04, $0c, $03, $0d, $01
+real_start:
+    lda $d011
+    eor #%00010000 // off
+    sta $d011
+
+    FillScreenMemory($0400,$20)
+    lda $d011
+    eor #%00010000 // off
+    sta $d011
+
+    ldy #64
+    jsr wait
+
+    ldx #0
+fadetowhite:
+    lda fadetab,x
+
+    sta $d020
+    sta $d021
+
+    ldy #10
+    jsr wait
+    inx
+    cpx #7
+    bne fadetowhite
+    jmp demo_init
+
+    // demo init
+demo_init:
     lda $d011
     eor #%00010000 // off
     sta $d011
@@ -796,7 +908,6 @@ start:
 
     lda #0
     jsr $c200
-
 
 
     // Set up raster interrupt.

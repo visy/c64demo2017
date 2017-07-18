@@ -1,3 +1,2 @@
 .label start=$f00 {
 }
-.label loop=$1035
