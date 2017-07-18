@@ -10,7 +10,9 @@ Output pass
 Memory Map
 ----------
 Default-segment:
-  $0f00-$3ec1 democode
+  $0f00-$36d4 democode
+  $3ff0-$3ff2 partswitch
+  $3ff3-$3ff5 partswitch_jmp
   $e000-$e3ff sintab
 
 Writing prg file: /Users/visy/dev/kick/hires2/bin/hires_Compiled.prg

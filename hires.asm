@@ -990,6 +990,8 @@ titlepics:
     jsr wait
     ldy #255
     jsr wait
+    ldy #255
+    jsr wait
 
     lda #%00000000
     sta $d018
@@ -1098,7 +1100,7 @@ koalaloop:
 
     :centerwipeoutmc_trans(10)
 
-    ldy #100
+    ldy #200
     jsr wait
 
     ldx #50
@@ -1131,7 +1133,7 @@ sprlogomove:
     cpx #50-24
     bne sprlogomove
 
-    ldy #100
+    ldy #200
     jsr wait
 
     lda #%00000000
@@ -1376,629 +1378,7 @@ afterdithers:
 
 
 bols:
-    jsr $c90 // load colormap
-
-    lda $d011
-    eor #%00010000 // on
-    sta $d011
-
-
-    // enable all sprites
-    lda #%11111111
-    sta $d015
-    // sprite 0 pos
-    lda #80
-    sta $d000
-    lda #230
-    sta $d001
-    
-    lda #120
-    sta $d002
-    lda #230
-    sta $d003
-    
-    lda #140
-    sta $d004
-    lda #230
-    sta $d005
-
-    lda #160
-    sta $d006
-    lda #230
-    sta $d007
-
-    lda #180
-    sta $d008
-    lda #230
-    sta $d009
-
-    lda #200
-    sta $d00a
-    lda #230
-    sta $d00b
-
-    lda #220
-    sta $d00c
-    lda #230
-    sta $d00d
-
-    lda #240
-    sta $d00e
-    lda #230
-    sta $d00f
-
-    lda #0
-    sta $d010
-    lda #$00
-
-    // sprite pointer
-    lda #$cc
-    sta $47f8
-    sta $47f9
-    sta $47fa
-    sta $47fb
-    sta $47fc
-    sta $47fd
-    sta $47fe
-    sta $47ff
-
-
-    // behind screen sprites
-    lda #$0
-    sta $d01b
-
-    // sprite color
-    lda #0
-    sta $d027
-    sta $d028
-    sta $d029
-    sta $d02a
-    sta $d02b
-    sta $d02c
-    sta $d02d
-    sta $d02e
-
-    // single color sprites
-    lda #0
-    sta $d01c
-
-    // stretch sprites
-    lda #$ff
-    sta $d01d
-    lda #$00
-    sta $d017
-
-
-    // bols
-    lda #$11
-    sta $d011
-
-    lda #%00011000
-    sta $d018
-
-    lda #$02   // set vic bank #1 with the dkd loader way
-    and #$03
-    eor #$3f
-    sta $dd02
-
-    lda #0
-    sta $d020
-    lda #0
-    sta $d021
-
-    :copymem(bolchars,$6000,8)
-    :FillScreenMemory($4400, 0)
-    lda #0
-    sta $d020
-    lda #0
-    sta $d021
-
-// boleorring
-
-    lda #0
-    sta $ee
-    sta $ef
-    sta $f0
-    lda #0
-    sta frame
-    sta frame2
-    sta $d5
-bolop:
-
-//    :FillScreenMemory($4400, 0)
-
-    // reversed coords, y = x, x = y
-
-    lda frame
-    clc
-    adc $f0
-    tax
-    lda costab2,x
-    clc
-    ror
-    clc
-    ror
-    adc #15
-    tay
-
-    ldx frame
-    lda sintab2,x
-    clc
-    ror
-    clc
-    ror
-    adc #2
-    tax
-
-    lda #%10001000
-    jsr bolpix
-    inc frame
-
-    inc $ee
-    lda $ee
-    cmp #3
-    bne no_bloslow
-    lda #0
-    sta $ee
-    ldx #1
-    ldy #1
-    jsr wait
-    :copymem_eor_short($4400,$4400+40,3)
-
-    inc frame2
-    lda frame2
-    cmp #200
-    bne cont_boleor
-    jmp bolscroll
-cont_boleor:
-
-no_bloslow:
-
-    inc $ef
-    lda $ef
-    cmp $f0
-    bne nobf
-
-    lda #0
-    sta $ef
-    inc $f0
-nobf:
-/*
-    ldx #0
-    ldy #0
-
-    stx bres_x1
-    sty bres_y1
-
-    ldx frame
-    ldy #49
-
-    inc frame
-    stx bres_x2
-    sty bres_y2
-    :bresenham(bres_x1,bres_y1,bres_x2,bres_y2,bres_err,bres_cntr,bres_dx,bres_dy)
-*/
-
-    jmp bolop
-
-bolerase:
-    ldx #255
-    stx $F1
-bolerase_loopx:
-.for (var i=0; i < 8;i++) {
-    lda $6000+i,x
-    lsr
-    sta $6000+i,x
-    lda $6100+i,x
-    asl
-    sta $6100+i,x
-    lda $6200+i,x
-    lsr
-    sta $6200+i,x
-    lda $6300+i,x
-    asl
-    sta $6300+i,x
-    lda $6400+i,x
-    lsr
-    sta $6400+i,x
-    lda $6500+i,x
-    asl
-    sta $6500+i,x
-    lda $6600+i,x
-    lsr
-    sta $6600+i,x
-    lda $6700+i,x
-    asl
-    sta $6700+i,x
-    lda $6800+i,x
-    lsr
-    sta $6800+i,x
-}
-    
-    inc $F1
-    lda $F1
-    cmp #3
-    bne no_bloeraseslow
-    lda #0
-    sta $F1
-    ldy #1
-    jsr wait
-no_bloeraseslow:
-
-    dex
-    bne bolerase_looper
-    jmp bolend
-bolerase_looper:
-    jmp bolerase_loopx
-bolend:
-    FillScreenMemory($4400,0)
-
-    rts
-
-bolscroll:
-
-    jsr bolerase
-
-    lda #0 // disable sprites
-    sta $d015
-
-    ldy #255
-    jsr wait
-
-//    FillScreenMemory($4400,0)
-
-    :copymem($4400,$4000,4)
-
-    :copymem(bolchars,$7800,8)
-
-    lda #%00001111 // $4000, chars at $7800
-    sta $d018
-
-    lda #4
-    sta $D5
-
-    lda #0
-    sta $D9
-bolfiller:
-bolfiller_y:
-    lda #0
-    sta $D8
-
-bolfiller_x:
-
-    ldy $D8
-    ldx $D9
-
-    lda #%10001000
-    jsr bolpix
-
-    inc $D8
-    lda $D8
-    cmp #80
-    bne bolfiller_x
-
-    inc $D9
-    lda $D9
-    cmp #50
-
-    bne bolfiller_y
-
-    ldy #255
-    ldx #255
-    jsr wait
-
-
-    lda #<$6828
-    sta $F9
-    lda #>$6828
-    sta $FA
-
-    lda #0
-    sta $F4
-    sta $F6
-    sta $F7
-    sta $F8
-
-    lda #0
-    sta $F5
-
-
-    lda #0
-    sta $DB // bytelbuf
-    lda #0
-    sta $d020
-    lda #%00001111 // $4000, chars at $7800
-    sta $d018
-
-// eye anim
-    jsr $c90 // load eye data
-
-
-    ldy #255
-    jsr wait
-    .for (var i = 0; i < 13; i++) {
-        SetScreenMemory($4400+i*$400)
-
-        ldy #8
-        jsr wait
-    }  
-
-    ldy #255
-    jsr wait
-    .for (var i = 1; i < 7; i++) {
-        SetScreenMemory($4400+i*$400)
-
-        ldy #16
-        jsr wait
-    }  
-
-    ldy #255
-    jsr wait
-
-
-    :copymem($5c00,$4400,4)
-    SetScreenMemory($4400)
-    :copymem(bolchars,$6000,8)
-    lda #%00011000
-    sta $d018
-
-    jsr bolerase
-/*
-    lda #0
-    sta $D5
-    sta $D9
-bolfiller2:
-    lda #0
-    sta $D8
-
-bolfiller_x2:
-
-    ldx $d8
-    lda #0
-bolfilc0:
-    sta $d800,x
-bolfilc1:
-    sta $d900,x
-bolfilc2:
-    sta $da00,x
-bolfilc3:
-    sta $db00,x
-    ldy #1
-    jsr wait
-
-    inc $D8
-    lda $D8
-    cmp #0
-    bne bolfiller_x2
-*/
-    lda #0
-    sta $d020
-    :copymem(bolchars,$6000,8)
-    FillScreenMemory($4400,0)
-    SetScreenMemory($4400) // reset to screen at $4400, chars at $6000
-    lda #%00011000
-    sta $d018
-
-    jsr $c90 // load color mask and scroller data
-
-    :copymem($6800,$4400,4)
-    FillScreenMemory($4800,0)
-
-
-fillloop1:
-    
-bol_copyloop_y:
-    lda $F4
-    cmp #4
-    beq copy_done
-
-    ldx #255
-bol_copyloop_x:
-    lda $6828,x
-bol_copyloop_target:
-    sta $4800,x 
-    dex
-    cpx #255
-    bne bol_copyloop_x // loop until our dest goes over 255
-
-    inc bol_copyloop_x+2
-    inc bol_copyloop_target+2
-    inc $F4 // pagecount
-
-copy_done:
-
-    lda #%00011111
-    clc
-    sbc $f5
-    sta $d011
-    inc $F5
-
-    ldy #1
-    jsr wait
-
-
-    lda $F5
-    cmp #7
-    bne no_finenull
-    lda #0
-    sta $F5
-    sta $F4
-
-    lda $F9
-    clc
-    adc #40
-    sta $F9
-    bcc bol_no_src_inc
-    inc $FA
-bol_no_src_inc:
-    lda $F9
-    sta bol_copyloop_x+1
-    lda $FA
-    sta bol_copyloop_x+2
-    cmp #$98
-    beq boscroll_over
-
-    lda $db
-    cmp #0
-    bne bolbuf1
-bolbuf0:
-    lda #%00101000 // 4800
-    sta $d018
-    lda #<$4400
-    sta bol_copyloop_target+1
-    lda #>$4400
-    sta bol_copyloop_target+2
-
-    jmp bolbufflipped
-bolbuf1:
-    lda #%00011000 // 4400
-    sta $d018
-    lda #<$4800
-    sta bol_copyloop_target+1
-    lda #>$4800
-    sta bol_copyloop_target+2
-
-bolbufflipped:
-    inc $db
-    lda $db
-    cmp #2
-    bne no_bolbytelres
-    lda #0
-    sta $db
-no_bolbytelres:
-
-no_finenull:
-
-    jmp fillloop1
-
-boscroll_over:
-
-    ldx #100
-    ldy #100
-    jsr wait
-
-    lda #%00011000 // 4400
-    sta $d018
-
-ranbyteols:
-
-// ranbyteols
-
-    lda #0
-    sta $FA
-    sta $FC
-    sta $FD
-    sta $FB
-
-fillloop2:
-    ldx #255
-    ldy #1
-    jsr wait
-    ldx #255
-
-fillloop3:
-    lda $FB
-    beq doEor2
-    asl
-    beq noEor2
-    bcc noEor2
-doEor2:  
-    eor #$1d
-noEor2:  
-    sta $FB
-
-    sta $43ff,x
-    sta $44ff,x
-    sta $45ff,x
-    sta $46ff,x
-
-    eor $FC
-    sta $d7ff,x
-    sta $d8ff,x
-    sta $d9ff,x
-    sta $daff,x
-    dex
-    bne fillloop3
-
-    dex
-
-    inc $FD
-
-
-    lda $FD
-    cmp #32
-    bne no_incflasheor2
-    lda #0
-    sta $FD
-    inc $FC
-    inc $FA
-    lda $FA
-    cmp #20
-    beq nobols
-no_incflasheor2:
-    sta $4400,x
-    sta $4500,x
-    sta $4600,x
-    sta $4700,x
-
-    eor $FC
-
-    sta $d800,x
-    sta $d900,x
-    sta $da00,x
-    sta $db00,x
-
-    jmp fillloop2
-
-nobols:
-    jsr $c90 // load part1 -> hires2.asm
-    jmp $f00
-
-
-bolpix: // params, a = 0, 8 or 136 
-    sta $F2
-
-    tya
-    lsr 
-    bcc bp1       
-    lsr $F2     //Point shifts right
-bp1:
-    tay         //if division has a
-    txa         //remainder
-    lsr
-    bcc bp2     
-    lsr $F2     //Point moves down
-    lsr $F2     //on remainder
-bp2:
-    tax     
-
-    lda #2
-    sta $F4
-    lda blotable,x   //Table holds the
-    sta $F5          //leftmost screen
-    lda bhitable,x   // address of row.
-    clc
-    sbc $D5
-    sta $F6
-    lda ($F5),y      // Get screen graphic
-    sta $F3
-
-    ora $F2          // mask in new value.
-    sta ($F5),y
-    rts
-
-blotable: 
-    .byte $00,$28,$50,$78,$a0,$c8,$f0
-    .byte $18,$40,$68,$90,$b8,$e0
-    .byte $08,$30,$58,$80,$a8,$d0,$f8
-    .byte $20,$48,$70,$98,$c0
-    
-bhitable:
-    .byte $45,$45,$45,$45,$45,$45,$45
-    .byte $46,$46,$46,$46,$46,$46
-    .byte $47,$47,$47,$47,$47,$47,$47
-    .byte $48,$48,$48,$48,$48
-    
+    jmp partswitch
 
 putpix16:
     lda #<$6000
@@ -2205,7 +1585,7 @@ hlineloop:
     tay
     ldx hline_sto+1
     lda #%00001000 // color, 0/8/136
-    jsr bolpix
+//    jsr bolpix
 
     ldx hline_sto+1
     ldy hline_sto+2
@@ -2230,7 +1610,7 @@ no_hline:
     ldy xb
     ldx yb
     lda #%10001000 // color, 0/8/136
-    jsr bolpix
+//    jsr bolpix
 
     lda #$00        // initialise err
     sta err
@@ -2292,7 +1672,7 @@ bhamoverx:      // here the loop over x begins
     tay
     ldx ya
     lda #%10001000 // color, 0/8/136
-    jsr bolpix
+//    jsr bolpix
 
     ldx xa
     ldy ya
@@ -2333,7 +1713,7 @@ bhamyy:
     tay
     ldx ya
     lda #%10001000 // color, 0/8/136
-    jsr bolpix
+//    jsr bolpix
 
     ldx xa
     ldy ya
@@ -2459,6 +1839,14 @@ frame2:
 
 bolchars:
 .import binary "bolchars_flip.raw"
+
+
+.pc = $3ff0 "partswitch"
+partswitch:
+    jsr $c90 // load part1 -> hires2.asm
+.pc = * "partswitch_jmp"
+partswitch2:
+    jmp $f00
 
 
 .pc = $e000  "sintab"

@@ -51,7 +51,10 @@ d_broke.bit		a000	2
 d_bune.clr		9000	2
 d_bune.bit		a000	2
 
-# bols / bolscroller
+#second codeblock, goes to $f00
+demo2.prg		f00 	2
+
+# bol part
 bolcolors.bin   d800!   
 
 # boleye
@@ -73,9 +76,6 @@ boleye.bin		7400	32CA	3E8
 #actual text scroller part colors
 bolgreets.bin	6800	2
 bolcolor2.bin   d800!   
-
-#second codeblock, goes to $f00
-demo2.prg		f00 	2
 
 #mc terminal pic
 terminal.bit
