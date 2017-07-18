@@ -8,6 +8,16 @@ nightre.sid		c200!	7e
 # The "!" indicates that this part should be written directly into I/O space, and hence
 # colour RAM. Without the exclamation mark, the data would go into shadow RAM. 
 
+#title pics
+title1.bin 		5000	0		3e8
+title1.bin 		6000	1000	1f40
+
+title2.bin 		5000	0		3e8
+title2.bin 		6000	1000	1f40
+
+title3.bin 		5000	0		3e8
+title3.bin 		6000	1000	1f40
+
 #smoky pic
 smoky3.bit
 smoky3.chr

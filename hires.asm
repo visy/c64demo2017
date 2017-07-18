@@ -824,19 +824,83 @@ start:
     cli
 
     lda $d011
-    eor #%00010000 // on
+    eor #%00010000
     sta $d011
+
+    lda #$02   // set vic bank #1 with the dkd loader way
+    and #$03
+    eor #$3f
+    sta $dd02
+
+    lda #$d8
+    sta $d016
+
+    lda #%01001000
+    sta $d018
+
+    lda #1
+    sta $d020
+    lda #1 // bgcolor
+    sta $d021
+    FillScreenMemory($4000,%00010001)
+
+    jsr $c90
+
+    SetHiresBitmapMode()
+
+    lda #%00111011
+    sta $d011
+
+    ldy #255
+    jsr wait
+    ldy #255
+    jsr wait
+
+titlepics:
+    ldy #255
+    jsr wait
+    ldy #255
+    jsr wait
+
+    lda #%00000000
+    sta $d018
+
+    jsr $c90
+
+    lda #%01001000
+    sta $d018
+
+    ldy #255
+    jsr wait
+    ldy #255
+    jsr wait
+
+    lda #%00000000
+    sta $d018
+
+    jsr $c90
+
+    lda #%01001000
+    sta $d018
+
+    ldy #255
+    jsr wait
+    ldy #255
+    jsr wait
+
+    lda #0
+    sta $d020
+    sta $d021
+    lda #%00000000
+    sta $d018
+
+    FillBitmap($4000,0)
 
 koalapic:
 
     ldx #32
     ldy #32
     jsr wait
-
-    lda #$02   // set vic bank #1 with the dkd loader way
-    and #$03
-    eor #$3f
-    sta $dd02
 
     jsr $c90 // load from disk (bit,chr,d80)
 
@@ -882,12 +946,6 @@ fade_screen1:
     stx $FA
     cpx #0
     bne fade_screen1
-
-    lda #$02   // set vic bank #1 with the dkd loader way
-    and #$03
-    eor #$3f
-    sta $dd02
-
 
 dotball:
 
@@ -2159,8 +2217,6 @@ bolchars:
 .import binary "bolchars_flip.raw"
 
 .pc = $e000  "sintab"
-
-
 
 sintab:
  .fill 256,round(63*sin(toRadians(i*360/63)))
