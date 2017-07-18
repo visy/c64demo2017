@@ -41,44 +41,27 @@ d_bune.clr		9000	2
 d_bune.bit		a000	2
 
 # bols / bolscroller
-bolgreets.bin	6800	2
 bolcolors.bin   d800!   
 
-#actual text scroller part colors
-bolcolor2.bin   d800!   
-
 # boleye
-boleye.bin		4800	2		3E8
-
+boleye.bin		4000	2		3E8
 boleye.bin		4400	3EA		3E8
-
 boleye.bin		4800	7D2		3E8
+boleye.bin		4c00	BBA		3E8
+boleye.bin		5000	FA2		3E8
+boleye.bin		5400	138A	3E8
+boleye.bin		5800	1772	3E8
+boleye.bin		5c00	1B5A	3E8
+boleye.bin		6000	1F42	3E8
+boleye.bin		6400	232A	3E8
+boleye.bin		6800	2712	3E8
+boleye.bin		6c00	2AFA	3E8
+boleye.bin		7000	2EE2	3E8
+boleye.bin		7400	32CA	3E8
 
-boleye.bin		4400	BBA		3E8
-
-boleye.bin		4800	FA2		3E8
-
-boleye.bin		4400	138A	3E8
-
-boleye.bin		4800	1772	3E8
-
-boleye.bin		4400	1B5A	3E8
-
-boleye.bin		4800	1F42	3E8
-
-boleye.bin		4400	232A	3E8
-
-boleye.bin		4800	2712	3E8
-
-boleye.bin		4400	2AFA	3E8
-
-boleye.bin		4800	2EE2	3E8
-
-boleye.bin		4400	32CA	3E8
-
-boleye.bin		4800	36B2	3E8
-
-boleye.bin		4400	3A9A	3E8
+#actual text scroller part colors
+bolgreets.bin	6800	2
+bolcolor2.bin   d800!   
 
 #mc terminal pic
 terminal.bit

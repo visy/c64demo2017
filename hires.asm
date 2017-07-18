@@ -1071,8 +1071,8 @@ afterdithers:
 
     :centerwipein_trans(10)
 
-    ldx #32
-    ldy #32
+    ldx #100
+    ldy #100
     jsr wait
 
     :centerwipeout_trans(10)
@@ -1081,8 +1081,8 @@ afterdithers:
 
     :centerwipein_trans(10)
 
-    ldx #32
-    ldy #32
+    ldx #100
+    ldy #100
     jsr wait
 
     :centerwipeout_trans(10)
@@ -1094,8 +1094,8 @@ afterdithers:
 
     :centerwipein_trans(10)
 
-    ldx #32
-    ldy #32
+    ldx #100
+    ldy #100
     jsr wait
 
     :centerwipeout_trans(10)
@@ -1109,9 +1109,13 @@ afterdithers:
     :copymem_eor($6000+320*20,$6000+320*20-1,5)
     */
 
+    ldx #100
+    ldy #100
+    jsr wait
+
 
 bols:
-    jsr $c90 // preload scroller bitmap & load colormap
+    jsr $c90 // load colormap
 
     lda $d011
     eor #%00010000 // on
@@ -1334,74 +1338,60 @@ bolscroll:
     lda #%00011011
     sta $d011
 
-    lda #%00011000 // 4400
-    sta $d018
-
     lda #0
     sta $DB // bytelbuf
-    lda #15
-    sta $d020
-
-    jsr $c90
-
-    jsr $c90
-    lda #%00101000
-    sta $d018
-    ldy #100
-    jsr wait
-    jsr $c90
-    lda #%00011000
-    sta $d018
-    jsr $c90
-    lda #%00101000
-    sta $d018
-    jsr $c90
-    lda #%00011000
-    sta $d018
-    jsr $c90
-    lda #%00101000
-    sta $d018
-    jsr $c90
-    lda #%00011000
-    sta $d018
-    jsr $c90
-    lda #%00101000
-    sta $d018
-    jsr $c90
-    lda #%00011000
-    sta $d018
-    jsr $c90
-    lda #%00101000
-    sta $d018
-    jsr $c90
-    lda #%00011000
-    sta $d018
-    jsr $c90
-    lda #%00101000
-    sta $d018
-    jsr $c90
-    lda #%00011000
-    sta $d018
-    jsr $c90
-    lda #%00101000
-    sta $d018
-    jsr $c90
-    lda #%00011000
-    sta $d018
-    jsr $c90
-    lda #%00101000
-    sta $d018
-    jsr $c90
-    lda #%00011000
-    sta $d018
-    ldy #200
-    jsr wait
     lda #0
     sta $d020
 
-    :copymem($6800,$4400,4)
-    ldy #200
+    lda $d011
+    eor #%00010000 // off
+    sta $d011
+
+// eye anim
+    jsr $c90 // load eye data
+
+    :copymem(bolchars,$7800,8)
+
+    lda #%00001111
+    sta $d018
+
+    lda $d011
+    eor #%00010000 // on
+    sta $d011
+
+    ldy #255
     jsr wait
+    .for (var i = 0; i < 13; i++) {
+        SetScreenMemory($4400+i*$400)
+
+        ldy #8
+        jsr wait
+    }  
+
+    ldy #255
+    jsr wait
+    .for (var i = 0; i < 6; i++) {
+        SetScreenMemory($4400+i*$400)
+
+        ldy #16
+        jsr wait
+    }  
+
+    ldy #100
+    jsr wait
+
+
+    lda #0
+    sta $d020
+    :copymem(bolchars,$6000,8)
+    FillScreenMemory($4400,0)
+    SetScreenMemory($4400) // reset to screen at $4400, chars at $6000
+    lda #%00011000
+    sta $d018
+
+    jsr $c90 // load color mask and scroller data
+
+    :copymem($6800,$4400,4)
 
 
 fillloop1:
