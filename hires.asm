@@ -1,4 +1,9 @@
 
+
+.function toSpritePtr(addr) {
+    .return (addr)/$40
+}
+
 .macro SetMultiColorMode() {
     lda $d016
     ora #16
@@ -891,12 +896,12 @@ titlepics:
     lda #0
     sta $d020
     sta $d021
-    lda #%00000000
+    lda #%00110000
     sta $d018
 
     FillBitmap($4000,0)
 
-koalapic:
+koalapic: // logoscene
 
     ldx #32
     ldy #32
@@ -914,6 +919,54 @@ koalapic:
     sta $d020
     lda #0 // bgcolor
     sta $d021
+
+    // Setup some sprites
+    lda #%00111111
+    sta $d015
+
+    lda #0
+    sta $d01c
+
+    lda #1
+    sta $d027
+    sta $d028
+    sta $d029
+    sta $d02a
+    sta $d02b
+    sta $d02c
+
+    lda #$0
+    sta $4400+$3f8
+    lda #$1
+    sta $4400+$3f9
+    lda #$2
+    sta $4400+$3fa
+    lda #$3
+    sta $4400+$3fb
+    lda #$4
+    sta $4400+$3fc
+    lda #$5
+    sta $4400+$3fd
+
+    ldy #50
+    lda #68
+    sta $d000
+    sty $d001
+    lda #70+24*1
+    sta $d002
+    sty $d003
+    lda #70+24*2
+    sta $d004
+    sty $d005
+    lda #70+24*3
+    sta $d006
+    sty $d007
+    lda #70+24*4
+    sta $d008
+    sty $d009
+    lda #70+24*5
+    sta $d00a
+    sty $d00b
 
     ldx #0
 
@@ -933,6 +986,45 @@ koalaloop:
     jsr wait
 
     :centerwipeoutmc_trans(10)
+
+    ldy #100
+    jsr wait
+
+    ldx #50
+sprlogomove:
+    txa
+    tay
+    lda #68
+    sta $d000
+    sty $d001
+    lda #70+24*1
+    sta $d002
+    sty $d003
+    lda #70+24*2
+    sta $d004
+    sty $d005
+    lda #70+24*3
+    sta $d006
+    sty $d007
+    lda #70+24*4
+    sta $d008
+    sty $d009
+    lda #70+24*5
+    sta $d00a
+    sty $d00b
+
+    ldy #3
+    jsr wait
+
+    dex
+    cpx #50-24
+    bne sprlogomove
+
+    ldy #100
+    jsr wait
+
+    lda #%00000000
+    sta $d015
 
     lda #7
     sta $FA
@@ -2215,6 +2307,8 @@ frame2:
 
 bolchars:
 .import binary "bolchars_flip.raw"
+
+
 
 .pc = $e000  "sintab"
 
