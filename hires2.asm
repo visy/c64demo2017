@@ -38,6 +38,75 @@
     bne !loop-
 }
 
+    .macro PNGtoHIRES(PNGpicture,BMPData,ColData) {
+
+        .var Graphics = LoadPicture(PNGpicture)
+
+        // Graphics RGB Colors. Must be adapted to the graphics
+
+        .const C64Black   = 000 * 65536 + 000 * 256 + 000   
+        .const C64White   = 255 * 65536 + 255 * 256 + 255
+        .const C64Red     = 104 * 65536 + 055 * 256 + 043
+        .const C64Cyan    = 112 * 65536 + 164 * 256 + 178
+        .const C64Purple  = 111 * 65536 + 061 * 256 + 134
+        .const C64Green   = 088 * 65536 + 141 * 256 + 067
+        .const C64Blue    = 053 * 65536 + 040 * 256 + 121 
+        .const C64Yellow  = 184 * 65536 + 199 * 256 + 111
+        .const C64L_brown = 111 * 65536 + 079 * 256 + 037
+        .const C64D_brown = 067 * 65536 + 057 * 256 + 000
+        .const C64L_red   = 154 * 65536 + 103 * 256 + 089
+        .const C64D_grey  = 068 * 65536 + 068 * 256 + 068
+        .const C64Grey    = 108 * 65536 + 108 * 256 + 108
+        .const C64L_green = 154 * 65536 + 210 * 256 + 132
+        .const C64L_blue  = 108 * 65536 + 094 * 256 + 181
+        .const C64L_grey  = 149 * 65536 + 149 * 256 + 149
+
+        // Add the colors neatly into a Hashtable for easy lookup reference
+        .var ColorTable = Hashtable()
+        .eval ColorTable.put(C64Black,0)
+        .eval ColorTable.put(C64White,1)
+        .eval ColorTable.put(C64Red,2)
+        .eval ColorTable.put(C64Cyan,3)
+        .eval ColorTable.put(C64Purple,4)
+        .eval ColorTable.put(C64Green,5)
+        .eval ColorTable.put(C64Blue,6)
+        .eval ColorTable.put(C64Yellow,7)
+        .eval ColorTable.put(C64L_brown,8)
+        .eval ColorTable.put(C64D_brown,9)
+        .eval ColorTable.put(C64L_red,10)
+        .eval ColorTable.put(C64D_grey,11)
+        .eval ColorTable.put(C64Grey,12)
+        .eval ColorTable.put(C64L_green,13)
+        .eval ColorTable.put(C64L_blue,14)
+        .eval ColorTable.put(C64L_grey,15)
+
+
+        .pc = BMPData "Hires Bitmap"
+
+        .var ScreenMem = List()
+        .for (var Line = 0 ; Line < 200 ; Line = Line + 8) {
+            .for (var Block = 0 ; Block < 320 ; Block=Block+8) {
+                .var Coll1 = Graphics.getPixel(Block,Line)
+                .var Coll2 = 0
+                .for (var j = 0 ; j < 8 ; j++ ) {
+                    .var ByteValue = 0
+                    .for (var i = 0 ; i < 8 ; i++ ) {
+                        .if (Graphics.getPixel(Block,Line) != Graphics.getPixel(Block+i,Line+j)) .eval ByteValue = ByteValue + pow(2,7-i)
+                        .if (Graphics.getPixel(Block,Line) != Graphics.getPixel(Block+i,Line+j)) .eval Coll2 = Graphics.getPixel(Block+i,Line+j)
+                    }
+                .byte ByteValue
+                }
+            .var BlockColor = [ColorTable.get(Coll2)]*16+ColorTable.get(Coll1)
+            .eval ScreenMem.add(BlockColor)
+            }
+        }
+        .pc = ColData "Hires Color Data"
+    ScreenMemColors:
+        .for (var i = 0 ; i < 1000 ; i++ ) {
+            .byte ScreenMem.get(i)
+        }
+    }
+
 .macro SetScreenMemory(address) {
 
     .var bits = (address / $0400) << 4
@@ -141,7 +210,9 @@
 
 .pc = $f00 "democode"
 
-start:
+part_init:
+
+
 bols:
     jsr $c90 // load colormap
 
@@ -761,8 +832,129 @@ koalaloop:
     ldy #100
     jsr wait
 
-looper:
-    jmp looper
+borderopen:
+    // TODO: figure out how to disable the $c10 interrupt handler from spindle to enable custom interrupts
+    jsr $c90 // load creditsprites
+
+    lda #%00111011
+    sta $d011
+
+    lda #%01001000
+    sta $d018
+
+    lda $d016
+    and #%11101111
+    sta $d016
+
+    // Setup some sprites
+    lda #%00011111
+    sta $d015
+
+    lda #0
+    sta $d01c
+
+    lda #1
+    sta $d027
+    sta $d028
+    sta $d029
+    sta $d02a
+    sta $d02b
+
+    lda #$0
+    sta $5000+$3f8
+    lda #$1
+    sta $5000+$3f9
+    lda #$2
+    sta $5000+$3fa
+    lda #$3
+    sta $5000+$3fb
+    lda #$4
+    sta $5000+$3fc
+
+    ldy #30
+
+    lda #68
+    sta $d000
+    sty $d001
+    lda #67+24*1
+    sta $d002
+    sty $d003
+    lda #68+24*2
+    sta $d004
+    sty $d005
+    lda #69+24*3
+    sta $d006
+    sty $d007
+    lda #69+24*4
+    sta $d008
+    sty $d009
+
+    lda #255
+waitforrasters:
+    cmp $d012
+    bne waitforrasters
+
+    sei
+    lda #<irq1
+    sta $fffe
+    lda #>irq1
+    sta $ffff
+    cli
+    jmp *
+
+irq1:    
+    sta restorea+1
+    stx restorex+1
+    sty restorey+1
+
+    inc frame
+    lda #$00
+    sta $d012
+    lda #$00
+    sta $d011
+    lda #<irq2
+    sta $fffe
+    lda #>irq2
+    sta $ffff
+
+    lda #$00
+    sta $d01d
+
+    jsr $c203 // le musica
+
+    lda #$ff
+    sta $d019
+restorea: lda #$00
+restorex: ldx #$00
+restorey: ldy #$00
+    rti
+
+irq2:    
+    sta restorea2+1
+    stx restorex2+1
+    sty restorey2+1
+
+    lda #$fa
+    sta $d012
+    lda #$3b //If you want to display a bitmap pic, use #$3b instead
+    sta $d011
+    lda #<irq1
+    sta $fffe
+    lda #>irq1
+    sta $ffff
+
+    lda #$ff
+    sta $d019
+
+restorea2: lda #$00
+restorex2: ldx #$00
+restorey2: ldy #$00
+    rti
+
+
+
+loopere:
+    jmp loopere
 
     .macro clear_colorline(dst) {
         lda #<dst // set our destination memory to copy to, $5000
@@ -850,8 +1042,11 @@ frame:
 frame2:
     .byte 0
 
+
 bolchars:
 .import binary "bolchars_flip.raw"
+
+
 
 .pc = $e000  "sintab" virtual
 sintab:

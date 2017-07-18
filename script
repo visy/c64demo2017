@@ -82,4 +82,9 @@ terminal.bit
 terminal.chr
 terminal.d80
 
+# top border sprites & hires pic
+creditsprites.raw 	4000 	0
+quadtrip.bit
+quadtrip.clr
+
 
