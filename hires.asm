@@ -1239,7 +1239,7 @@ afterdithers:
 
     jsr $c90 // load spacebunny
 
-    lda #6
+    lda #0
     sta $d020
 
     :centerwipein_trans(10)
