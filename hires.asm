@@ -1436,7 +1436,7 @@ bolop:
 
     inc frame2
     lda frame2
-    cmp #255
+    cmp #200
     bne cont_boleor
     jmp bolscroll
 cont_boleor:
@@ -1469,9 +1469,70 @@ nobf:
 */
 
     jmp bolop
+
+bolerase:
+    ldx #255
+    stx $F1
+bolerase_loopx:
+.for (var i=0; i < 8;i++) {
+    lda $6000+i,x
+    lsr
+    sta $6000+i,x
+    lda $6100+i,x
+    asl
+    sta $6100+i,x
+    lda $6200+i,x
+    lsr
+    sta $6200+i,x
+    lda $6300+i,x
+    asl
+    sta $6300+i,x
+    lda $6400+i,x
+    lsr
+    sta $6400+i,x
+    lda $6500+i,x
+    asl
+    sta $6500+i,x
+    lda $6600+i,x
+    lsr
+    sta $6600+i,x
+    lda $6700+i,x
+    asl
+    sta $6700+i,x
+    lda $6800+i,x
+    lsr
+    sta $6800+i,x
+}
+    
+    inc $F1
+    lda $F1
+    cmp #3
+    bne no_bloeraseslow
+    lda #0
+    sta $F1
+    ldy #1
+    jsr wait
+no_bloeraseslow:
+
+    dex
+    bne bolerase_looper
+    jmp bolend
+bolerase_looper:
+    jmp bolerase_loopx
+bolend:
+    FillScreenMemory($4400,0)
+
+    rts
+
 bolscroll:
+
+    jsr bolerase
+
     lda #0 // disable sprites
     sta $d015
+
+    ldy #255
+    jsr wait
 
 //    FillScreenMemory($4400,0)
 
@@ -1566,7 +1627,12 @@ bolfiller_x:
 
     :copymem($5c00,$4400,4)
     SetScreenMemory($4400)
+    :copymem(bolchars,$6000,8)
+    lda #%00011000
+    sta $d018
 
+    jsr bolerase
+/*
     lda #0
     sta $D5
     sta $D9
@@ -1593,7 +1659,7 @@ bolfilc3:
     lda $D8
     cmp #0
     bne bolfiller_x2
-
+*/
     lda #0
     sta $d020
     :copymem(bolchars,$6000,8)
@@ -1774,10 +1840,8 @@ no_incflasheor2:
     jmp fillloop2
 
 nobols:
-
-    // bols end
-
-    jmp koalapic
+    jsr $c90 // load part1 -> hires2.asm
+    jmp $f00
 
 
 bolpix: // params, a = 0, 8 or 136 
@@ -1943,29 +2007,6 @@ dithers:
 
     rts
 
-pics_fromdisk:
-/*
-    lda #<$9000
-    sta $FB
-    lda #>$9000
-    sta $FC
-    lda prgnum // prg index
-    jsr loadfile // load file #1 to $5000 (hires gfx memory dump)
-    :centerwipein_trans(10)
-
-    :drawtri(frame2,frame2)
-
-    inc frame2
-    inc prgnum
-
-    lda prgnum
-    cmp #6
-    bne no_resetprg
-    lda #1
-    sta prgnum
-no_resetprg:
-*/
-    rts
 
 prgnum:
     .byte 1
@@ -2307,7 +2348,6 @@ frame2:
 
 bolchars:
 .import binary "bolchars_flip.raw"
-
 
 
 .pc = $e000  "sintab"
