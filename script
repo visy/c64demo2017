@@ -92,5 +92,6 @@ quadtrip.clr
 # vicscreen with "end of the line"
 demo3.prg	f00		2
 charscrollvic.bin
+endscroller.bin		
 
 

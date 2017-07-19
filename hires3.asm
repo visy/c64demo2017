@@ -225,8 +225,14 @@
     }
 .pc = $f00 "democode"
 
+start:
 part_init:
-    inc $d020
+    sei
+     lda #<irq1
+     sta $fffe
+     lda #>irq1
+     sta $ffff
+     cli
 
 charrotator:
 
@@ -236,6 +242,9 @@ charrotator:
     // Setup some sprites
     lda #%11101111
     sta $d015
+
+    lda #2
+    sta $dd00
 
     lda #0
     sta $d01c
@@ -332,6 +341,35 @@ charrotator:
     lda #$5
     sta $4400+$3ff
 
+/*
+    sei
+    lda #<irq1
+    sta $fffe
+    lda #>irq1
+    sta $ffff
+    cli
+*/
+
+    // chars on screen
+    ldx #8
+scrollerinit:
+    txa
+    sta $4400+(40*12)-8,x
+    inx
+    cpx #40+8
+    bne scrollerinit
+
+    lda #<scrollbitmap-384
+    sta $f5
+    lda #>scrollbitmap-384
+    sta $f6
+
+    // finescroll
+    lda #%11001111
+    sta $f3
+    lda #0
+    sta $f4 // flag for doing 8x scroll
+
 
 //    jsr init16
     .for(var xx = 0; xx < 8; xx++) {
@@ -389,7 +427,16 @@ do_pixel:
     lda #0
     sta $F1
 pixloop:
-
+    inc frame
+    lda frame
+    cmp #8
+    bne no_bgscroll0
+    lda #0
+    sta frame
+    jmp do_bgscroll
+no_bgscroll0:
+    jmp no_bgscroll
+do_bgscroll:
     clc
     // x scrolls
     .for (var i = 0; i < 8; i++) {
@@ -433,10 +480,6 @@ ycopy2:
     sta $6000
     // y scroll end
 no_yscroll:
-    ldy #1
-    jsr wait
-
-
 
     inc $F1
     lda $F1
@@ -445,10 +488,56 @@ no_yscroll:
     lda #0
     sta $F1
 no_scrollreset:
+no_bgscroll:
+    // copy bitmap to chars
+    ldy #0
+    lda $f5
+    sta copyscroll_loopx+1
+    lda $f6
+    sta copyscroll_loopx+2
+    lda #<$6000+8*8
+    sta scrollchar_offset+1
+    lda #>$6000+8*8
+    sta scrollchar_offset+2
+
+copyscrollbitmap:
+    ldx #0
+copyscroll_loopx:
+    lda scrollbitmap,x
+scrollchar_offset:
+    sta $6000+8*8,x
+    inx
+    bne copyscroll_loopx
+    inc scrollchar_offset+2
+    inc copyscroll_loopx+2
+
+    iny
+    cpy #2
+    bne copyscrollbitmap
+
+    lda $f4
+    cmp #1
+    bne no_scrollupper
+    lda #%11001111
+    sta $f3
+
+    lda #0
+    sta $f4
+    lda $f5
+    clc
+    adc #8
+    sta $f5
+    bcc no_scrollupper
+    inc $f6
+    lda $f6
+    cmp #(>scrollbitmap)+4
+    bne no_scrollupper
+    lda #>scrollbitmap-384
+    sta $f6
+no_scrollupper:
 
     jmp pixloop
 
-    jmp *
 
 
 colors:
@@ -529,138 +618,77 @@ frame2:
 frame3:
     .byte 0
 
+.pc = $3000 "raster irqs"
+irq1:
+    sta restorea+1
+    stx restorex+1
+    sty restorey+1
 
+    inc $d019
+
+    lda #%11001000
+    sta $d016
+    lda #$91
+    sta $d012
+    lda #<irq2
+    sta $fffe
+    lda #>irq2
+    sta $ffff
+
+    jsr $c203 // le musica
+
+    lda #$ff
+    sta $d019
+restorea: lda #$00
+restorex: ldx #$00
+restorey: ldy #$00
+    rti
+
+irq2:    
+    sta restorea2+1
+    stx restorex2+1
+    sty restorey2+1
+
+    inc $d019
+    lda $f4
+    cmp #1
+    beq no_finereset
+    dec $f3
+    lda $f3
+    sta $d016
+    cmp #%11001000
+    bne no_finereset
+    lda #1
+    sta $f4
+no_finereset:
+
+    lda #$9c
+    sta $d012
+    lda #<irq1
+    sta $fffe
+    lda #>irq1
+    sta $ffff
+    lda #$ff
+    sta $d019
+restorea2: lda #$00
+restorex2: ldx #$00
+restorey2: ldy #$00
+    rti
+
+.pc = $4000 "charscreen" virtual
+// .import binary "charscrollvic.bin"
+
+.pc = $7200 "scrollbitmap" virtual
+scrollbitmap:
 /*
-.pc = $4000
-sprite1:    
-            .byte %11111000, %00000000, %00000000   
-            .byte %11100000, %00000000, %00000000   
-            .byte %11000000, %00000000, %00000000   
-            .byte %10000000, %00000000, %00000000   
-            .byte %10000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte $00
-sprite2:    
-            .byte %00000000, %00000000, %00011111   
-            .byte %00000000, %00000000, %00000111   
-            .byte %00000000, %00000000, %00000011   
-            .byte %00000000, %00000000, %00000001   
-            .byte %00000000, %00000000, %00000001   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte $00
-sprite3:    
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %10000000, %00000000, %00000000   
-            .byte %10000000, %00000000, %00000000   
-            .byte %11000000, %00000000, %00000000   
-            .byte %11100000, %00000000, %00000000   
-            .byte %11111000, %00000000, %00000000   
-            .byte $00
-sprite4:    
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000001   
-            .byte %00000000, %00000000, %00000001   
-            .byte %00000000, %00000000, %00000011   
-            .byte %00000000, %00000000, %00000111   
-            .byte %00000000, %00000000, %00011111   
-            .byte $00
-sprite5:
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte %00000000, %00000000, %00000000   
-            .byte $00
+scrollbitmap:
+.var endscroller = LoadPicture("endscroller.png")
+    .for (var x=0;x<128; x++) // 8 * 64 = 1024
+        .for(var charPosY=0; charPosY<8; charPosY++)
+            .byte endscroller.getSinglecolorByte(x,charPosY)
 
-sprite6:
-.byte $00,$00,$00,$00,$00,$00,$03,$C3,$C0,$04,$24,$20,$08,$18,$10,$10,$00,$08,$10,$00,$08,$10,$00,$08,$10,$00,$08,$08,$00,$10,$08,$00,$10,$04,$00,$20,$02,$00,$40,$01,$00,$80,$00,$81,$00,$00,$42,$00,$00,$24,$00,$00,$18,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$10
-
-sprite7:
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$03,$C3,$C0,$07,$E7,$E0,$0F,$FF,$F0,$0F,$FF,$F0,$0F,$FF,$F0,$0F,$FF,$F0,$07,$FF,$E0,$07,$FF,$E0,$03,$FF,$C0,$01,$FF,$80,$00,$FF,$00,$00,$7E,$00,$00,$3C,$00,$00,$18,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$1A
-
-sprite8:
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03,$00,$00,$04,$00,$00,$04,$00,$00,$04,$00,$00,$02,$00,$00,$02,$00,$00,$01,$00,$00,$00,$80,$00,$00,$40,$00,$00,$20,$00,$00,$10,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$01
-
-.pc = $4400 
-.import binary "charscrollscreen.bin"
+.fill 256,0
 */
-
 .pc = $e000  "sintab" virtual
 sintab:
     .fill 256,0
