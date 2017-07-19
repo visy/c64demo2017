@@ -6,7 +6,8 @@ Output pass
 Memory Map
 ----------
 Default-segment:
-  $0f00-$15c0 democode
+  $0f00-$159b democode
+  $4000-$41ff Unnamed
   *$e000-$e0ff sintab
   *$e100-$e1ff costab
   *$e200-$e2ff sintab2
