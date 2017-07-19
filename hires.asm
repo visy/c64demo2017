@@ -1326,6 +1326,9 @@ dithersandpics:
     ldx #250
     ldy #250
     jsr wait
+    ldx #250
+    ldy #250
+    jsr wait
 
     jsr dithers
 afterdithers:
@@ -1337,8 +1340,26 @@ afterdithers:
 
     :centerwipein_trans(10)
 
-    ldx #250
-    ldy #250
+
+    ldy #200
+    jsr wait
+
+
+    lda #0
+    sta $f0
+foxglitch:
+    copymem_eor($6c40,$6c48,6) 
+    ldy #1
+    jsr wait
+
+    inc $f0
+    lda $f0
+    cmp #80
+    bne foxglitch
+
+
+    ldx #100
+    ldy #100
     jsr wait
 
     :centerwipeout_trans(10)
