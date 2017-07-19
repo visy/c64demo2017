@@ -6,8 +6,8 @@ Output pass
 Memory Map
 ----------
 Default-segment:
-  $0f00-$1b9a democode
-  $3000-$38cc raster irqs
+  $0f00-$1bac democode
+  $3000-$3917 raster irqs
   $3f00-$3f17 next part irq
   $3fc0-$3fd6 partswitch
   *$e000-$e0ff sintab

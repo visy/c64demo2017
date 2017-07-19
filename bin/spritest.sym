@@ -1,0 +1,10 @@
+.label setup_sprite=$8b6
+.label ex=$8b5
+.label l0=$853
+.label l1=$862
+.label l2=$876
+.label l3=$88a
+.label irq=$84b
+.label le=$89e
+.label animate=$8a8
+.label int=$83e

@@ -833,7 +833,7 @@ koalaloop:
     jsr wait
 
 borderopen:
-    // TODO: figure out how to disable the $c10 interrupt handler from spindle to enable custom interrupts
+    
     jsr $c90 // load creditsprites
     lda #0
     sta frame
@@ -854,13 +854,6 @@ borderopen:
 
     lda #0
     sta $d01c
-
-    lda #1
-    sta $d027
-    sta $d028
-    sta $d029
-    sta $d02a
-    sta $d02b
 
     lda #$0
     sta $5000+$3f8
@@ -904,6 +897,8 @@ waitforrasters:
     cli
 
 rasterscreenloop:
+
+
     lda frame
     cmp #255
     beq go_partswitch
@@ -912,13 +907,20 @@ rasterscreenloop:
 go_partswitch:
     jmp partswitch
 
+fadetab:
+    .byte $01,$0d,$07,$0f,$03,$05,$0a,$0c,$0e,$08,$04,$02,$0b,$06,$09,$00,$09,$06,$0b,$02,$04,$08,$0e,$0c,$0a,$05,$03,$0f,$07,$0d
+
+faders:
+    .byte 0,1,2,3,4
+
 .pc = $3000 "raster irqs"
 irq1:    
     sta restorea+1
     stx restorex+1
     sty restorey+1
 
-    inc frame
+    inc frame  
+
     lda #$00
     sta $d012
     lda #$00
@@ -930,6 +932,38 @@ irq1:
 
     lda #$00
     sta $d01d
+
+    inc faders  
+    inc faders+1 
+    inc faders+2
+    inc faders+3 
+    inc faders+4 
+
+    lda faders
+    and #29
+    tax
+    lda fadetab,x
+    sta $d027
+    lda faders+1
+    and #29
+    tax
+    lda fadetab,x
+    sta $d028
+    lda faders+2
+    and #29
+    tax
+    lda fadetab,x
+    sta $d029
+    lda faders+3
+    and #29
+    tax
+    lda fadetab,x
+    sta $d02a
+    lda faders+4
+    and #29
+    tax
+    lda fadetab,x
+    sta $d02b
 
     jsr $c203 // le musica
 
