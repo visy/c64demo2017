@@ -3,7 +3,7 @@
 # here, unless you specify an entry point with the -e option.
 
 demo.prg
-nightre.sid		c200!	7e
+goat0.sid		c200!	7e
 
 # The "!" indicates that this part should be written directly into I/O space, and hence
 # colour RAM. Without the exclamation mark, the data would go into shadow RAM. 
