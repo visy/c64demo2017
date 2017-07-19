@@ -1316,6 +1316,9 @@ dithersandpics:
 
     jsr $c90 // load quadtrip logo
 
+    ldy #10
+    jsr wait
+
     SetHiresBitmapMode()
     SetScreenMemory(screen_memory - vic_base)
     SetBitmapAddress(bitmap_address - vic_base)

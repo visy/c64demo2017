@@ -55,7 +55,7 @@ al C:e100 .costab
 al C:15e4 .bolbuf0
 al C:15f6 .bolbuf1
 al C:159a .bol_copyloop_target
-al C:3fda .partswitch2
+al C:3fd4 .partswitch2
 al C:10a7 .nobf
 al C:3f13 .restorexa
 al C:1611 .no_bolbytelres

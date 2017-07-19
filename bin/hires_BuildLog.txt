@@ -10,7 +10,7 @@ Output pass
 Memory Map
 ----------
 Default-segment:
-  $0f00-$36d4 democode
+  $0f00-$36d9 democode
   $3ff0-$3ff2 partswitch
   $3ff3-$3ff5 partswitch_jmp
   *$e000-$e0ff sintab

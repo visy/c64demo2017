@@ -1078,12 +1078,11 @@ waitforrasters2:
     bne waitforrasters2
 
 partswitch:
-    inc $d020
     lda #<nextirq
     sta $fffe
     lda #>nextirq
     sta $ffff
-    inc $d020
+
     jsr $c90 // load part2 -> hires3.asm
 partswitch2:
     jmp $f00

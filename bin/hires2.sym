@@ -53,7 +53,7 @@
 .label bolbuf0=$15e4
 .label bolbuf1=$15f6
 .label bol_copyloop_target=$159a
-.label partswitch2=$3fda
+.label partswitch2=$3fd4
 .label nobf=$10a7
 .label restorexa=$3f13
 .label no_bolbytelres=$1611
