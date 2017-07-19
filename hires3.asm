@@ -226,14 +226,9 @@
 .pc = $f00 "democode"
 
 part_init:
-charrotator:
-    lda #%00000010
-    sta $dd00
+    inc $d020
 
-    lda #$02   // set vic bank #1 with the dkd loader way
-    and #$03
-    eor #$3f
-    sta $dd02
+charrotator:
 
     lda #%01010011
     sta $d011
@@ -258,6 +253,9 @@ charrotator:
     lda #0
     sta $d02e
 
+    lda #%11100000
+    sta $d01d
+    sta $d017
 
     lda #%00001010
     sta $d010
@@ -283,8 +281,8 @@ charrotator:
     sty $d007
 
 
-    lda #64
-    ldy #100
+    lda #160
+    ldy #130
     sta $d00a
     sty $d00b
     sta $d00c
@@ -305,6 +303,8 @@ charrotator:
 
     lda #11
     sta $d020
+    lda #6
+    sta $d021
 
     :FillScreenMemory($6000, 0) // character mem aka 128x128 "framebuffer"
     :FillScreenMemory($63e8, 0) // character mem
@@ -314,20 +314,6 @@ charrotator:
 
     lda #%00011000
     sta $d018
-
-
-    .for(var i = 0; i < 25; i+=4) {
-    set_line($4400+40*i,2<<6)
-    set_line($4400+40*(i+1),1<<6)
-    set_line($4400+40*(i+2),3<<6)
-    set_line($4400+40*(i+3),1<<6)
-    }
-
-    set_line($4400+40*10,(2<<6)+3)
-    set_line($4400+40*11,3)
-    set_line($4400+40*12,(3<<6)+2)
-    set_line($4400+40*13,1)
-    set_line($4400+40*14,(2<<6)+1)
 
 
     lda #$0
@@ -543,6 +529,8 @@ frame2:
 frame3:
     .byte 0
 
+
+/*
 .pc = $4000
 sprite1:    
             .byte %11111000, %00000000, %00000000   
@@ -669,6 +657,9 @@ sprite7:
 sprite8:
 .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03,$00,$00,$04,$00,$00,$04,$00,$00,$04,$00,$00,$02,$00,$00,$02,$00,$00,$01,$00,$00,$00,$80,$00,$00,$40,$00,$00,$20,$00,$00,$10,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$01
 
+.pc = $4400 
+.import binary "charscrollscreen.bin"
+*/
 
 .pc = $e000  "sintab" virtual
 sintab:

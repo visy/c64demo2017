@@ -835,6 +835,8 @@ koalaloop:
 borderopen:
     // TODO: figure out how to disable the $c10 interrupt handler from spindle to enable custom interrupts
     jsr $c90 // load creditsprites
+    lda #0
+    sta frame
 
     lda #%00111011
     sta $d011
@@ -900,8 +902,17 @@ waitforrasters:
     lda #>irq1
     sta $ffff
     cli
-    jmp *
 
+rasterscreenloop:
+    lda frame
+    cmp #255
+    beq go_partswitch
+    jmp rasterscreenloop
+
+go_partswitch:
+    jmp partswitch
+
+.pc = $3000 "raster irqs"
 irq1:    
     sta restorea+1
     stx restorex+1
@@ -950,8 +961,6 @@ restorea2: lda #$00
 restorex2: ldx #$00
 restorey2: ldy #$00
     rti
-
-
 
 loopere:
     jmp loopere
@@ -1045,6 +1054,39 @@ frame2:
 
 bolchars:
 .import binary "bolchars_flip.raw"
+
+
+.pc = $3f00 "next part irq"
+nextirq:
+    sta restoreaa+1
+    stx restorexa+1
+    sty restoreya+1
+
+    jsr $c203 // le musica
+
+    lda #$ff
+    sta $d019
+restoreaa: lda #$00
+restorexa: ldx #$00
+restoreya: ldy #$00
+    rti
+
+.pc = $3fc0 "partswitch"
+    lda #255
+waitforrasters2:
+    cmp $d012
+    bne waitforrasters2
+
+partswitch:
+    inc $d020
+    lda #<nextirq
+    sta $fffe
+    lda #>nextirq
+    sta $ffff
+    inc $d020
+    jsr $c90 // load part2 -> hires3.asm
+partswitch2:
+    jmp $f00
 
 
 

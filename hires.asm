@@ -1848,17 +1848,19 @@ partswitch:
 partswitch2:
     jmp $f00
 
-
-.pc = $e000  "sintab"
-
+.pc = $e000  "sintab" virtual
 sintab:
- .fill 256,round(63*sin(toRadians(i*360/63)))
+    .fill 256,0
+.pc = $e100  "costab" virtual
 costab:
- .fill 256,round(63*cos(toRadians(i*360/63)))
+    .fill 256,0
+.pc = $e200 "sintab2" virtual
 sintab2:
- .fill 256,90+round(90*sin(toRadians(i*360/255)))
+    .fill 256,0
+.pc = $e300 "costab2" virtual
 costab2:
- .fill 256,100+round(100*cos(toRadians(i*360/255)))
+    .fill 256,0
+
 
 
 .print "vic_bank: " + toHexString(vic_bank)

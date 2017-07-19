@@ -2,8 +2,9 @@
 # Spindle automatically jumps to the load address of the first file listed
 # here, unless you specify an entry point with the -e option.
 
-demo.prg
+demo.prg		f00		2
 goat0.sid		c200!	7e
+sinedata.bin	e000!	2
 
 # The "!" indicates that this part should be written directly into I/O space, and hence
 # colour RAM. Without the exclamation mark, the data would go into shadow RAM. 
@@ -86,5 +87,10 @@ terminal.d80
 creditsprites.raw 	4000 	0
 quadtrip.bit
 quadtrip.clr
+
+# third codeblock
+# vicscreen with "end of the line"
+demo3.prg	f00		2
+charscrollvic.bin
 
 
