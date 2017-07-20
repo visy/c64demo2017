@@ -1,0 +1,16 @@
+.label wait=$f90
+.label frame3=$f9f
+.label sintab=$e000
+.label waiter1=$f90
+.label frame2=$f9e
+.label start=$f00
+.label sintab2=$e200
+.label charrotator=$f20
+.label costab=$e100
+.label spry=$fa0
+.label loop=$f8d
+.label irq1=$3000
+.label costab2=$e300
+.label no_spryreset=$301e
+.label part_init=$f00
+.label frame=$f9d

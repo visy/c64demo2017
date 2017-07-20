@@ -1,0 +1,21 @@
+parsing
+flex pass 1
+flex pass 2
+flex pass 3
+Output pass
+
+Memory Map
+----------
+Default-segment:
+  $0801-$080c Basic
+  $080e-$080d Basic End
+  $0f00-$105a democode
+  $3000-$307d raster irqs
+  $307e-$30c6 compare
+  $4000-$4800 Unnamed
+  $7040-$7868 Music
+  $9000-$91ff sintab
+
+Writing prg file: /Users/visy/dev/kick/hires2/bin/intro_Compiled.prg
+Writing Vice symbol file: /Users/visy/dev/kick/hires2/bin/intro.vs
+Writing Symbol file: bin/intro.sym

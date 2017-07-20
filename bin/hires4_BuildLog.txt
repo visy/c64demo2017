@@ -1,0 +1,22 @@
+parsing
+flex pass 1
+flex pass 2
+flex pass 3
+Output pass
+
+Memory Map
+----------
+Default-segment:
+  $0801-$080c Basic
+  $080e-$080d Basic End
+  $0f00-$0fa0 democode
+  $3000-$3029 raster irqs
+  $4000-$4800 charscreen
+  *$e000-$e0ff sintab
+  *$e100-$e1ff costab
+  *$e200-$e2ff sintab2
+  *$e300-$e3ff costab2
+
+Writing prg file: /Users/visy/dev/kick/hires2/bin/hires4_Compiled.prg
+Writing Vice symbol file: /Users/visy/dev/kick/hires2/bin/hires4.vs
+Writing Symbol file: bin/hires4.sym

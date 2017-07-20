@@ -1,3 +1,65 @@
+.macro StabilizeRaster() {
+    //
+    // Register a new irq handler for the next line.
+    //
+    lda #<stabilizedirq
+    sta $fffe
+    lda #>stabilizedirq
+    sta $ffff
+    inc $d012
+
+    //
+    // ACK the current IRQ
+    //
+    lda #$ff
+    sta $d019
+
+    // Save the old stack pointer so we can just restore the stack as it was
+    // before the stabilizing got in the way.
+    tsx
+
+    // Enable interrupts and call nop's until the end of the current line
+    // should be reached
+    cli
+
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    // Add one more nop if NTSC
+
+    // Here's or second irq handler
+stabilizedirq:
+
+    // Reset the SP so it looks like the extra irq stuff never happened
+    txs
+
+    //
+    // Wait for line to finish.
+    //
+
+    // PAL-63  // NTSC-64    // NTSC-65
+    //---------//------------//-----------
+    ldx #$08   // ldx #$08   // ldx #$09
+    dex        // dex        // dex
+    bne *-1    // bne *-1    // bne *-1
+    bit $00    // nop
+               // nop
+
+    //
+    // Check at exactly what point we go to the next line
+    //
+    lda $d012
+    cmp $d012
+    beq *+2 // If we haven't changed line yet, wait an extra cycle.
+
+    // Here our real logic can start running.
+}
+
 .macro FillBitmap(addr, value) {
     ldx #$00
     lda #value
@@ -223,380 +285,126 @@
         bne copyloop // loop until our dest goes over 255
 
     }
+
+ .var music = LoadSid("intromusre.sid")
+    BasicUpstart2(start)
+
 .pc = $f00 "democode"
 
 start:
+    lda #%00000000
+    sta $d011
+    lda #2
+    sta $dd00
 part_init:
+    ldx #0
+    ldy #0
+    lda #music.startSong-1
+    jsr music.init
+
     sei
-     lda #<irq1
-     sta $fffe
-     lda #>irq1
-     sta $ffff
-     cli
+    lda #<irq1
+    sta $314
+    lda #>irq1
+    sta $315
+    lda #$7f
+    sta $dc0d
+    lda #$01
+    sta $d01a
+
+    lda #52
+    sta $d012
+
+    cli
+
 
 charrotator:
 
-    lda #%01010011
+    lda #%00010011
     sta $d011
 
     // Setup some sprites
-    lda #%11101111
+    lda #%00000111
     sta $d015
 
     lda #0
     sta $d01c
 
-    lda #11
-    sta $d027
-    sta $d028
-    sta $d029
-    sta $d02a
 
     lda #1
-    sta $d02c
+    sta $d027
     lda #10
-    sta $d02d
+    sta $d028
     lda #0
-    sta $d02e
+    sta $d029
 
-    lda #%11100000
+    lda #%00000000
     sta $d01d
+    lda #%00000000
     sta $d017
 
-    lda #%00001010
+    lda #%00000000
     sta $d010
 
-    lda #24
-    ldy #54
+    lda #160+12
+    ldy #12
     sta $d000
     sty $d001
-
-    lda #64
-    ldy #54
     sta $d002
     sty $d003
-
-    lda #24
-    ldy #225
     sta $d004
     sty $d005
 
-    lda #64
-    ldy #225
-    sta $d006
-    sty $d007
+FillScreenMemory($d800,0)
 
-
-    lda #160
-    ldy #130
-    sta $d00a
-    sty $d00b
-    sta $d00c
-    sty $d00d
-    sta $d00e
-    sty $d00f
-
-
-
-    // ecm colors
-
-    lda #5
-    sta $D022
-    lda #12
-    sta $D023
-    lda #15
-    sta $D024
-
-    lda #11
+    lda #0
     sta $d020
-    lda #6
+    lda #4
     sta $d021
 
-    :FillScreenMemory($6000, 0) // character mem aka 128x128 "framebuffer"
-    :FillScreenMemory($63e8, 0) // character mem
-    :FillScreenMemory($63e8+$3e8*1, 0) // character mem
-    :FillScreenMemory($63e8+$3e8*2, 0) // character mem
-    FillScreenMemory($d800,0)
-
-    lda #%00011000
-    sta $d018
-
-
-    lda #$0
-    sta $4400+$3f8
-    lda #$1
-    sta $4400+$3f9
-    lda #$2
-    sta $4400+$3fa
-    lda #$3
-    sta $4400+$3fb
-
-    lda #$7
-    sta $4400+$3fd
-    lda #$6
-    sta $4400+$3fe
-    lda #$5
-    sta $4400+$3ff
-
-/*
-    sei
-    lda #<irq1
-    sta $fffe
-    lda #>irq1
-    sta $ffff
-    cli
-*/
-
-    // chars on screen
-    ldx #8
-scrollerinit:
-    txa
-    sta $4400+(40*12)-8,x
-    inx
-    cpx #40+8
-    bne scrollerinit
-
-    lda #<scrollbitmap-384
-    sta $f5
-    lda #>scrollbitmap-384
-    sta $f6
-
-    // finescroll
-    lda #%11001111
-    sta $f3
+    ldx #255
+drawscr:
     lda #0
-    sta $f4 // flag for doing 8x scroll
-
-
-//    jsr init16
-    .for(var xx = 0; xx < 8; xx++) {
-    ldx #xx
-    ldy #xx
-    jsr putpix16
-    }
-
-    .for(var xx = 8; xx < 16; xx++) {
-    lda #xx
-    and #7
-    tax
-    ldy #xx
-    jsr putpix16
-    }
-
-    .for(var xx = 16; xx < 20; xx++) {
-    lda #7
-    sbc #(xx-16)
-    and #7
-
-    tax
-    ldy #xx
-    jsr putpix16
-    }
-
-    .for(var xx = 20; xx < 24; xx++) {
-    lda #xx
-    adc #0
-    and #7
-    tax
-    ldy #xx
-    jsr putpix16
-    }
-
-    .for(var xx = 24; xx < 32; xx++) {
-    lda #7
-    sbc #(xx-24)
-    and #7
-    tax
-    ldy #xx
-    jsr putpix16
-    }
-
-do_pixel:
-    clc
-    .for (var i = 0; i < 5; i++) {
-        lda $6000+i
-        asl
-        adc #0
-        eor $6000+i+1
-        sta $6000+i
-    }
+    sta $4400
+    inc *-2
 
     lda #0
-    sta $F1
-pixloop:
-    inc frame
-    lda frame
-    cmp #8
-    bne no_bgscroll0
-    lda #0
-    sta frame
-    jmp do_bgscroll
-no_bgscroll0:
-    jmp no_bgscroll
-do_bgscroll:
-    clc
-    // x scrolls
-    .for (var i = 0; i < 8; i++) {
-        lda $6000+8+i
-        asl
-        adc #0
-        sta $6000+8+i
-        lda $6000+16+i
-        asl
-        adc #0
-        sta $6000+16+i
-        lda $6000+24+i
-        asl
-        adc #0
-        sta $6000+24+i
-
-    }
-
-    // y scroll
-    lda $6000+7
-    sta $F2
-
-    ldx #0
-ycopy1:
-    lda $6000,x
-    sta $E1,x
-    inx
-    cpx #8
-    bne ycopy1
-
-
-    ldx #0
-ycopy2:
-    lda $E1,x
-    sta $6001,x
-    inx
-    cpx #7
-    bne ycopy2
-
-    lda $F2
-    sta $6000
-    // y scroll end
-no_yscroll:
-
-    inc $F1
-    lda $F1
-    cmp #8
-    bne no_scrollreset
-    lda #0
-    sta $F1
-no_scrollreset:
-no_bgscroll:
-    // copy bitmap to chars
-    ldy #0
-    lda $f5
-    sta copyscroll_loopx+1
-    lda $f6
-    sta copyscroll_loopx+2
-    lda #<$6000+8*8
-    sta scrollchar_offset+1
-    lda #>$6000+8*8
-    sta scrollchar_offset+2
-
-copyscrollbitmap:
-    ldx #0
-copyscroll_loopx:
-    lda scrollbitmap,x
-scrollchar_offset:
-    sta $6000+8*8,x
-    inx
-    bne copyscroll_loopx
-    inc scrollchar_offset+2
-    inc copyscroll_loopx+2
-
-    iny
-    cpy #2
-    bne copyscrollbitmap
-
-    lda $f4
-    cmp #1
-    bne no_scrollupper
-    lda #%11001111
-    sta $f3
+    sta $4500
+    inc *-2
 
     lda #0
-    sta $f4
-    lda $f5
-    clc
-    adc #8
-    sta $f5
-    bcc no_scrollupper
-    inc $f6
-    lda $f6
-    cmp #(>scrollbitmap)+4
-    bne no_scrollupper
-    lda #>scrollbitmap-384
-    sta $f6
-no_scrollupper:
+    sta $4600
+    inc *-2
+    dex
+    cpx #255
+    bne drawscr
 
-    jmp pixloop
+    ldx #232
+drawscr2:
+    lda #0
+    sta $4700
+    inc *-2
+    dex
 
+    bne drawscr2
 
-
-colors:
-    .byte 2<<6,1<<6,2<<6,3<<6
-
-putpix16:
-    lda #<$6000
-    sta $fb
-
-    // ptr = (x / 8) * 128
-    txa
-    lsr                     // x / 8
-    lsr
-    lsr
-
-    lsr                     // * 128 (16-bit)
-    ror $fb
-    adc #>$6000
-    sta $fc
-
-    // mask = 2 ^ (x & 3)
-    txa
-    and #%00000111
-    tax
-    lda ($fb),y
-    ora bitmask16,x
-    sta ($fb),y
-    rts
-
-index16:
-    .byte 0,0
-
-bitmask16:
-     .byte $80,$40,$20,$10,$08,$04,$02,$01
-
-init16:
-
-ichar:
-    ldx #0
-initic: 
-    txa
-    ldy #0
-i162:
-    sta $4400,y
-    clc
-    adc #16
-    iny
-    cpy #16
-    bne i162
-
-    lda i162+1
-    clc
-    adc #40
-    sta i162+1
-    bcc *+5
-    inc i162+2
-
-    inx
-    cpx #16
-    bne initic
-
-    rts
+loop:
+    inc frame3
+    lda frame3
+    cmp #255
+    bne loop
+    lda #0
+    sta frame3
+    inc frame4
+    lda frame4
+    cmp #32
+    bne loop
+    lda #0
+    sta frame4
+//    inc $d021 
+    inc frame2
+    jsr chrfuck
+    jmp loop
 
 wait:
 waiter1:
@@ -608,94 +416,227 @@ waiter1:
     bne wait
     rts
 
+chrfuck:
+    lda frame4
+    tax
+    and #7
+    sta $d016
+    eor frame2
+    lsr
+    sta $5000
+    asl
+    sta $5001
+    lsr
+    sta $5002
+    asl
+    sta $5003
+    lsr
+    sta $5004
+    asl
+    sta $5005
+    lsr
+    sta $5006
+    asl
+    sta $5007
+    lsr
+    sta $5008
+/*
+    txa
+    and #2
+    lsr
+    sbc frame
+*/
+//    txa
+    and #2
+    adc $d012
+    eor $d000,x
+    eor $d41b
+    lsr $d405
+    and #%00011000
+    lda frame4
+    and #127
+    sta $d016
+//    sta $d015
+
+    rts
 frame:
-    .byte 0
+    .byte 0,8,16,24,32,40,48,56
+
+colors: 
+    .byte 12,5,3,2,6,7,9,12
+
+sprcolors: 
+    .byte 10,5,3,2,6,7,9,12
+
 frame2:
     .byte 0
 frame3:
     .byte 0
+frame4:
+    .byte 0
+sprx:
+    .byte 0
+spry:
+    .byte 0
+heartindex:
+    .byte 0
+yoffs:
+    .byte 0
 
 .pc = $3000 "raster irqs"
-irq1:
-    sta restorea+1
-    stx restorex+1
-    sty restorey+1
+irq1:    
+
+    lda #<stabilizedirq
+    sta $314
+    lda #>stabilizedirq
+    sta $315
+    inc $d012
+
+    //
+    // ACK the current IRQ
+    //
 
     inc $d019
 
-    lda #%11001000
-    sta $d016
-    lda #$91
+    // Save the old stack pointer so we can just restore the stack as it was
+    // before the stabilizing got in the way.
+    tsx
+
+    // Enable interrupts and call nop's until the end of the current line
+    // should be reached
+    cli
+
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    // Add one more nop if NTSC
+
+    // Here's or second irq handler
+stabilizedirq:
+
+    // Reset the SP so it looks like the extra irq stuff never happened
+    txs
+
+    //
+    // Wait for line to finish.
+    //
+
+    // PAL-63  // NTSC-64    // NTSC-65
+    //---------//------------//-----------
+    ldx #$08   // ldx #$08   // ldx #$09
+    dex        // dex        // dex
+    bne *-1    // bne *-1    // bne *-1
+    bit $00    // nop
+               // nop
+
+    //
+    // Check at exactly what point we go to the next line
+    //
+
+
+    lda $d012
+    cmp $d012
+    beq *+2 // If we haven't changed line yet, wait an extra cycle.
+
+    lda spry
+    cmp #52
+    bne music_done
+    jsr music.play
+music_done:
+
+    lda #0
+
+    nop
+    nop
+    nop
+    ldx heartindex
+    lda colors,x
+    sta $d020
+
+    ldy #0
+nextsprite:
+    lda spry // Wait for position where we want LineCrunch to start
+    clc
+    adc #24
+    sta spry
+    adc yoffs
+
     sta $d012
-    lda #<irq2
-    sta $fffe
-    lda #>irq2
-    sta $ffff
+    clc
+    sbc #20
+    sta $d001
+    sta $d003
+    sta $d005
 
-    jsr $c203 // le musica
+    ldy heartindex
+    lda frame,y
+    tax
+    lda sintab,x
 
-    lda #$ff
-    sta $d019
-restorea: lda #$00
-restorex: ldx #$00
-restorey: ldy #$00
-    rti
+    clc
+    adc #110
+    sta $d000
+    sta $d002
+    sta $d004
 
-irq2:    
-    sta restorea2+1
-    stx restorex2+1
-    sty restorey2+1
+    lda sprcolors,y
+    sta $d028
 
-    inc $d019
-    lda $f4
-    cmp #1
-    beq no_finereset
-    dec $f3
-    lda $f3
-    sta $d016
-    cmp #%11001000
-    bne no_finereset
-    lda #1
-    sta $f4
-no_finereset:
-
-    lda #$9c
+    lda spry
+.pc = * "compare"
+compare:
+    cmp #230
+    bcc no_spryreset
+    lda #52
+    sta spry
     sta $d012
-    lda #<irq1
-    sta $fffe
-    lda #>irq1
-    sta $ffff
+
+    lda #0
+    sta heartindex
+
+
+    inc frame
+    inc frame+1
+    inc frame+2
+    inc frame+3
+    inc frame+4
+    inc frame+5
+    inc frame+6
+    inc frame+7
+
+    lda #12
+    sta $d020
+
+    ldx frame
+    lda sintab,x
+    lsr
+    lsr
+    sbc #10
+//    adc frame
+    sta yoffs
+
+  //  jsr chrfuck
+    jmp $ea7e
+no_spryreset:
     lda #$ff
-    sta $d019
-restorea2: lda #$00
-restorex2: ldx #$00
-restorey2: ldy #$00
-    rti
+    sta $d019   //ACK interrupt so it can be called again
 
-.pc = $4000 "charscreen" virtual
-// .import binary "charscrollvic.bin"
+    inc heartindex
+ //   jsr chrfuck
+    jmp $ea7e
 
-.pc = $7200 "scrollbitmap" virtual
-scrollbitmap:
-/*
-scrollbitmap:
-.var endscroller = LoadPicture("endscroller.png")
-    .for (var x=0;x<128; x++) // 8 * 64 = 1024
-        .for(var charPosY=0; charPosY<8; charPosY++)
-            .byte endscroller.getSinglecolorByte(x,charPosY)
 
-.fill 256,0
-*/
-.pc = $e000  "sintab" virtual
+.pc = $4000
+.import c64 "charscrollvic2.bin"
+
+*=music.location "Music"
+.fill music.size, music.getData(i)
+
+.pc = $9000  "sintab"
 sintab:
-    .fill 256,0
-.pc = $e100  "costab" virtual
-costab:
-    .fill 256,0
-.pc = $e200 "sintab2" virtual
-sintab2:
-    .fill 256,0
-.pc = $e300 "costab2" virtual
-costab2:
-    .fill 256,0
-
+ .fill 512,round(63.5+63.5*sin(toRadians(i*360/64)))
