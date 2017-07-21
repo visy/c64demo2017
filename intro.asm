@@ -293,8 +293,34 @@ stabilizedirq:
  .var music = LoadSid("intromusre.sid")
 
 .pc = $f00 "democode"
-
 start:
+
+    FillScreenMemory($0400,32)
+    lda #0
+    sta $d020
+    sta $d021
+
+init_text:  ldx #$00         // init X register with $00
+loop_text:  lda line1,x      // read characters from line1 table of text...
+           sta $0590,x      // ...and store in screen ram near the center
+           lda line2,x      // read characters from line1 table of text...
+           sta $05e0,x      // ...and put 2 rows below line1
+
+           inx 
+           cpx #$28         // finished when all 40 cols of a line are processed
+           bne loop_text    // loop if we are not done yet
+
+    ldy #255
+    jsr wait
+    ldy #255
+    jsr wait
+    ldy #255
+    jsr wait
+    jmp real_start
+line1: .text "           quadtrip presents            "
+line2: .text "             leif eriksson              "
+real_start:
+
     lda #%00000000
     sta $d011
     lda #2
@@ -304,9 +330,6 @@ part_init:
     ldy #0
     lda #music.startSong-1
     jsr music.init
-
-    lda #1
-    sta $d9
 
     sei
     lda #<irq1
@@ -338,11 +361,8 @@ charrotator:
     sta $d011
 
     // Setup some sprites
-    lda #%00000111
+    lda #%00111111
     sta $d015
-
-    lda #0
-    sta $d01c
 
 
     lda #1
@@ -351,6 +371,14 @@ charrotator:
     sta $d028
     lda #0
     sta $d029
+
+    lda #1
+    sta $d02a
+    lda #10
+    sta $d02b
+    lda #0
+    sta $d02c
+
 
     lda #%00000000
     sta $d01d
@@ -369,12 +397,25 @@ charrotator:
     sta $d004
     sty $d005
 
-FillScreenMemory($d800,0)
+    sta $d006
+    sty $d007
+    sta $d008
+    sty $d009
+    sta $d00a
+    sty $d00b
 
-    lda #0
-    sta $d020
-    lda #4
-    sta $d021
+    lda #07
+    sta $47f8
+    lda #06
+    sta $47f9
+    lda #05
+    sta $47fa
+    lda #07
+    sta $47fb
+    lda #06
+    sta $47fc
+    lda #05
+    sta $47fd
 
     ldx #255
 drawscr:
@@ -487,7 +528,7 @@ chrfuck:
 
     rts
 frame:
-    .byte 0,8,16,24,32,40,48,56
+    .byte 0
 
 colors: 
     .byte 12,5,3,2,6,7,9,12
@@ -582,9 +623,12 @@ stabilizedirq:
     bne music_done
     jsr music.play
 music_done:
-
-    lda #0
-
+    ldx #2
+    cpx #1
+    beq yes
+    nop
+    nop
+yes:
     nop
     nop
     nop
@@ -592,7 +636,6 @@ music_done:
     lda colors,x
     sta $d020
 
-    ldy #0
 nextsprite:
     lda spry // Wait for position where we want LineCrunch to start
     clc
@@ -602,13 +645,25 @@ nextsprite:
 
     sta $d012
     clc
-    sbc #20
+    sbc #19
     sta $d001
     sta $d003
     sta $d005
+    adc #1
+    sta $d007
+    sta $d009
+    sta $d00b
 
     ldy heartindex
-    lda frame,y
+    lda frame
+    adc heartindex  
+    adc heartindex  
+    adc heartindex  
+    adc heartindex  
+    adc heartindex  
+    adc heartindex  
+    adc heartindex  
+    adc heartindex  
     tax
     lda sintab,x
 
@@ -617,9 +672,14 @@ nextsprite:
     sta $d000
     sta $d002
     sta $d004
-
+    adc #2
+    sta $d006
+    sta $d008
+    sta $d00a
     lda sprcolors,y
     sta $d028
+    lda #11
+    sta $d02b
 
     lda spry
 .pc = * "compare"
@@ -635,13 +695,6 @@ compare:
 
 
     inc frame
-    inc frame+1
-    inc frame+2
-    inc frame+3
-    inc frame+4
-    inc frame+5
-    inc frame+6
-    inc frame+7
 
     lda #12
     sta $d020
@@ -665,226 +718,55 @@ no_spryreset:
     jmp $ea7e
 
 
-.pc = $4000 "vicdata"
-.import c64 "charscrollvic2.bin"
 
-.pc = $9000 "upscroller"
-.label upscroll_part = *
-.modify B2() {
+.pc = $4140 "vicdata"
+.import c64 "heartsprites2.bin"
+
+.pc = $2000 "upscroller"
     .import c64 "upscroll.prg"
-}
 
-.pc = $6000 "partswitch"
+*=music.location "Music"
+.fill music.size, music.getData(i)
+
 decrunch_next_part:
+    lda #12
+    sta $F4   
 
-    ldy #<upscroll_part
-    ldx #>upscroll_part
-    jsr Decrunch
+morefade:
+    ldx #8
+spritesaway:
+    lda sprcolors,x
+    tay
+    dey
+    tya
+    cmp #255
+    beq no_over
+    sta sprcolors,x
+    ldy #1
+    jsr wait
+no_over:
 
-    sei
+    dex
+    cpx #255
+    bne spritesaway
+
+    dec $f4
+    lda $f4
+    cmp #0
+    bne morefade 
+
+    ldy #100
+    jsr wait
+
 
     lda #<short_irq
     sta $314
     lda #>short_irq
     sta $315
-    lda #$7f
-    sta $dc0d
-    lda #$01
-    sta $d01a
-
     lda #15
     sta $d012
 
-    cli
-    lda #1
-    sta $D9
-    lda #%00000000
-    sta $d015
-
-
     jmp $2000
-
-// decruncher
-
-.const B2_ZP_BASE = $03
-// ByteBoozer Decruncher    /HCL May.2003
-// B2 Decruncher            December 2014
-
-.label zp_base  = B2_ZP_BASE
-.label bits     = zp_base
-.label put      = zp_base + 2
-
-.macro  GetNextBit() {
-    asl bits
-    bne DgEnd
-    jsr GetNewBits
-DgEnd:
-}
-
-.macro  GetLen() {
-    lda #1
-GlLoop:
-    :GetNextBit()
-    bcc GlEnd
-    :GetNextBit()
-    rol
-    bpl GlLoop
-GlEnd:
-}
-
-Decrunch:
-    sty Get1+1
-    sty Get2+1
-    sty Get3+1
-    stx Get1+2
-    stx Get2+2
-    stx Get3+2
-
-    ldx #0
-    jsr GetNewBits
-    sty put-1,x
-    cpx #2
-    bcc *-7
-/*
-    lda #$10
-    sta put
-    lda #$08
-    sta put+1
-*/
-    lda #$80
-    sta bits
-DLoop:
-    :GetNextBit()
-    bcs Match
-Literal:
-    // Literal run.. get length.
-    :GetLen()
-    sta LLen+1
-
-    ldy #0
-LLoop:
-Get3:
-    lda $feed,x
-    inx
-    bne *+5
-    jsr GnbInc
-L1: sta (put),y
-    iny
-LLen:
-    cpy #0
-    bne LLoop
-
-    clc
-    tya
-    adc put
-    sta put
-    bcc *+4
-    inc put+1
-
-    iny
-    beq DLoop
-
-    // Has to continue with a match..
-
-Match:
-    // Match.. get length.
-    :GetLen()
-    sta MLen+1
-
-    // Length 255 -> EOF
-    cmp #$ff
-    beq End
-
-    // Get num bits
-    cmp #2
-    lda #0
-    rol
-    :GetNextBit()
-    rol
-    :GetNextBit()
-    rol
-    tay
-    lda Tab,y
-    beq M8
-
-    // Get bits < 8
-M_1: 
-    :GetNextBit()
-    rol
-    bcs M_1
-    bmi MShort
-M8:
-    // Get byte
-    eor #$ff
-    tay
-Get2:
-    lda $feed,x
-    inx
-    bne *+5
-    jsr GnbInc
-    jmp Mdone
-MShort:
-    ldy #$ff
-Mdone:
-    //clc
-    adc put
-    sta MLda+1
-    tya
-    adc put+1
-    sta MLda+2
-
-    ldy #$ff
-MLoop:
-    iny
-MLda:
-    lda $beef,y
-    sta (put),y
-MLen:
-    cpy #0
-    bne MLoop
-
-    //sec
-    tya
-    adc put
-    sta put
-    bcc *+4
-    inc put+1
-
-    jmp DLoop
-
-End:
-
-    rts
-
-GetNewBits:
-Get1:
-    ldy $feed,x
-    sty bits
-    rol bits
-    inx
-    bne GnbEnd
-GnbInc: 
-    inc Get1+2
-    inc Get2+2
-    inc Get3+2
-GnbEnd:
-    rts
-
-Tab:
-    // Short offsets
-    .byte %11011111 // 3
-    .byte %11111011 // 6
-    .byte %00000000 // 8
-    .byte %10000000 // 10
-    // Long offsets
-    .byte %11101111 // 4
-    .byte %11111101 // 7
-    .byte %10000000 // 10
-    .byte %11110000 // 13
-
-
-*=music.location "Music"
-.fill music.size, music.getData(i)
 
 .pc = $c400  "sintab"
 sintab:

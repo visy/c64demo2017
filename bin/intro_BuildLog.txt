@@ -1,19 +1,17 @@
 parsing
 flex pass 1
-B2: unnamed $2000 - $2725 Packed size $062a (86%) Pack start: $f9d0
 flex pass 2
 Output pass
 
 Memory Map
 ----------
 Default-segment:
-  $0f00-$108a democode
-  $4000-$4800 vicdata
-  $6000-$6122 partswitch
-  $7040-$7868 Music
-  $9000-$9629 upscroller
-  $c000-$c088 raster irqs
-  $c089-$c0d1 compare
+  $0f00-$112c democode
+  $2000-$2725 upscroller
+  $4140-$41fa vicdata
+  $7040-$78a4 Music
+  $c000-$c0bf raster irqs
+  $c0c0-$c0f3 compare
   $c400-$c4ff sintab
 
 Writing prg file: /Users/visy/dev/kick/hires2/bin/intro_Compiled.prg

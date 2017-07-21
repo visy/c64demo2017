@@ -296,24 +296,17 @@ stabilizedirq:
 .pc = $2000 "democode"
 
 start:
+    lda #0
+    sta $d020
     lda #%00111011
     sta $d011
     lda #%10000000 // bitmap at $4000, screen at $6000
     sta $d018
-
-    lda #2
-    sta $dd00
-
-    lda #0
-    sta $d020
-    lda #0
-    sta $d021
-
     lda #%01111111
     sta $d015
     sta $d01d
 
-    lda #64+24
+    lda #64+22
     sta $F1
     ldy #0
     ldx #0
@@ -357,15 +350,11 @@ part_init:
     sta $F0 // crunchindex
     B2_DECRUNCH(crunch_pic0)
     lda #255
-    sta $47c0
-    sta $47c1
-    sta $47c2
-    sta $47c3
-    sta $47c4
-    sta $47c5
-    sta $47c6
-    sta $47c7
-    sta $47c8
+    ldx #8
+filoop:
+    sta $47c0,x
+    dex
+    bne filoop
 
 
     ldy #64
