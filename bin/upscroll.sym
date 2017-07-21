@@ -1,0 +1,54 @@
+.label possprites=$2029
+.label no_new_fld_calc=$21d4
+.label no_incfldframe=$20f5
+.label zp_base=$3
+.label waiter1=$21d9
+.label MShort=$2299
+.label LLen=$2236
+.label M8=$228a
+.label put=$5
+.label Literal=$2210 {
+}
+.label Get1=$22bf
+.label Decrunch=$21e6
+.label Get3=$222a
+.label Get2=$228d
+.label fldframe=$21d7
+.label GetNewBits=$22bf
+.label Mdone=$229b
+.label crunch_pic1=$2552
+.label crunch_pic0=$2300
+.label loop2=$20b2
+.label bits=$3
+.label loop1=$2094
+.label MLen=$22ae
+.label donecru=$21bd
+.label the_actual_effect=$20cc
+.label stopfld=$210c
+.label CalcNumLines2=$20f5
+.label End=$22be
+.label M_1=$227e {
+}
+.label GnbInc=$22c9
+.label wait=$21d9
+.label LLoop=$222a
+.label GnbEnd=$22d2
+.label nextbitmap=$2094
+.label no_turnon=$20e0
+.label Match=$2247 {
+}
+.label do_one_fld_frame=$21d6
+.label pic2=$21a6
+.label loopforever=$21a6
+.label CalcNumLines=$20e3
+.label no_stop_fld=$2108
+.label L1=$2233
+.label do_calc_fld=$20e3
+.label start=$2000
+.label DLoop=$2207 {
+}
+.label MLoop=$22a8
+.label Tab=$22d3
+.label MLda=$22a9
+.label part_init=$204d
+.label NumFLDLines=$21d5

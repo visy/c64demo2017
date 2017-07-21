@@ -62,8 +62,8 @@ stabilizedirq:
 
 .macro FillBitmap(addr, value) {
     ldx #$00
-    lda #value
 !loop:
+    lda #0
     sta addr,x
     sta (addr + $100),x
     sta (addr + $200),x
@@ -96,11 +96,14 @@ stabilizedirq:
     sta (addr + $1d00),x
     sta (addr + $1e00),x
     sta (addr + $1f00),x
+    ldy #1
+    jsr wait
     dex
     bne !loop-
 }
 
-    .macro PNGtoHIRES(PNGpicture,BMPData,ColData) {
+
+    .macro PNGtoHIRES_single(PNGpicture,BMPData,ColData,color,bgcolor) {
 
         .var Graphics = LoadPicture(PNGpicture)
 
@@ -142,23 +145,21 @@ stabilizedirq:
         .eval ColorTable.put(C64L_blue,14)
         .eval ColorTable.put(C64L_grey,15)
 
-
         .pc = BMPData "Hires Bitmap"
 
         .var ScreenMem = List()
         .for (var Line = 0 ; Line < 200 ; Line = Line + 8) {
             .for (var Block = 0 ; Block < 320 ; Block=Block+8) {
                 .var Coll1 = Graphics.getPixel(Block,Line)
-                .var Coll2 = 0
+                .var Coll2 = bgcolor
                 .for (var j = 0 ; j < 8 ; j++ ) {
                     .var ByteValue = 0
                     .for (var i = 0 ; i < 8 ; i++ ) {
-                        .if (Graphics.getPixel(Block,Line) != Graphics.getPixel(Block+i,Line+j)) .eval ByteValue = ByteValue + pow(2,7-i)
-                        .if (Graphics.getPixel(Block,Line) != Graphics.getPixel(Block+i,Line+j)) .eval Coll2 = Graphics.getPixel(Block+i,Line+j)
+                        .if (Graphics.getPixel(Block+i,Line+j) != 0) .eval ByteValue = ByteValue + pow(2,7-i)
                     }
                 .byte ByteValue
                 }
-            .var BlockColor = [ColorTable.get(Coll2)]*16+ColorTable.get(Coll1)
+            .var BlockColor = bgcolor*16+color
             .eval ScreenMem.add(BlockColor)
             }
         }
@@ -168,6 +169,7 @@ stabilizedirq:
             .byte ScreenMem.get(i)
         }
     }
+
 
 .macro SetScreenMemory(address) {
 
@@ -287,151 +289,219 @@ stabilizedirq:
     }
 
 
-.plugin "se.triad.kickass.CruncherPlugins"
-
-
  .var music = LoadSid("intromusre.sid")
 
-.pc = $f00 "democode"
+.plugin "se.triad.kickass.CruncherPlugins"
+
+.pc = $2000 "democode"
 
 start:
-    lda #%00000000
+    lda #%00111011
     sta $d011
+    lda #%10000000 // bitmap at $4000, screen at $6000
+    sta $d018
+
     lda #2
     sta $dd00
+
+    lda #0
+    sta $d020
+    lda #0
+    sta $d021
+
+    lda #%01111111
+    sta $d015
+    sta $d01d
+
+    lda #64+24
+    sta $F1
+    ldy #0
+    ldx #0
+possprites:
+    lda $f1
+    sta $d000,x
+    lda #246
+    sta $d001,x
+    lda #0
+    sta $d027,y
+    lda #$1f
+    sta $63f8,y
+    lda #255
+    lda $f1
+    clc
+    adc #24
+    sta $f1
+    inx
+    inx  
+    iny
+    cpy #8
+    bne possprites
+
 part_init:
+/*
     ldx #0
     ldy #0
     lda #music.startSong-1
     jsr music.init
+*/
+    bit $d011 // Wait for new frame
+    bpl *-3
+    bit $d011
+    bmi *-3
 
-    lda #1
-    sta $d9
-
-    sei
-    lda #<irq1
-    sta $314
-    lda #>irq1
-    sta $315
-    lda #$7f
-    sta $dc0d
-    lda #$01
-    sta $d01a
-
-    lda #52
-    sta $d012
-
-    cli
-
-    ldy #250
-    jsr wait
-    ldy #250
-    jsr wait
-    ldy #250
-    jsr wait
-    ldy #180
-    jsr wait
-
-charrotator:
-
-    lda #%00010011
+    lda $d011
+    eor #%00010000 // off
     sta $d011
 
-    // Setup some sprites
-    lda #%00000111
-    sta $d015
-
     lda #0
-    sta $d01c
+    sta $F0 // crunchindex
+    B2_DECRUNCH(crunch_pic0)
+    lda #255
+    sta $47c0
+    sta $47c1
+    sta $47c2
+    sta $47c3
+    sta $47c4
+    sta $47c5
+    sta $47c6
+    sta $47c7
+    sta $47c8
 
+
+    ldy #64
+    jsr wait
+
+    lda $d011
+    eor #%00010000 // on
+    sta $d011
+
+nextbitmap:
+loop1:
+
+    bit $d011 // Wait for new frame
+    bpl *-3
+    bit $d011
+    bmi *-3
+
+
+
+    lda #%00111011
+    sta $d011
+
+    jsr CalcNumLines // Call sinus substitute routine
+
+    lda #$30 // Wait for position where we want FLD to start
+    cmp $d012
+    bne *-3
+
+    ldx NumFLDLines
+    beq loop1 // Skip if we want 0 lines FLD
+loop2:
+    lda $d012 // Wait for beginning of next line
+    cmp $d012
+    beq *-3
+
+    clc // Do one line of FLD
+    lda $d011
+    adc #1
+    and #7
+    ora #$18
+    ora #%00100000
+    sta $d011
+
+    dex // Decrease counter
+    bne loop2 // Branch if counter not 0
+
+the_actual_effect:
+    lda do_one_fld_frame
+    cmp #0
+    beq no_turnon
+    lda $d011
+    eor #%00010000 // on
+    sta $d011
+    lda #0
+    sta do_one_fld_frame
+no_turnon:
+    jmp loop1 // Next frame
+
+CalcNumLines:
+do_calc_fld:
+    inc fldframe
+    lda fldframe
+    cmp #2
+    bne no_incfldframe
+    lda #0
+    sta fldframe
+    inc fldframe+1
+no_incfldframe:
+CalcNumLines2:
+    ldx #220
+    lda $c400,x
+    clc
+    sbc fldframe+1
+    sta NumFLDLines
+    cmp #5
+    bcs no_stop_fld
+    jmp stopfld
+no_stop_fld:
+    inc CalcNumLines2+1
+    rts
+stopfld:
+    ldy #255
+    jsr wait
+    ldy #255
+    jsr wait
+    ldy #255
+    jsr wait
+
+    FillBitmap($4000,0)
+
+    lda $d011
+    eor #%00010000 // off
+    sta $d011
 
     lda #1
-    sta $d027
-    lda #10
-    sta $d028
+    sta do_one_fld_frame
+
+    inc $F0
+    lda $F0
+    cmp #1
+    bne pic2
+    B2_DECRUNCH(crunch_pic1)
+    jmp donecru
+pic2:    
+loopforever:
+    ldy #60
+    jsr wait
+
+    sei
     lda #0
-    sta $d029
+    sta $d404
+    sta $d40b
+    sta $d412
+    sta $d418
 
-    lda #%00000000
-    sta $d01d
-    lda #%00000000
-    sta $d017
-
-    lda #%00000000
-    sta $d010
-
-    lda #160+12
-    ldy #12
-    sta $d000
-    sty $d001
-    sta $d002
-    sty $d003
-    sta $d004
-    sty $d005
-
-FillScreenMemory($d800,0)
-
+    jmp loopforever
+donecru:
     lda #0
-    sta $d020
-    lda #4
-    sta $d021
-
-    ldx #255
-drawscr:
+    sta fldframe 
+    lda #75
+    sta fldframe+1 
+    lda #220
+    sta CalcNumLines2+1
     lda #0
-    sta $4400
-    inc *-2
+    sta NumFLDLines
+    jmp nextbitmap
 
-    lda #0
-    sta $4500
-    inc *-2
+no_new_fld_calc:
+    .byte 0
+NumFLDLines:
+    .byte 0
+do_one_fld_frame:
+    .byte 0
+fldframe:
+    .byte 0,75
 
-    lda #0
-    sta $4600
-    inc *-2
-    dex
-    cpx #255
-    bne drawscr
-
-    ldx #232
-drawscr2:
-    lda #0
-    sta $4700
-    inc *-2
-    dex
-
-    bne drawscr2
-
-
-loop:
-    inc frame3
-    lda frame3
-    cmp #255
-    bne loop
-    lda #0
-    sta frame3
-    inc frame4
-    lda frame4
-    cmp #32
-    bne loop
-    lda #0
-    sta frame4
-    inc frame5
-
-    lda frame5
-    lsr
-    lsr
-    adc #1
-    sta $d021
-    lda frame5
-    cmp #100
-    bne no_nextpart
-    jmp decrunch_next_part
-no_nextpart:
-//    inc $d021 
-    inc frame2
-    jsr chrfuck
-    jmp loop
 
 wait:
 waiter1:
@@ -443,267 +513,6 @@ waiter1:
     bne wait
     rts
 
-chrfuck:
-    lda frame4
-    tax
-    and #7
-    sta $d016
-    eor frame2
-    lsr
-    sta $5000
-    asl
-    sta $5001
-    lsr
-    sta $5002
-    asl
-    sta $5003
-    lsr
-    sta $5004
-    asl
-    sta $5005
-    lsr
-    sta $5006
-    asl
-    sta $5007
-    lsr
-    sta $5008
-/*
-    txa
-    and #2
-    lsr
-    sbc frame
-*/
-//    txa
-    and #2
-    adc $d012
-    eor $d000,x
-    eor $d41b
-    lsr $d405
-    and #%00011000
-    lda frame4
-    and #127
-    sta $d016
-//    sta $d015
-
-    rts
-frame:
-    .byte 0,8,16,24,32,40,48,56
-
-colors: 
-    .byte 12,5,3,2,6,7,9,12
-
-sprcolors: 
-    .byte 10,5,3,2,6,7,9,12
-
-frame2:
-    .byte 0
-frame3:
-    .byte 0
-frame4:
-    .byte 0
-frame5:
-    .byte 0
-sprx:
-    .byte 0
-spry:
-    .byte 0
-heartindex:
-    .byte 0
-yoffs:
-    .byte 0
-
-.pc = $c000 "raster irqs"
-short_irq:
-    jsr music.play
-    lda #$ff
-    sta $d019   //ACK interrupt so it can be called again
-    jmp $ea7e
-
-irq1:    
-    lda #<stabilizedirq
-    sta $314
-    lda #>stabilizedirq
-    sta $315
-    inc $d012
-
-    //
-    // ACK the current IRQ
-    //
-
-    inc $d019
-
-    // Save the old stack pointer so we can just restore the stack as it was
-    // before the stabilizing got in the way.
-    tsx
-
-    // Enable interrupts and call nop's until the end of the current line
-    // should be reached
-    cli
-
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    // Add one more nop if NTSC
-
-    // Here's or second irq handler
-stabilizedirq:
-
-    // Reset the SP so it looks like the extra irq stuff never happened
-    txs
-
-    //
-    // Wait for line to finish.
-    //
-
-    // PAL-63  // NTSC-64    // NTSC-65
-    //---------//------------//-----------
-    ldx #$08   // ldx #$08   // ldx #$09
-    dex        // dex        // dex
-    bne *-1    // bne *-1    // bne *-1
-    bit $00    // nop
-               // nop
-
-    //
-    // Check at exactly what point we go to the next line
-    //
-
-
-    lda $d012
-    cmp $d012
-    beq *+2 // If we haven't changed line yet, wait an extra cycle.
-
-    lda spry
-    cmp #52
-    bne music_done
-    jsr music.play
-music_done:
-
-    lda #0
-
-    nop
-    nop
-    nop
-    ldx heartindex
-    lda colors,x
-    sta $d020
-
-    ldy #0
-nextsprite:
-    lda spry // Wait for position where we want LineCrunch to start
-    clc
-    adc #24
-    sta spry
-    adc yoffs
-
-    sta $d012
-    clc
-    sbc #20
-    sta $d001
-    sta $d003
-    sta $d005
-
-    ldy heartindex
-    lda frame,y
-    tax
-    lda sintab,x
-
-    clc
-    adc #28
-    sta $d000
-    sta $d002
-    sta $d004
-
-    lda sprcolors,y
-    sta $d028
-
-    lda spry
-.pc = * "compare"
-compare:
-    cmp #230
-    bcc no_spryreset
-    lda #52
-    sta spry
-    sta $d012
-
-    lda #0
-    sta heartindex
-
-
-    inc frame
-    inc frame+1
-    inc frame+2
-    inc frame+3
-    inc frame+4
-    inc frame+5
-    inc frame+6
-    inc frame+7
-
-    lda #12
-    sta $d020
-
-    ldx frame
-    lda sintab,x
-    lsr
-    lsr
-    sbc #10
-//    adc frame
-    sta yoffs
-
-  //  jsr chrfuck
-    jmp $ea7e
-no_spryreset:
-    lda #$ff
-    sta $d019   //ACK interrupt so it can be called again
-
-    inc heartindex
- //   jsr chrfuck
-    jmp $ea7e
-
-
-.pc = $4000 "vicdata"
-.import c64 "charscrollvic2.bin"
-
-.pc = $9000 "upscroller"
-.label upscroll_part = *
-.modify B2() {
-    .import c64 "upscroll.prg"
-}
-
-.pc = $6000 "partswitch"
-decrunch_next_part:
-
-    ldy #<upscroll_part
-    ldx #>upscroll_part
-    jsr Decrunch
-
-    sei
-
-    lda #<short_irq
-    sta $314
-    lda #>short_irq
-    sta $315
-    lda #$7f
-    sta $dc0d
-    lda #$01
-    sta $d01a
-
-    lda #15
-    sta $d012
-
-    cli
-    lda #1
-    sta $D9
-    lda #%00000000
-    sta $d015
-
-
-    jmp $2000
-
 // decruncher
 
 .const B2_ZP_BASE = $03
@@ -713,6 +522,12 @@ decrunch_next_part:
 .label zp_base  = B2_ZP_BASE
 .label bits     = zp_base
 .label put      = zp_base + 2
+
+.macro B2_DECRUNCH(addr) {
+    ldy #<addr
+    ldx #>addr
+    jsr Decrunch
+}
 
 .macro  GetNextBit() {
     asl bits
@@ -745,12 +560,6 @@ Decrunch:
     sty put-1,x
     cpx #2
     bcc *-7
-/*
-    lda #$10
-    sta put
-    lda #$08
-    sta put+1
-*/
     lda #$80
     sta bits
 DLoop:
@@ -882,10 +691,15 @@ Tab:
     .byte %10000000 // 10
     .byte %11110000 // 13
 
+.pc = $2300 "crunchdata"
 
-*=music.location "Music"
-.fill music.size, music.getData(i)
+.label crunch_pic0 = *
+.modify B2() {
+    :PNGtoHIRES_single("upscroll.png",$4000,$6000,0,1)
+}
+.label crunch_pic1 = *
+.modify B2() {
+    :PNGtoHIRES_single("upscroll2.png",$4000,$6000,0,1)
+}
 
-.pc = $c400  "sintab"
-sintab:
-    .fill 256, 64.5*abs(sin(toRadians(i*360/128))) // Generates a sine curve
+

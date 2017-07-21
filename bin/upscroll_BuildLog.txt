@@ -1,0 +1,16 @@
+parsing
+flex pass 1
+B2: [ Hires Bitmap, Hires Color Data ] $4000 - $63e7 Packed size $0252 (6%) Pack start: $fda8
+B2: [ Hires Bitmap, Hires Color Data ] $4000 - $63e7 Packed size $01d4 (5%) Pack start: $fe26
+flex pass 2
+Output pass
+
+Memory Map
+----------
+Default-segment:
+  $2000-$22da democode
+  $2300-$2725 crunchdata
+
+Writing prg file: /Users/visy/dev/kick/hires2/bin/upscroll_Compiled.prg
+Writing Vice symbol file: /Users/visy/dev/kick/hires2/bin/upscroll.vs
+Writing Symbol file: bin/upscroll.sym
