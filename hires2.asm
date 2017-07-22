@@ -657,10 +657,20 @@ copy_done:
 
     lda $F5
     cmp #7
-    bne no_finenull
+    bcc no_finenull
+    beq do_offsetting
+    cmp #8
+    beq do_fine
+do_fine:
     lda #0
-    sta $F5
     sta $F4
+    sta $F5
+    lda #%00011111
+    clc
+    sbc $f5
+    sta $d011
+    jmp no_finenull
+do_offsetting:
 
     lda $F9
     clc

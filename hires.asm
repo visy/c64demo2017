@@ -1511,6 +1511,8 @@ dithers:
 
     ldy #255
     jsr wait
+    ldy #128
+    jsr wait
 
     lda #%00000000
     sta $d015
@@ -1525,6 +1527,8 @@ dithers:
     sta $d015
 
     ldy #255
+    jsr wait
+    ldy #128
     jsr wait
 
     lda #%00000000
@@ -1541,12 +1545,14 @@ dithers:
 
     ldy #255
     jsr wait
-
-
-    jsr $c90
+    ldy #128
+    jsr wait
 
     lda #%00000000
     sta $d015
+
+    jsr $c90
+
 
     :FillScreenMemory($5000,(1<<4) + 0)
 
