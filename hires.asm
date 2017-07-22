@@ -782,13 +782,188 @@ checkup:
 .var screen_memory=$1000 + vic_base
 .var bitmap_address=$2000 + vic_base
 
-.pc = $f00 "democode"
+.pc = $1000 "democode"
 
 start:
     lda #0
     sta $d020
     sta $d021
 
+    jsr $c90
+
+    ldx #255
+nuller0:
+    lda #0
+    sta $3800,x
+    sta $3900,x
+    sta $3a00,x
+    sta $3b00,x
+    sta $3c00,x
+    sta $3d00,x
+    sta $3e00,x
+    sta $4000,x
+    sta $4100,x
+    sta $4200,x
+    sta $4300,x
+    sta $4400,x
+    sta $4500,x
+    sta $4600,x
+    sta $4700,x
+    sta $4800,x
+    sta $4900,x
+    sta $4a00,x
+    sta $4b00,x
+    sta $4c00,x
+    sta $4d00,x
+    sta $4e00,x
+    sta $4f00,x
+    sta $5000,x
+    sta $5100,x
+    sta $5200,x
+    sta $5300,x
+    sta $5400,x
+    sta $5500,x
+    sta $5600,x
+    sta $5700,x
+    sta $5800,x
+    sta $5900,x
+    sta $5a00,x
+    sta $5b00,x
+    sta $5c00,x
+    sta $5d00,x
+    sta $5e00,x
+    sta $5f00,x
+    sta $6000,x
+    sta $6100,x
+    sta $6200,x
+    sta $6300,x
+    sta $6400,x
+    sta $6500,x
+    sta $6600,x
+    sta $6700,x
+    sta $6800,x
+    sta $6900,x
+    sta $6a00,x
+    sta $6b00,x
+    sta $6c00,x
+    sta $6d00,x
+    sta $6e00,x
+    sta $6f00,x
+    sta $7000,x
+    sta $7100,x
+    sta $7200,x
+    sta $7300,x
+    sta $7400,x
+    sta $7500,x
+    sta $7600,x
+    sta $7700,x
+    sta $7800,x
+    sta $7900,x
+    sta $7a00,x
+    sta $7b00,x
+    sta $7c00,x
+    sta $7d00,x
+    sta $7e00,x
+    sta $7f00,x
+    sta $8000,x
+    sta $8100,x
+    sta $8200,x
+    sta $8300,x
+    sta $8400,x
+    sta $8500,x
+    sta $8600,x
+    sta $8700,x
+    sta $8800,x
+    sta $8900,x
+    sta $8a00,x
+    sta $8b00,x
+    sta $8c00,x
+    sta $8d00,x
+    sta $8e00,x
+    sta $8f00,x
+    sta $9000,x
+    sta $9100,x
+    sta $9200,x
+    sta $9300,x
+    sta $9400,x
+    sta $9500,x
+    sta $9600,x
+    sta $9700,x
+    sta $9800,x
+    sta $9900,x
+    sta $9a00,x
+    sta $9b00,x
+    sta $9c00,x
+    sta $9d00,x
+    sta $9e00,x
+    sta $9f00,x
+    sta $a000,x
+    sta $a100,x
+    sta $a200,x
+    sta $a300,x
+    sta $a400,x
+    sta $a500,x
+    sta $a600,x
+    sta $a700,x
+    sta $a800,x
+    sta $a900,x
+    sta $aa00,x
+    sta $ab00,x
+    sta $ac00,x
+    sta $ad00,x
+    sta $ae00,x
+    sta $af00,x
+    sta $b000,x
+    sta $b100,x
+    sta $b200,x
+    sta $b300,x
+    sta $b400,x
+    sta $b500,x
+    sta $b600,x
+    sta $b700,x
+    sta $bc00,x
+    sta $bd00,x
+    sta $be00,x
+    sta $bf00,x
+    sta $e000,x
+    sta $e100,x
+    sta $e200,x
+    sta $e300,x
+    sta $e400,x
+    sta $e500,x
+    sta $e600,x
+    sta $e700,x
+    sta $e800,x
+    sta $e900,x
+    sta $ea00,x
+    sta $eb00,x
+    sta $ec00,x
+    sta $ed00,x
+    sta $ee00,x
+    sta $ef00,x
+    sta $f000,x
+    sta $f100,x
+    sta $f200,x
+    sta $f300,x
+    sta $f400,x
+    sta $f500,x
+    sta $f600,x
+    sta $f700,x
+    sta $f800,x
+    sta $f900,x
+    sta $fa00,x
+    sta $fb00,x
+    sta $fc00,x
+    sta $fd00,x
+    sta $fe00,x
+    sta $ff00,x
+    dex
+    cpx #255
+    bne nuller
+    jmp nuller1
+nuller:
+    jmp nuller0
+nuller1:
     sei
 loop1:
 
@@ -1934,6 +2109,7 @@ partswitch:
 .pc = * "partswitch_jmp"
 partswitch2:
     jmp $f00
+
 
 .pc = $b800  "sintab" virtual
 sintab:

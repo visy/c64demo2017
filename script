@@ -2,7 +2,8 @@
 # Spindle automatically jumps to the load address of the first file listed
 # here, unless you specify an entry point with the -e option.
 
-demo.prg		f00		2
+demo.prg
+
 goat0.sid		c200	7e
 sinedata.bin	b800	2
 
