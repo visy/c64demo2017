@@ -789,18 +789,10 @@ start:
     sta $d020
     sta $d021
 
-    jsr $c90
 
     ldx #255
 nuller0:
     lda #0
-    sta $3800,x
-    sta $3900,x
-    sta $3a00,x
-    sta $3b00,x
-    sta $3c00,x
-    sta $3d00,x
-    sta $3e00,x
     sta $4000,x
     sta $4100,x
     sta $4200,x
@@ -965,6 +957,15 @@ nuller:
     jmp nuller0
 nuller1:
     sei
+
+    lda #<$e000
+    sta $fffa
+    lda #>$e000
+    sta $fffb
+
+    jsr $c90
+
+
 loop1:
 
     bit $d011 // Wait for new frame
@@ -1133,9 +1134,8 @@ demo_init:
     sta $d020
     lda #1 // bgcolor
     sta $d021
-    FillScreenMemory($4000,%00010001)
 
-    jsr $c90
+    FillScreenMemory($4000,%00010001)
 
     SetHiresBitmapMode()
 
@@ -1156,7 +1156,8 @@ titlepics:
     lda #%00000000
     sta $d018
 
-    jsr $c90
+    copymem($8000,$5000,10)
+    copymem($9000,$6000,30)
 
     lda #%01001000
     sta $d018
@@ -1171,7 +1172,8 @@ titlepics:
     lda #%00000000
     sta $d018
 
-    jsr $c90
+    copymem($b000,$5000,10)
+    copymem($e000,$6000,30)
 
     lda #%01001000
     sta $d018
@@ -1351,7 +1353,6 @@ loop16:
     ldy #1
     jsr wait
 
-    sei
 
     lda #$44
     sta i162+2
@@ -1403,7 +1404,6 @@ sinop:
 
     sta i162+1
     jsr init16 // address for 16x16 screen pos
-    cli
     lda #0
     ldx index16
     clc
@@ -1446,20 +1446,12 @@ no_index_clear:
     beq exit16
 
 no_fres:
-    jsr feebyteack16
+    copymem_eor($6000,$6081,4)
 
     jmp loop16
 
-feebyteack16:
-//    copymem_eor($6000,$6081,4) // sierpinski
-
-    copymem_eor($6000,$6081,4)
-
-    rts
-
 fade_border_tab:
     .byte 14,8,4,11,10,9,6,0
-
 
 exit16:
 
@@ -1480,7 +1472,6 @@ fade_border1:
     cpx #7
     bne fade_border1
 
-    jsr $c90 // load quadtrip logo
 
     lda #0
     sta $d020
@@ -1488,6 +1479,8 @@ fade_border1:
 
     ldy #32
     jsr wait
+
+    jsr $c90 // load quadtrip logo
 
 dithersandpics:
 
@@ -1507,10 +1500,7 @@ dithersandpics:
     jsr dithers
 afterdithers:
 
-    ldy #32
-    jsr wait
-
-    jsr $c90 // load fox
+    jsr $c90 // load fox && broke
 
     :centerwipein_trans(10)
 
@@ -1538,7 +1528,8 @@ foxglitch:
 
     :centerwipeout_trans(10)
 
-    jsr $c90 // load broke
+    copymem($8000,$9000,10)
+    copymem($e000,$a000,32)
 
     :centerwipein_trans(10)
 
@@ -1637,7 +1628,7 @@ i162:
     rts
 
 dithers:
-    jsr $c90
+    jsr $c90 // init to 8000, a000, e000
 
     // Setup some sprites
     lda #%00000000
@@ -1678,7 +1669,7 @@ dithers:
     :FillBitmap($6000,0)
     :FillScreenMemory($5000,(11<<4) + 0)
 
-    :copymem_eor($9000,$6000,40)
+    :copymem_eor($8000,$6000,32)
 
     lda #%00011111
     sta $d015
@@ -1695,7 +1686,7 @@ dithers:
 
     :FillScreenMemory($5000,(12<<4) + 0)
 
-    :copymem_eor($9000,$6000,40)
+    :copymem_eor($a000,$6000,32)
 
     lda #%00011111
     sta $d015
@@ -1712,7 +1703,7 @@ dithers:
 
     :FillScreenMemory($5000,(15<<4) + 0)
 
-    :copymem_eor($9000,$6000,40)
+    :copymem_eor($e000,$6000,32)
 
     lda #%00011111
     sta $d015
@@ -1724,31 +1715,25 @@ dithers:
 
     lda #%00000000
     sta $d015
-
-    jsr $c90
 
 
     :FillScreenMemory($5000,(1<<4) + 0)
 
-    :copymem_eor($9000,$6000,40)
+    :copymem_eor($a000,$6000,32)
 
     ldy #128
     jsr wait
-
-    jsr $c90
 
     :FillScreenMemory($5000,(15<<4) + 0)
 
-    :copymem_eor($9000,$6000,40)
+    :copymem_eor($8000,$6000,32)
 
     ldy #128
     jsr wait
 
-    jsr $c90
-
     :FillScreenMemory($5000,(12<<4) + 0)
 
-    :copymem_eor($9000,$6000,40)
+    :copymem_eor($e000,$6000,32)
 
     ldy #128
     jsr wait
@@ -1801,7 +1786,7 @@ clear_y:
 }
 .macro centerwipein_trans(waittime) {
     :FillScreenMemory($5000,(0<<4)+0)
-    :copymem($a000,$6000,35)
+    :copymem($a000,$6000,32)
 
     ldx #0
     .for(var i=0;i<13;i++) { 
@@ -2124,6 +2109,8 @@ sintab2:
 costab2:
     .fill 256,0
 
+.pc = $e000
+    rti
 
 
 
