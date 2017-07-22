@@ -3,7 +3,7 @@ al C:114d .demo_init
 al C:17c2 .fade_screen1
 al C:f5c .no_incfldframe
 al C:18aa .over_half_sin
-al C:e000 .sintab
+al C:b800 .sintab
 al C:1910 .no_index_clear
 al C:2f82 .waiter1
 al C:2f95 .bolchars
@@ -22,7 +22,7 @@ al C:f09 .loop1
 al C:2cbb .bitmask16
 al C:f72 .real_start0
 al C:f5c .CalcNumLines2
-al C:e300 .costab2
+al C:bb00 .costab2
 al C:2c9b .bols
 al C:18bd .sinop
 al C:11e5 .titlepics
@@ -32,7 +32,7 @@ al C:18ba .no_neg_sin
 al C:2f82 .wait
 al C:3ff0 .partswitch
 al C:2cc5 .initic
-al C:e200 .sintab2
+al C:ba00 .sintab2
 al C:2cc3 .ichar
 al C:1108 .real_start
 al C:1878 .loop16
@@ -51,7 +51,7 @@ al C:1100 .fadetab
 al C:2f92 .loadfile
 al C:1137 .fadetowhite
 al C:192c .feebyteack16
-al C:e100 .costab
+al C:b900 .costab
 al C:1000 .sinus
 al C:1b8e .fade_border1
 al C:3ff3 .partswitch2

@@ -1,5 +1,5 @@
 .label no_incflasheor2=$1685
-.label sintab=$e000
+.label sintab=$b800
 .label waiter1=$3109
 .label bolchars=$3118
 .label bolpix=$30ab
@@ -22,7 +22,7 @@
 .label doEor2=$164d
 .label bolend=$12c0 {
 }
-.label costab2=$e300
+.label costab2=$bb00
 .label bols=$f00
 .label copy_done=$15aa
 .label ranbyteols=$1631
@@ -33,7 +33,7 @@
 .label restorex=$307a
 .label blotable=$30d7
 .label restorex2=$30a3
-.label sintab2=$e200
+.label sintab2=$ba00
 .label no_bloeraseslow=$12b7
 .label boscroll_over=$1625
 .label bolerase=$10aa
@@ -52,7 +52,7 @@
 .label waitforrasters=$1b7d
 .label fadetab=$1b9b
 .label loopere=$30a8
-.label costab=$e100
+.label costab=$b900
 .label bolbuf0=$15f5
 .label bolbuf1=$1607
 .label bol_copyloop_target=$159a

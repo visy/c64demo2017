@@ -3,8 +3,8 @@
 # here, unless you specify an entry point with the -e option.
 
 demo.prg		f00		2
-goat0.sid		c200!	7e
-sinedata.bin	e000!	2
+goat0.sid		c200	7e
+sinedata.bin	b800	2
 
 # The "!" indicates that this part should be written directly into I/O space, and hence
 # colour RAM. Without the exclamation mark, the data would go into shadow RAM. 
@@ -57,6 +57,7 @@ d_bune.bit		a000	2
 
 #second codeblock, goes to $f00
 demo2.prg		f00 	2
+sinedata.bin	b800	2
 
 # bol part
 bolcolors.bin   d800!   

@@ -10,10 +10,10 @@ Default-segment:
   $3000-$3917 raster irqs
   $3f00-$3f17 next part irq
   $3fc0-$3fd6 partswitch
-  *$e000-$e0ff sintab
-  *$e100-$e1ff costab
-  *$e200-$e2ff sintab2
-  *$e300-$e3ff costab2
+  *$b800-$b8ff sintab
+  *$b900-$b9ff costab
+  *$ba00-$baff sintab2
+  *$bb00-$bbff costab2
 
 Writing prg file: /Users/visy/dev/kick/hires2/bin/hires2_Compiled.prg
 Writing Vice symbol file: /Users/visy/dev/kick/hires2/bin/hires2.vs

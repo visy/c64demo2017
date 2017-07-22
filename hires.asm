@@ -1935,18 +1935,19 @@ partswitch:
 partswitch2:
     jmp $f00
 
-.pc = $e000  "sintab" virtual
+.pc = $b800  "sintab" virtual
 sintab:
     .fill 256,0
-.pc = $e100  "costab" virtual
+.pc = $b900  "costab" virtual
 costab:
     .fill 256,0
-.pc = $e200 "sintab2" virtual
+.pc = $ba00 "sintab2" virtual
 sintab2:
     .fill 256,0
-.pc = $e300 "costab2" virtual
+.pc = $bb00 "costab2" virtual
 costab2:
     .fill 256,0
+
 
 
 

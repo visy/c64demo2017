@@ -3,7 +3,7 @@
 .label fade_screen1=$17c2
 .label no_incfldframe=$f5c
 .label over_half_sin=$18aa
-.label sintab=$e000
+.label sintab=$b800
 .label no_index_clear=$1910
 .label waiter1=$2f82
 .label bolchars=$2f95
@@ -21,7 +21,7 @@
 .label bitmask16=$2cbb
 .label real_start0=$f72
 .label CalcNumLines2=$f5c
-.label costab2=$e300
+.label costab2=$bb00
 .label bols=$2c9b
 .label sinop=$18bd
 .label titlepics=$11e5
@@ -31,7 +31,7 @@
 .label wait=$2f82
 .label partswitch=$3ff0
 .label initic=$2cc5
-.label sintab2=$e200
+.label sintab2=$ba00
 .label ichar=$2cc3
 .label real_start=$1108
 .label loop16=$1878
@@ -53,7 +53,7 @@
 .label fadetowhite=$1137
 .label feebyteack16=$192c {
 }
-.label costab=$e100
+.label costab=$b900
 .label sinus=$1000
 .label fade_border1=$1b8e
 .label partswitch2=$3ff3

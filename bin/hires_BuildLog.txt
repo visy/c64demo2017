@@ -13,10 +13,10 @@ Default-segment:
   $0f00-$3794 democode
   $3ff0-$3ff2 partswitch
   $3ff3-$3ff5 partswitch_jmp
-  *$e000-$e0ff sintab
-  *$e100-$e1ff costab
-  *$e200-$e2ff sintab2
-  *$e300-$e3ff costab2
+  *$b800-$b8ff sintab
+  *$b900-$b9ff costab
+  *$ba00-$baff sintab2
+  *$bb00-$bbff costab2
 
 Writing prg file: /Users/visy/dev/kick/hires2/bin/hires_Compiled.prg
 Writing Vice symbol file: /Users/visy/dev/kick/hires2/bin/hires.vs
