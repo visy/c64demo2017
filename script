@@ -30,15 +30,18 @@ quadtrip.bit
 quadtrip.clr
 
 # dithers
+dither1spr.bin  4000 	0
 d_dither3.bin 	9000	2
 
 d_dither1.bin	9000	2
+dither2spr.bin  4000 	0
 
 d_dither2.bin	9000	2
-
-d_dither3.bin	9000	2
+dither3spr.bin  4000 	0
 
 d_dither1.bin	9000	2
+
+d_dither3.bin	9000	2
 
 d_dither2.bin	9000	2
 

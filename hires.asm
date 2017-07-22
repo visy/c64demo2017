@@ -1463,15 +1463,57 @@ i162:
     rts
 
 dithers:
+    jsr $c90
+
+    // Setup some sprites
+    lda #%00000000
+    sta $d015
+
+    lda #0
+    sta $d01c
+
+    lda #$0
+    sta $5000+$3f8
+    lda #$1
+    sta $5000+$3f9
+    lda #$2
+    sta $5000+$3fa
+    lda #$3
+    sta $5000+$3fb
+    lda #$4
+    sta $5000+$3fc
+
+    ldy #60
+
+    lda #68
+    sta $d000
+    sty $d001
+    lda #67+24*1
+    sta $d002
+    sty $d003
+    lda #68+24*2
+    sta $d004
+    sty $d005
+    lda #69+24*3
+    sta $d006
+    sty $d007
+    lda #69+24*4
+    sta $d008
+    sty $d009
+
     :FillBitmap($6000,0)
     :FillScreenMemory($5000,(11<<4) + 0)
 
-    jsr $c90
-
     :copymem_eor($9000,$6000,40)
 
-    ldy #32
+    lda #%00011111
+    sta $d015
+
+    ldy #255
     jsr wait
+
+    lda #%00000000
+    sta $d015
 
     jsr $c90
 
@@ -1479,8 +1521,14 @@ dithers:
 
     :copymem_eor($9000,$6000,40)
 
-    ldy #32
+    lda #%00011111
+    sta $d015
+
+    ldy #255
     jsr wait
+
+    lda #%00000000
+    sta $d015
 
     jsr $c90
 
@@ -1488,16 +1536,23 @@ dithers:
 
     :copymem_eor($9000,$6000,40)
 
-    ldy #32
+    lda #%00011111
+    sta $d015
+
+    ldy #255
     jsr wait
 
+
     jsr $c90
+
+    lda #%00000000
+    sta $d015
 
     :FillScreenMemory($5000,(1<<4) + 0)
 
     :copymem_eor($9000,$6000,40)
 
-    ldy #32
+    ldy #128
     jsr wait
 
     jsr $c90
@@ -1506,7 +1561,7 @@ dithers:
 
     :copymem_eor($9000,$6000,40)
 
-    ldy #32
+    ldy #128
     jsr wait
 
     jsr $c90
@@ -1515,10 +1570,13 @@ dithers:
 
     :copymem_eor($9000,$6000,40)
 
-    ldy #32
+    ldy #128
     jsr wait
 
     :FillScreenMemory($5000,(11<<4) + 0)
+
+    lda #%00000000
+    sta $d015
 
     rts
 
