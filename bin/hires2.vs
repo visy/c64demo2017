@@ -1,5 +1,5 @@
 al C:1685 .no_incflasheor2
-al C:b800 .sintab
+al C:ba00 .sintab
 al C:3109 .waiter1
 al C:3118 .bolchars
 al C:30ab .bolpix
@@ -23,7 +23,7 @@ al C:3f11 .restoreaa
 al C:30f0 .bhitable
 al C:164d .doEor2
 al C:12c0 .bolend
-al C:bb00 .costab2
+al C:bd00 .costab2
 al C:f00 .bols
 al C:15aa .copy_done
 al C:1631 .ranbyteols
@@ -34,7 +34,7 @@ al C:307c .restorey
 al C:307a .restorex
 al C:30d7 .blotable
 al C:30a3 .restorex2
-al C:ba00 .sintab2
+al C:bc00 .sintab2
 al C:1081 .copyloop2
 al C:12b7 .no_bloeraseslow
 al C:1625 .boscroll_over
@@ -54,7 +54,7 @@ al C:3117 .frame2
 al C:1b7d .waitforrasters
 al C:1b9b .fadetab
 al C:30a8 .loopere
-al C:b900 .costab
+al C:bb00 .costab
 al C:15f5 .bolbuf0
 al C:1607 .bolbuf1
 al C:159a .bol_copyloop_target

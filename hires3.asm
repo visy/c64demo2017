@@ -693,16 +693,16 @@ scrollbitmap:
 
 .fill 256,0
 */
-.pc = $b800  "sintab" virtual
+.pc = $ba00  "sintab" virtual
 sintab:
     .fill 256,0
-.pc = $b900  "costab" virtual
+.pc = $bb00  "costab" virtual
 costab:
     .fill 256,0
-.pc = $ba00 "sintab2" virtual
+.pc = $bc00 "sintab2" virtual
 sintab2:
     .fill 256,0
-.pc = $bb00 "costab2" virtual
+.pc = $bd00 "costab2" virtual
 costab2:
     .fill 256,0
 

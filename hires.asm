@@ -1484,15 +1484,14 @@ fade_border1:
     ldy #32
     jsr wait
 
-    jsr $c90 // load quadtrip logo
-
-dithersandpics:
-
-
-
     SetHiresBitmapMode()
     SetScreenMemory(screen_memory - vic_base)
     SetBitmapAddress(bitmap_address - vic_base)
+
+dithersandpics:
+
+    copymem($9a00, $6000,32)
+    copymem($8000, $5000,10)
 
     ldx #250
     ldy #250
@@ -2100,16 +2099,16 @@ partswitch2:
     jmp $f00
 
 
-.pc = $b800  "sintab" virtual
+.pc = $ba00  "sintab" virtual
 sintab:
     .fill 256,0
-.pc = $b900  "costab" virtual
+.pc = $bb00  "costab" virtual
 costab:
     .fill 256,0
-.pc = $ba00 "sintab2" virtual
+.pc = $bc00 "sintab2" virtual
 sintab2:
     .fill 256,0
-.pc = $bb00 "costab2" virtual
+.pc = $bd00 "costab2" virtual
 costab2:
     .fill 256,0
 

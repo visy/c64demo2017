@@ -10,13 +10,13 @@ Output pass
 Memory Map
 ----------
 Default-segment:
-  $1000-$3b40 democode
+  $1000-$3b81 democode
   $3ff0-$3ff2 partswitch
   $3ff3-$3ff5 partswitch_jmp
-  *$b800-$b8ff sintab
-  *$b900-$b9ff costab
-  *$ba00-$baff sintab2
-  *$bb00-$bbff costab2
+  *$ba00-$baff sintab
+  *$bb00-$bbff costab
+  *$bc00-$bcff sintab2
+  *$bd00-$bdff costab2
 
 Writing prg file: /Users/visy/dev/kick/hires2/bin/hires_Compiled.prg
 Writing Vice symbol file: /Users/visy/dev/kick/hires2/bin/hires.vs
