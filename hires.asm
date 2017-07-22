@@ -958,9 +958,13 @@ nuller:
 nuller1:
     sei
 
-    lda #<$e000
+    lda #$40 // rti
+    sta $0900
+
+    // restore handler
+    lda #<$0900
     sta $fffa
-    lda #>$e000
+    lda #>$0900
     sta $fffb
 
     jsr $c90
@@ -2108,11 +2112,6 @@ sintab2:
 .pc = $bb00 "costab2" virtual
 costab2:
     .fill 256,0
-
-.pc = $e000
-    rti
-
-
 
 .print "vic_bank: " + toHexString(vic_bank)
 .print "vic_base: " + toHexString(vic_base)

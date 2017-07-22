@@ -1,8 +1,8 @@
-.label no_new_fld_calc=$1265
+.label no_new_fld_calc=$126a
 .label demo_init=$144d
 .label fade_screen1=$1b41
 .label nuller1=$11eb
-.label no_incfldframe=$124c
+.label no_incfldframe=$1251
 .label nuller0=$100a
 .label over_half_sin=$1c28
 .label sintab=$b800
@@ -14,16 +14,16 @@
 .label i162=$307d
 .label clear_y=$332c
 .label afterdithers=$1f62
-.label fldframe=$1267
+.label fldframe=$126c
 .label dotball=$1b55
 .label dithers=$309c
 .label index16=$306e
-.label loop2=$1217
-.label loop1=$11f9
+.label loop2=$121c
+.label loop1=$11fe
 .label nuller=$11e8
 .label bitmask16=$3070
-.label real_start0=$1262
-.label CalcNumLines2=$124c
+.label real_start0=$1267
+.label CalcNumLines2=$1251
 .label costab2=$bb00
 .label bols=$3050
 .label sinop=$1c3b
@@ -43,12 +43,12 @@
 .label dithersandpics=$1f2d {
 }
 .label putpix16=$3053
-.label CalcNumLines=$1232
+.label CalcNumLines=$1237
 .label hline_sto=$333b
-.label no_stop_fld=$125e
+.label no_stop_fld=$1263
 .label exit16=$1cd2 {
 }
-.label do_calc_fld=$123a
+.label do_calc_fld=$123f
 .label frame2=$3340
 .label start=$1000
 .label fadetab=$1400
@@ -62,4 +62,4 @@
 }
 .label foxglitch=$22a9 {
 }
-.label NumFLDLines=$1266
+.label NumFLDLines=$126b

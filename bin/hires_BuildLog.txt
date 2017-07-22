@@ -17,7 +17,6 @@ Default-segment:
   *$b900-$b9ff costab
   *$ba00-$baff sintab2
   *$bb00-$bbff costab2
-  $e000-$e000 Unnamed
 
 Writing prg file: /Users/visy/dev/kick/hires2/bin/hires_Compiled.prg
 Writing Vice symbol file: /Users/visy/dev/kick/hires2/bin/hires.vs
