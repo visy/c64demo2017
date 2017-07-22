@@ -1305,6 +1305,8 @@ fade_border1:
     cpx #7
     bne fade_border1
 
+    jsr $c90 // load quadtrip logo
+
     lda #0
     sta $d020
     sta $d021
@@ -1314,10 +1316,7 @@ fade_border1:
 
 dithersandpics:
 
-    jsr $c90 // load quadtrip logo
 
-    ldy #10
-    jsr wait
 
     SetHiresBitmapMode()
     SetScreenMemory(screen_memory - vic_base)
