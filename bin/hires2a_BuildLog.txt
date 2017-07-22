@@ -1,0 +1,15 @@
+parsing
+flex pass 1
+flex pass 2
+Output pass
+
+Memory Map
+----------
+Default-segment:
+  $0f00-$1010 democode
+  $3f00-$3f17 next part irq
+  $3fc0-$3fd6 partswitch
+
+Writing prg file: /Users/visy/dev/kick/hires2/bin/hires2a_Compiled.prg
+Writing Vice symbol file: /Users/visy/dev/kick/hires2/bin/hires2a.vs
+Writing Symbol file: bin/hires2a.sym

@@ -91,6 +91,11 @@ creditsprites.raw 	4000 	0
 quadtrip.bit
 quadtrip.clr
 
+demo2a.prg	f00		2
+orditchars.bin 	5000 	2
+orditpic1.bin 	6400
+orditpic2.bin 	6800
+
 # third codeblock
 # vicscreen with "end of the line"
 demo3.prg	f00		2

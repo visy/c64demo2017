@@ -218,7 +218,7 @@ stabilizedirq:
 
         lda ($FB),y  // indirect index source memory address, starting at $00
         clc
-        adc $F2
+        sbc $F2
         cmp #38
         bcs no_over
         cmp #0
@@ -295,12 +295,26 @@ no_over:
 
 .plugin "se.triad.kickass.CruncherPlugins"
 
-
-BasicUpstart2(start)
  .var music = LoadSid("intromusre.sid")
 
 .pc = $f00 "democode"
 start:
+
+    lda #0
+    sta $F0
+    sta $F1
+    lda #30
+    sta $F2
+
+    sei
+    lda #<short_irq
+    sta $fffe
+    lda #>short_irq
+    sta $ffff
+    lda #$ff
+    sta $d012
+
+    cli
 
     lda #0
     sta $d020
@@ -308,60 +322,40 @@ start:
 
     lda #%00010000
     sta $d011
-    lda #2
-    sta $dd00
 
-    ldx #0
-    ldy #0
-    lda #music.startSong-1
-    jsr music.init
-
-    sei
-    lda #<short_irq
-    sta $314
-    lda #>short_irq
-    sta $315
-    lda #$7f
-    sta $dc0d
-    lda #$01
-    sta $d01a
-
-    lda #$ff
-    sta $d012
-
-    cli
 
 
     lda #%00001000
     sta $d016
-    lda #0
-    sta $F0
-    sta $F1
-    sta $F2
 
-    lda #30
-    sta $f2
-    FillScreenMemory($d800,7)
-    lda #9
+    FillScreenMemory($d800,1)
+    lda #0
     sta $d021
 loop:
     copymem_inc($6400,$4400,4)
     copymem_inc($6800,$4800,4)
+    lda $F2
+    cmp #210
+    bne no_reset_color0
+
+    jmp partswitch
+no_reset_color0:
+
     jmp loop
 
 flipper:
     .byte 0
 
 short_irq:
-    jsr music.play
-    lda #$ff
-    sta $d019   //ACK interrupt so it can be called again
+    sta restorea+1
+    stx restorex+1
+    sty restorey+1
 
-
+    inc $d019
 
     inc $F0
     lda $F0
-    cmp #32
+    cmp #6
     bne no_inc
     lda #0
     sta $F0
@@ -372,13 +366,6 @@ short_irq:
     lsr
 */
     dec $F2
-    lda $F2
-    cmp #240
-    bne no_reset_color
-    lda #30
-    sta $f2    
-
-no_reset_color:
 no_inc:
 
     lda flipper
@@ -403,7 +390,14 @@ do_flipper:
     sta flipper
 no_resetflip:
 
-    jmp $ea7e
+    jsr $c203 // le musica
+restorea: lda #$00
+restorex: ldx #$00
+restorey: ldy #$00
+    rti
+
+
+
 
 wait:
 waiter1:
@@ -415,22 +409,33 @@ waiter1:
     bne wait
     rts
 
-.pc = $6400
-.import binary "orditpic1.bin"
+.pc = $3f00 "next part irq"
+nextirq:
+    sta restoreaa+1
+    stx restorexa+1
+    sty restoreya+1
 
-.pc = $6800
-.import binary "orditpic2.bin"
+    jsr $c203 // le musica
 
-.pc = $5000
-.var ordit = LoadPicture("ordit.png")
-    .for (var x=0;x<32; x++)
-        .for(var charPosY=0; charPosY<8; charPosY++)
-            .byte ordit.getSinglecolorByte(x,charPosY)
-.fill 255,255
+    lda #$ff
+    sta $d019
+restoreaa: lda #$00
+restorexa: ldx #$00
+restoreya: ldy #$00
+    rti
 
-*=music.location "Music"
-.fill music.size, music.getData(i)
+.pc = $3fc0 "partswitch"
 
-.pc = $c400  "sintab"
-sintab:
-    .fill 256, 13.5+22.5*(sin(toRadians(i*360/64))) // Generates a sine curve
+partswitch:
+    nop
+    nop
+    ldy #64
+    jsr wait
+    lda #<nextirq
+    sta $fffe
+    lda #>nextirq
+    sta $ffff
+
+    jsr $c90 // load part2 -> hires3.asm
+partswitch2:
+    jmp $f00

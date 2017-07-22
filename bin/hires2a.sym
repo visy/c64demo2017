@@ -1,0 +1,21 @@
+.label wait=$1004
+.label partswitch=$3fc0
+.label restorey=$1001
+.label restorex=$fff
+.label short_irq=$fb1
+.label waiter1=$1004
+.label no_reset_color0=$fad
+.label start=$f00
+.label show_offsetted=$fe1
+.label nextirq=$3f00
+.label restoreaa=$3f11
+.label flipper=$fb0
+.label do_flipper=$feb
+.label partswitch2=$3fd4
+.label loop=$f4a {
+}
+.label no_resetflip=$ffa
+.label restoreya=$3f15
+.label restorexa=$3f13
+.label restorea=$ffd
+.label no_inc=$fcd
