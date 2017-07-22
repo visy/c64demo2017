@@ -338,6 +338,9 @@ charrotator:
     lda #$5
     sta $4400+$3ff
 
+    lda #0
+    sta $f9
+
 /*
     sei
     lda #<irq1
@@ -515,8 +518,8 @@ scrollchar_offset:
     lda $f4
     cmp #1
     bne no_scrollupper
-    lda #%11001111
-    sta $f3
+    lda #1
+    sta $f9
 
     lda #0
     sta $f4
@@ -647,16 +650,18 @@ irq2:
     sty restorey2+1
 
     inc $d019
-    lda $f4
-    cmp #1
-    beq no_finereset
-    dec $f3
     lda $f3
     sta $d016
-    cmp #%11001000
+
+    dec $f3
+    lda $f3
+    cmp #%11000111
     bne no_finereset
+    lda #%11001111
+    sta $f3
     lda #1
     sta $f4
+
 no_finereset:
 
     lda #$9c
