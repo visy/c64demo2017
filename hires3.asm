@@ -234,6 +234,8 @@ part_init:
      sta $ffff
      cli
 
+     :copymem($a000,$4000,10)
+
 charrotator:
 
     lda #%01010011

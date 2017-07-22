@@ -6,7 +6,7 @@ Output pass
 Memory Map
 ----------
 Default-segment:
-  $0f00-$13ae democode
+  $0f00-$13d0 democode
   $3000-$306a raster irqs
   *$4000-$3fff charscreen
   *$7200-$71ff scrollbitmap
