@@ -899,7 +899,7 @@ waitforrasters:
     sta $ffff
     cli
 
-    ldy #$2c
+    ldy #$2d
     jsr waitforpart
 
 go_partswitch:
