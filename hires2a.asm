@@ -511,11 +511,92 @@ no_x21:
 loop_fadetowhite11:
     lda #30
     sta $F2
+    lda #0
+    sta $f0
 
 
 loop_fadetowhite:
-    copymem_inc($6400,$4400,4)
-    copymem_inc($6800,$4800,4)
+ 
+    lda #<$6400
+    sta flx1+1
+    lda #>$6400
+    sta flx1+2
+
+    lda #<$4400
+    sta flx3+1
+    lda #>$4400
+    sta flx3+2
+
+    ldy #0
+fxl:
+    ldx #0
+fxl1:
+
+flx1:
+    lda $6400,x
+    clc 
+    sbc $F2
+    cmp #38
+    bcs no_over1
+    cmp #0
+    bcc no_over1
+flx3:
+    sta $4400,x
+no_over1:
+fno_x1:
+    inx
+    cpx #0
+    bne fxl1
+
+    inc flx1+2
+    inc flx3+2
+
+    iny
+    cpy #4
+    bne fxl
+
+    // load 6800, sub envmap, store 5800
+
+    lda #<$6800
+    sta flx21+1
+    lda #>$6800
+    sta flx21+2
+
+    lda #<$4800
+    sta flx23+1
+    lda #>$4800
+    sta flx23+2
+
+    ldy #0
+fx2l:
+    ldx #0
+fx2l1:
+
+flx21:
+    lda $6800,x
+    clc 
+    sbc $F2
+    cmp #38
+    bcs no_over2
+    cmp #0
+    bcc no_over2
+
+flx23:
+    sta $4800,x
+no_over2:
+fno_x21:
+    inx
+    cpx #0
+    bne fx2l1
+
+    inc flx21+2
+    inc flx23+2
+
+    iny
+    cpy #4
+    bne fx2l
+
+
     lda $F2
     cmp #210
     bne no_reset_color0
@@ -546,11 +627,10 @@ no_part_hi_add:
     bcc no_inc
     inc $F0
     lda $F0
-    cmp #7
+    cmp #3
     bne no_inc
     lda #0
     sta $F0
-    inc $F1 
 /*
     ldx $F1
     lda sintab,x
