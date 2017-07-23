@@ -869,19 +869,19 @@ borderopen:
 
     ldy #30
 
-    lda #68
+    lda #68-45
     sta $d000
     sty $d001
-    lda #67+24*1
+    lda #67-45+24*1
     sta $d002
     sty $d003
-    lda #68+24*2
+    lda #68-45+24*2
     sta $d004
     sty $d005
-    lda #69+24*3
+    lda #69-45+24*3
     sta $d006
     sty $d007
-    lda #69+24*4
+    lda #69-45+24*4
     sta $d008
     sty $d009
 
@@ -1082,7 +1082,7 @@ waiter0:
 
 wait:
 waiter1:
-    lda #250
+    lda #251
     cmp $D012
     bne *-3
     dey

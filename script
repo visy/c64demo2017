@@ -75,8 +75,8 @@ terminal.d80
 
 # top border sprites & hires pic
 creditsprites.raw 	4000 	0
-quadtrip.bit
-quadtrip.clr
+credits.bit
+credits.clr
 
 demo2a.prg	f00		2
 orditchars.bin 	5000 	2

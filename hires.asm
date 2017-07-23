@@ -786,6 +786,7 @@ checkup:
 .pc = $1000 "democode"
 
 start:
+
     lda #0
     sta $d020
     sta $d021
