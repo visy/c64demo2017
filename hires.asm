@@ -783,6 +783,7 @@ checkup:
 .var screen_memory=$1000 + vic_base
 .var bitmap_address=$2000 + vic_base
 
+
 .pc = $1000 "democode"
 
 start:
