@@ -403,16 +403,103 @@ start:
 loop:
     lda #2
     sta $F3
-    copymem_add(envmap,$6400,$5400,4)
-    copymem_add(envmap,$6800,$5800,4)
+
+    // load 6400, sub envmap, store 5400
+
+    lda #<$6400
+    sta lx1+1
+    lda #>$6400
+    sta lx1+2
+
+    lda #<$8000
+    adc $f0
+    sta lx2+1
+    lda #>$8000
+    sta lx2+2
+
+    lda #<$4400
+    sta lx3+1
+    lda #>$4400
+    sta lx3+2
+
+    ldy #0
+xl:
+    ldx #0
+xl1:
+
+lx1:
+    lda $6400,x
+    clc 
+lx2:
+    sbc $8000,x
+    cmp #64
+    bcs no_x1
+lx3:
+    sta $4400,x
+no_x1:
+    inx
+    cpx #0
+    bne xl1
+
+    inc lx1+2
+    inc lx2+2
+    inc lx3+2
+
+    iny
+    cpy #4
+    bne xl
+
+    // load 6800, sub envmap, store 5800
+
+    lda #<$6800
+    sta lx21+1
+    lda #>$6800
+    sta lx21+2
+
+    lda #<$8000
+    adc $f0
+    sta lx22+1
+    lda #>$8000
+    sta lx22+2
+
+    lda #<$4800
+    sta lx23+1
+    lda #>$4800
+    sta lx23+2
+
+    ldy #0
+x2l:
+    ldx #0
+x2l1:
+
+lx21:
+    lda $6800,x
+    clc 
+lx22:
+    sbc $8000,x
+    cmp #64
+    bcs no_x21
+lx23:
+    sta $4800,x
+no_x21:
+    inx
+    cpx #0
+    bne x2l1
+
+    inc lx21+2
+    inc lx22+2
+    inc lx23+2
+
+    iny
+    cpy #4
+    bne x2l
+    
     inc $F1
-    ldx $F1
+    ldx $f1
     lda sintab,x
     lsr
     adc #10
     sta $F0
-    copymem($5400,$4400,4)
-    copymem($5800,$4800,4)
 
     jmp loop
 
