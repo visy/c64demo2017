@@ -320,6 +320,8 @@ charrotator:
     :FillScreenMemory($63e8+$3e8*2, 0) // character mem
     FillScreenMemory($d800,0)
 
+    set_line($D9E0,1)
+
     lda #%00011000
     sta $d018
 

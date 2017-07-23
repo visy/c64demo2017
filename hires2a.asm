@@ -365,7 +365,7 @@ no_part_hi_add:
 
     inc $F0
     lda $F0
-    cmp #6
+    cmp #7
     bne no_inc
     lda #0
     sta $F0

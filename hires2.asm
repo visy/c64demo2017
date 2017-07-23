@@ -922,6 +922,8 @@ irq1:
 no_part_hi_add2:
 
     inc frame  
+    lda #%00000000
+    sta $d015
 
     lda #$00
     sta $d012
@@ -983,6 +985,9 @@ irq2:
 
     lda #$fa
     sta $d012
+    lda #%00011111
+    sta $d015
+
     lda #$3b //If you want to display a bitmap pic, use #$3b instead
     sta $d011
     lda #<irq1
