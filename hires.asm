@@ -1329,6 +1329,8 @@ afterdithers:
     ldy #13
     jsr waitforpart
 
+    ldy #100
+    jsr wait 
     lda #0
     sta $f0
 foxglitch:
@@ -1338,7 +1340,7 @@ foxglitch:
 
     inc $f0
     lda $f0
-    cmp #80
+    cmp #220
     bne foxglitch
 
     ldy #15
@@ -1615,7 +1617,7 @@ waiter0:
 
 wait:
 waiter1:
-    lda #255
+    lda #64
     cmp $D012
     bne *-3
     dey

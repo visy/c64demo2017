@@ -418,7 +418,7 @@ waiter0:
 
 wait:
 waiter1:
-    lda #255
+    lda #64
     cmp $D012
     bne *-3
     dey

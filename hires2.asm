@@ -557,7 +557,7 @@ bolfiller_x:
     .for (var i = 0; i < 13; i++) {
         SetScreenMemory($4400+i*$400)
 
-        ldy #2
+        ldy #6
         jsr wait
     }  
 
@@ -568,7 +568,7 @@ bolfiller_x:
     .for (var i = 1; i < 7; i++) {
         SetScreenMemory($4400+i*$400)
 
-        ldy #3
+        ldy #10
         jsr wait
     }  
 
@@ -899,13 +899,8 @@ waitforrasters:
     sta $ffff
     cli
 
-rasterscreenloop:
-
-
-    lda frame
-    cmp #255
-    beq go_partswitch
-    jmp rasterscreenloop
+    ldy #$2c
+    jsr waitforpart
 
 go_partswitch:
     jmp partswitch
@@ -921,6 +916,12 @@ irq1:
     sta restorea+1
     stx restorex+1
     sty restorey+1
+
+    inc part_lo
+    lda part_lo
+    bne no_part_hi_add2
+    inc part_hi
+no_part_hi_add2:
 
     inc frame  
 
@@ -1083,7 +1084,7 @@ waiter0:
 
 wait:
 waiter1:
-    lda #255
+    lda #250
     cmp $D012
     bne *-3
     dey
