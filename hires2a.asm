@@ -395,8 +395,6 @@ start:
     lda #%00001000
     sta $d016
 
-    jsr $c90 // load envmap + sine
-
     FillScreenMemory($d800,1)
     lda #0
     sta $d021
