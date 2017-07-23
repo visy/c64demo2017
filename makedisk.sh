@@ -5,4 +5,4 @@ cp bin/hires2a_Compiled.prg demo2a.prg
 cp bin/hires3_Compiled.prg demo3.prg
 ./spindle-2.3/spindle/spin -v -E 50 -a dirart.txt -t BROKEN -e 1000 script
 cp disk.d64 test.d64
-/Applications/Vice/x64.app/Contents/MacOS/x64 test.d64
+# /Applications/Vice/x64.app/Contents/MacOS/x64 test.d64

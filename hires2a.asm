@@ -1,3 +1,7 @@
+
+.var part_lo = $c1
+.var part_hi = $c2
+
 .macro StabilizeRaster() {
     //
     // Register a new irq handler for the next line.
@@ -353,6 +357,12 @@ short_irq:
 
     inc $d019
 
+    inc part_lo
+    lda part_lo
+    bne no_part_hi_add
+    inc part_hi
+no_part_hi_add:
+
     inc $F0
     lda $F0
     cmp #6
@@ -397,6 +407,13 @@ restorey: ldy #$00
     rti
 
 
+waitforpart:
+    dey
+
+waiter0:
+    cpy part_hi
+    bcs waiter0
+    rts
 
 
 wait:
@@ -414,6 +431,12 @@ nextirq:
     sta restoreaa+1
     stx restorexa+1
     sty restoreya+1
+
+    inc part_lo
+    lda part_lo
+    bne no_part_hi_add2
+    inc part_hi
+no_part_hi_add2:
 
     jsr $c203 // le musica
 

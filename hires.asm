@@ -1,4 +1,5 @@
-
+.var part_lo = $c1
+.var part_hi = $c2
 
 .function toSpritePtr(addr) {
     .return (addr)/$40
@@ -788,175 +789,8 @@ start:
     lda #0
     sta $d020
     sta $d021
-
-
-    ldx #255
-nuller0:
-    lda #0
-    sta $4000,x
-    sta $4100,x
-    sta $4200,x
-    sta $4300,x
-    sta $4400,x
-    sta $4500,x
-    sta $4600,x
-    sta $4700,x
-    sta $4800,x
-    sta $4900,x
-    sta $4a00,x
-    sta $4b00,x
-    sta $4c00,x
-    sta $4d00,x
-    sta $4e00,x
-    sta $4f00,x
-    sta $5000,x
-    sta $5100,x
-    sta $5200,x
-    sta $5300,x
-    sta $5400,x
-    sta $5500,x
-    sta $5600,x
-    sta $5700,x
-    sta $5800,x
-    sta $5900,x
-    sta $5a00,x
-    sta $5b00,x
-    sta $5c00,x
-    sta $5d00,x
-    sta $5e00,x
-    sta $5f00,x
-    sta $6000,x
-    sta $6100,x
-    sta $6200,x
-    sta $6300,x
-    sta $6400,x
-    sta $6500,x
-    sta $6600,x
-    sta $6700,x
-    sta $6800,x
-    sta $6900,x
-    sta $6a00,x
-    sta $6b00,x
-    sta $6c00,x
-    sta $6d00,x
-    sta $6e00,x
-    sta $6f00,x
-    sta $7000,x
-    sta $7100,x
-    sta $7200,x
-    sta $7300,x
-    sta $7400,x
-    sta $7500,x
-    sta $7600,x
-    sta $7700,x
-    sta $7800,x
-    sta $7900,x
-    sta $7a00,x
-    sta $7b00,x
-    sta $7c00,x
-    sta $7d00,x
-    sta $7e00,x
-    sta $7f00,x
-    sta $8000,x
-    sta $8100,x
-    sta $8200,x
-    sta $8300,x
-    sta $8400,x
-    sta $8500,x
-    sta $8600,x
-    sta $8700,x
-    sta $8800,x
-    sta $8900,x
-    sta $8a00,x
-    sta $8b00,x
-    sta $8c00,x
-    sta $8d00,x
-    sta $8e00,x
-    sta $8f00,x
-    sta $9000,x
-    sta $9100,x
-    sta $9200,x
-    sta $9300,x
-    sta $9400,x
-    sta $9500,x
-    sta $9600,x
-    sta $9700,x
-    sta $9800,x
-    sta $9900,x
-    sta $9a00,x
-    sta $9b00,x
-    sta $9c00,x
-    sta $9d00,x
-    sta $9e00,x
-    sta $9f00,x
-    sta $a000,x
-    sta $a100,x
-    sta $a200,x
-    sta $a300,x
-    sta $a400,x
-    sta $a500,x
-    sta $a600,x
-    sta $a700,x
-    sta $a800,x
-    sta $a900,x
-    sta $aa00,x
-    sta $ab00,x
-    sta $ac00,x
-    sta $ad00,x
-    sta $ae00,x
-    sta $af00,x
-    sta $b000,x
-    sta $b100,x
-    sta $b200,x
-    sta $b300,x
-    sta $b400,x
-    sta $b500,x
-    sta $b600,x
-    sta $b700,x
-    sta $bc00,x
-    sta $bd00,x
-    sta $be00,x
-    sta $bf00,x
-    sta $e000,x
-    sta $e100,x
-    sta $e200,x
-    sta $e300,x
-    sta $e400,x
-    sta $e500,x
-    sta $e600,x
-    sta $e700,x
-    sta $e800,x
-    sta $e900,x
-    sta $ea00,x
-    sta $eb00,x
-    sta $ec00,x
-    sta $ed00,x
-    sta $ee00,x
-    sta $ef00,x
-    sta $f000,x
-    sta $f100,x
-    sta $f200,x
-    sta $f300,x
-    sta $f400,x
-    sta $f500,x
-    sta $f600,x
-    sta $f700,x
-    sta $f800,x
-    sta $f900,x
-    sta $fa00,x
-    sta $fb00,x
-    sta $fc00,x
-    sta $fd00,x
-    sta $fe00,x
-    sta $ff00,x
-    dex
-    cpx #255
-    bne nuller
-    jmp nuller1
-nuller:
-    jmp nuller0
-nuller1:
-    sei
+    sta part_lo
+    sta part_hi
 
     lda #$40 // rti
     sta $0900
@@ -966,8 +800,6 @@ nuller1:
     sta $fffa
     lda #>$0900
     sta $fffb
-
-    jsr $c90
 
 
 loop1:
@@ -1112,10 +944,18 @@ demo_init:
     ldx #0
     ldy #0
 
+    sei
+    lda #<short_irq
+    sta $fffe
+    lda #>short_irq
+    sta $ffff
+    lda #$7f
+    sta $dc0d
+    lda #$01
+    sta $d01a
 
-    ldx #<$c203
-    ldy #>$c203
-    jsr $c10 // music playroutine register
+    lda #255
+    sta $d012
 
     cli
 
@@ -1146,16 +986,10 @@ demo_init:
     lda #%00111011
     sta $d011
 
-    ldy #255
-    jsr wait
-    ldy #255
-    jsr wait
+    ldy #1
+    jsr waitforpart
 
 titlepics:
-    ldy #255
-    jsr wait
-    ldy #255
-    jsr wait
 
     lda #%00000000
     sta $d018
@@ -1166,12 +1000,8 @@ titlepics:
     lda #%01001000
     sta $d018
 
-    ldy #255
-    jsr wait
-    ldy #255
-    jsr wait
-    ldy #255
-    jsr wait
+    ldy #2
+    jsr waitforpart
 
     lda #%00000000
     sta $d018
@@ -1182,10 +1012,8 @@ titlepics:
     lda #%01001000
     sta $d018
 
-    ldy #255
-    jsr wait
-    ldy #255
-    jsr wait
+    ldy #3
+    jsr waitforpart
 
     lda #0
     sta $d020
@@ -1197,11 +1025,11 @@ titlepics:
 
 koalapic: // logoscene
 
-    ldx #32
-    ldy #32
-    jsr wait
 
     jsr $c90 // load from disk (bit,chr,d80)
+
+    ldy #4
+    jsr waitforpart
 
     lda #$d8
     sta $d016
@@ -1272,17 +1100,11 @@ koalaloop:
     inx
     bne koalaloop
 
-    ldx #200
-    ldy #200
-    jsr wait
-    ldx #200
-    ldy #200
-    jsr wait
+    ldy #5
+    jsr waitforpart
 
-    :centerwipeoutmc_trans(10)
+    :centerwipeoutmc_trans(3)
 
-    ldy #200
-    jsr wait
 
     ldx #50
 sprlogomove:
@@ -1307,15 +1129,13 @@ sprlogomove:
     sta $d00a
     sty $d00b
 
-    ldy #3
+    ldy #1
     jsr wait
 
     dex
     cpx #50-24
     bne sprlogomove
 
-    ldy #200
-    jsr wait
 
     lda #%00000000
     sta $d015
@@ -1323,7 +1143,7 @@ sprlogomove:
     lda #7
     sta $FA
 fade_screen1:
-    ldy #20
+    ldy #1
     jsr wait
     ldx $FA
     lda fade_border_tab,x
@@ -1481,10 +1301,13 @@ fade_border1:
     sta $d020
     sta $d021
 
-    ldy #32
-    jsr wait
 
-    SetHiresBitmapMode()
+    lda #%00111011
+    sta $d011
+
+    lda #%11001000
+    sta $d016
+
     SetScreenMemory(screen_memory - vic_base)
     SetBitmapAddress(bitmap_address - vic_base)
 
@@ -1493,24 +1316,18 @@ dithersandpics:
     copymem($9a00, $6000,32)
     copymem($8000, $5000,10)
 
-    ldx #250
-    ldy #250
-    jsr wait
-    ldx #250
-    ldy #250
-    jsr wait
+    ldy #8
+    jsr waitforpart
 
     jsr dithers
 afterdithers:
 
     jsr $c90 // load fox && broke
 
-    :centerwipein_trans(10)
+    :centerwipein_trans(3)
 
-
-    ldy #200
-    jsr wait
-
+    ldy #13
+    jsr waitforpart
 
     lda #0
     sta $f0
@@ -1524,36 +1341,30 @@ foxglitch:
     cmp #80
     bne foxglitch
 
+    ldy #15
+    jsr waitforpart
 
-    ldx #100
-    ldy #100
-    jsr wait
-
-    :centerwipeout_trans(10)
+    :centerwipeout_trans(3)
 
     copymem($8000,$9000,10)
     copymem($e000,$a000,32)
 
-    :centerwipein_trans(10)
+    :centerwipein_trans(3)
 
-    ldx #250
-    ldy #250
-    jsr wait
+    ldy #16
+    jsr waitforpart
 
-    :centerwipeout_trans(10)
+    :centerwipeout_trans(3)
 
     jsr $c90 // load spacebunny
 
     lda #0
     sta $d020
 
-    :centerwipein_trans(10)
+    ldy #17
+    jsr waitforpart
 
-    ldx #250
-    ldy #250
-    jsr wait
-
-    :centerwipeout_trans(10)
+    :centerwipein_trans(3)
 
     lda #0
     sta $d020
@@ -1564,10 +1375,10 @@ foxglitch:
     :copymem_eor($6000+320*20,$6000+320*20-1,5)
     */
 
-    ldx #100
-    ldy #100
-    jsr wait
+    ldy #19
+    jsr waitforpart
 
+    :centerwipeout_trans(3)
 
 bols:
     jmp partswitch
@@ -1677,10 +1488,8 @@ dithers:
     lda #%00011111
     sta $d015
 
-    ldy #255
-    jsr wait
-    ldy #128
-    jsr wait
+    ldy #10
+    jsr waitforpart
 
     lda #%00000000
     sta $d015
@@ -1694,10 +1503,8 @@ dithers:
     lda #%00011111
     sta $d015
 
-    ldy #255
-    jsr wait
-    ldy #128
-    jsr wait
+    ldy #11
+    jsr waitforpart
 
     lda #%00000000
     sta $d015
@@ -1711,10 +1518,8 @@ dithers:
     lda #%00011111
     sta $d015
 
-    ldy #255
-    jsr wait
-    ldy #128
-    jsr wait
+    ldy #12
+    jsr waitforpart
 
     lda #%00000000
     sta $d015
@@ -1724,21 +1529,21 @@ dithers:
 
     :copymem_eor($a000,$6000,32)
 
-    ldy #128
+    ldy #32
     jsr wait
 
     :FillScreenMemory($5000,(15<<4) + 0)
 
     :copymem_eor($8000,$6000,32)
 
-    ldy #128
+    ldy #32
     jsr wait
 
     :FillScreenMemory($5000,(12<<4) + 0)
 
     :copymem_eor($e000,$6000,32)
 
-    ldy #128
+    ldy #32
     jsr wait
 
     :FillScreenMemory($5000,(11<<4) + 0)
@@ -1800,6 +1605,12 @@ clear_y:
     }
 }
 
+waitforpart:
+    dey
+waiter0:
+    cpy part_hi
+    bcs waiter0
+    rts
 
 
 wait:
@@ -2090,6 +1901,26 @@ frame2:
 bolchars:
 .import binary "bolchars_flip.raw"
 
+
+.pc = $3f00
+short_irq:
+    sta restorea+1
+    stx restorex+1
+    sty restorey+1
+
+    inc $d019
+
+    inc part_lo
+    lda part_lo
+    bne no_part_hi_add
+    inc part_hi
+no_part_hi_add:
+
+    jsr $c203 // le musica
+restorea: lda #$00
+restorex: ldx #$00
+restorey: ldy #$00
+    rti
 
 .pc = $3ff0 "partswitch"
 partswitch:

@@ -1,3 +1,6 @@
+.var part_lo = $c1
+.var part_hi = $c2
+
 .macro FillBitmap(addr, value) {
     ldx #$00
     lda #value
@@ -215,6 +218,9 @@ part_init:
 
 bols:
     jsr $c90 // load colormap
+
+    ldy #$14
+    jsr waitforpart
 
     lda $d011
     eor #%00010000 // on
@@ -480,9 +486,6 @@ bolscroll:
     lda #0 // disable sprites
     sta $d015
 
-    ldy #255
-    jsr wait
-
 //    FillScreenMemory($4400,0)
 
     :copymem($4400,$4000,4)
@@ -521,10 +524,6 @@ bolfiller_x:
 
     bne bolfiller_y
 
-    ldy #255
-    ldx #255
-    jsr wait
-
 
     lda #<$6828
     sta $F9
@@ -551,27 +550,28 @@ bolfiller_x:
 // eye anim
     jsr $c90 // load eye data
 
+    ldy #$17
+    jsr waitforpart
 
-    ldy #255
-    jsr wait
+
     .for (var i = 0; i < 13; i++) {
         SetScreenMemory($4400+i*$400)
 
-        ldy #8
+        ldy #2
         jsr wait
     }  
 
-    ldy #255
-    jsr wait
+    ldy #$18
+    jsr waitforpart
+
+
     .for (var i = 1; i < 7; i++) {
         SetScreenMemory($4400+i*$400)
 
-        ldy #16
+        ldy #3
         jsr wait
     }  
 
-    ldy #255
-    jsr wait
 
 
     :copymem($5c00,$4400,4)
@@ -618,6 +618,9 @@ bolfilc3:
     sta $d018
 
     jsr $c90 // load color mask and scroller data
+
+    ldy #$1a
+    jsr waitforpart
 
     :copymem($6800,$4400,4)
     FillScreenMemory($4800,0)
@@ -721,9 +724,6 @@ no_finenull:
 
 boscroll_over:
 
-    ldx #100
-    ldy #100
-    jsr wait
 
     lda #%00011000 // 4400
     sta $d018
@@ -780,8 +780,9 @@ noEor2:
     sta $FD
     inc $FC
     inc $FA
-    lda $FA
-    cmp #20
+
+    ldy part_hi
+    cpy #$27
     beq nobols
 no_incflasheor2:
     sta $4400,x
@@ -801,10 +802,6 @@ no_incflasheor2:
 nobols:
 
 koalapic: // logoscene
-
-    ldx #32
-    ldy #32
-    jsr wait
 
     jsr $c90 // load from disk (bit,chr,d80)
 
@@ -830,17 +827,13 @@ koalaloop:
     inx
     bne koalaloop
 
-    ldx #200
-    ldy #200
-    jsr wait
-    ldx #200
-    ldy #200
-    jsr wait
+    ldy #$29
+    jsr waitforpart
 
-    :centerwipeoutmc_trans(10)
+    :centerwipeoutmc_trans(3)
 
-    ldy #100
-    jsr wait
+    ldy #$2a
+    jsr waitforpart
 
 borderopen:
     
@@ -1080,6 +1073,14 @@ bhitable:
     .byte $47,$47,$47,$47,$47,$47,$47
     .byte $48,$48,$48,$48,$48
 
+waitforpart:
+    dey
+
+waiter0:
+    cpy part_hi
+    bcs waiter0
+    rts
+
 wait:
 waiter1:
     lda #255
@@ -1105,6 +1106,12 @@ nextirq:
     sta restoreaa+1
     stx restorexa+1
     sty restoreya+1
+
+    inc part_lo
+    lda part_lo
+    bne no_part_hi_add
+    inc part_hi
+no_part_hi_add:
 
     jsr $c203 // le musica
 
