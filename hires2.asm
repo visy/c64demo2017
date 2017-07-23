@@ -217,8 +217,6 @@ part_init:
 
 
 bols:
-    jsr $c90 // load colormap
-
     ldy #$14
     jsr waitforpart
 

@@ -46,8 +46,6 @@ d_bune.bit		a000	2
 #second codeblock, goes to $f00
 demo2.prg		f00 	2
 sinedata.bin	ba00	2
-
-# bol part
 bolcolors.bin   d800!   
 
 # boleye
