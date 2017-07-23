@@ -217,13 +217,7 @@ stabilizedirq:
     copyloop:
 
         lda ($FB),y  // indirect index source memory address, starting at $00
-        clc
         adc $F2
-        cmp #38
-        bcs no_over
-        cmp #0
-        bcc no_over
-        //eor ($FD),y  // indirect index dest memory address, starting at $00
         sta ($FD),y  // indirect index dest memory address, starting at $00
 no_over:
         iny
@@ -234,6 +228,72 @@ no_over:
         bne copyloop // if we're not there yet, loop
 
     }
+
+    .macro copymem(src,dst,size) {
+        lda #<src // set our source memory address to copy from, $6000
+        sta $FB
+        lda #>src 
+        sta $FC
+        lda #<dst // set our destination memory to copy to, $5000
+        sta $FD 
+        lda #>dst
+        sta $FE
+
+        ldx #size // size of copy
+        ldy #$00
+
+    copyloop:
+
+        lda ($FB),y  // indirect index source memory address, starting at $00
+        sta ($FD),y  // indirect index dest memory address, starting at $00
+        iny
+        bne copyloop // loop until our dest goes over 255
+        inc $FC // increment high order source memory address
+        inc $FE // increment high order dest memory address
+        dex
+        bne copyloop // if we're not there yet, loop
+
+    }
+
+    .macro copymem_add(src,src2,dst,size) {
+        lda #<src // set our source memory address to copy from, $6000
+        clc
+        adc $F0
+        sta $FB
+        lda #>src 
+        sta $FC
+        lda #<src2 // set our source memory address to copy from, $6000
+        sta $F8
+        lda #>src2
+        sta $F9
+
+        lda #<dst // set our destination memory to copy to, $5000
+        sta $FD 
+        lda #>dst
+        sta $FE
+
+        ldx #size // size of copy
+        ldy #$00
+
+    copyloop:
+        lda ($F8),y  // indirect index source memory address, starting at $00
+        clc
+        adc $f3
+        sbc ($FB),y  // indirect index source memory address, starting at $00
+        cmp #32
+        bcs toobig
+        sta ($FD),y  // indirect index dest memory address, starting at $00
+toobig:
+        iny
+        bne copyloop // loop until our dest goes over 255
+        inc $F9 // increment high order source memory address
+        inc $FC // increment high order source memory address
+        inc $FE // increment high order dest memory address
+        dex
+        bne copyloop // if we're not there yet, loop
+
+    }
+
 
     .macro copymem_eor_short(src,dst,size) {
         lda #<src // set our source memory address to copy from, $6000
@@ -334,19 +394,26 @@ start:
 
     lda #%00001000
     sta $d016
-    lda #0
-    sta $F0
-    sta $F1
-    sta $F2
 
-    lda #30
-    sta $f2
-    FillScreenMemory($d800,7)
-    lda #9
+    FillScreenMemory($d800,1)
+    lda #0
     sta $d021
+
+
 loop:
-    copymem_inc($6400,$4400,4)
-    copymem_inc($6800,$4800,4)
+    lda #2
+    sta $F3
+    copymem_add(envmap,$6400,$5400,4)
+    copymem_add(envmap,$6800,$5800,4)
+    inc $F1
+    ldx $F1
+    lda sintab,x
+    lsr
+    adc #10
+    sta $F0
+    copymem($5400,$4400,4)
+    copymem($5800,$4800,4)
+
     jmp loop
 
 flipper:
@@ -356,30 +423,6 @@ short_irq:
     jsr music.play
     lda #$ff
     sta $d019   //ACK interrupt so it can be called again
-
-
-
-    inc $F0
-    lda $F0
-    cmp #32
-    bne no_inc
-    lda #0
-    sta $F0
-    inc $F1 
-/*
-    ldx $F1
-    lda sintab,x
-    lsr
-*/
-    dec $F2
-    lda $F2
-    cmp #240
-    bne no_reset_color
-    lda #30
-    sta $f2    
-
-no_reset_color:
-no_inc:
 
     lda flipper
     cmp #1
@@ -431,6 +474,18 @@ waiter1:
 *=music.location "Music"
 .fill music.size, music.getData(i)
 
+.pc = $8000 "envmap"
+envmap:
+    .for(var y=5;y<32;y++) {
+        .for(var x=0;x<40;x++) {
+            .var nx=(x-20)/20.0
+            .var ny=(y-20)/20
+            .var nz=1.0-sqrt(nx*nx+ny*ny)
+            .if (nz<=0) .byte 0
+            else .byte 8 * nz
+        }
+    }
+
 .pc = $c400  "sintab"
 sintab:
-    .fill 256, 13.5+22.5*(sin(toRadians(i*360/64))) // Generates a sine curve
+    .fill 256, 64+64.5*(sin(toRadians(i*360/128))) // Generates a sine curve

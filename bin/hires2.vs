@@ -9,7 +9,6 @@ al C:1691 .koalapic
 al C:1334 .bolfiller
 al C:3f1d .restoreya
 al C:12db .bolscroll
-al C:3fc2 .waitforrasters2
 al C:10b0 .bolerase_loopx
 al C:12bf .bolerase_looper
 al C:16af .koalaloop
@@ -30,7 +29,7 @@ al C:15a0 .copy_done
 al C:1620 .ranbyteols
 al C:312e .frame
 al C:3121 .wait
-al C:3fc7 .partswitch
+al C:3fc0 .partswitch
 al C:3089 .restorey
 al C:3087 .restorex
 al C:30e9 .blotable
@@ -61,7 +60,7 @@ al C:15fd .bolbuf1
 al C:1590 .bol_copyloop_target
 al C:15cc .do_offsetting
 al C:3011 .no_part_hi_add2
-al C:3fd4 .partswitch2
+al C:3fcd .partswitch2
 al C:10a9 .nobf
 al C:3f1b .restorexa
 al C:1618 .no_bolbytelres

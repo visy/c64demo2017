@@ -1,13 +1,10 @@
-.label wait=$1014
+.label wait=$1058
 .label sintab=$c400
-.label short_irq=$fc2
-.label waiter1=$1014
+.label short_irq=$1020
+.label waiter1=$1058
 .label start=$f00
-.label show_offsetted=$ff8
-.label no_reset_color=$fe4
-.label flipper=$fc1
-.label do_flipper=$1002
-.label loop=$f64 {
-}
-.label no_resetflip=$1011
-.label no_inc=$fe4
+.label show_offsetted=$103c
+.label flipper=$101f
+.label do_flipper=$1046
+.label loop=$f58
+.label no_resetflip=$1055

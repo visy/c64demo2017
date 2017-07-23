@@ -1127,11 +1127,6 @@ restoreya: ldy #$00
     rti
 
 .pc = $3fc0 "partswitch"
-    lda #255
-waitforrasters2:
-    cmp $d012
-    bne waitforrasters2
-
 partswitch:
     lda #<nextirq
     sta $fffe

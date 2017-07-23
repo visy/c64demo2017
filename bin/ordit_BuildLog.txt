@@ -9,11 +9,12 @@ Memory Map
 Default-segment:
   $0801-$080c Basic
   $080e-$080d Basic End
-  $0f00-$1020 democode
+  $0f00-$1064 democode
   $5000-$51fe Unnamed
   $6400-$67e7 Unnamed
   $6800-$6be7 Unnamed
   $7040-$7868 Music
+  $8000-$8437 envmap
   $c400-$c4ff sintab
 
 Writing prg file: /Users/visy/dev/kick/hires2/bin/ordit_Compiled.prg

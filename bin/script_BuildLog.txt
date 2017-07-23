@@ -1,5 +1,5 @@
 parsing
-Got 76 errors while executing:
+Got 78 errors while executing:
   (/Users/visy/dev/kick/hires2/script 1:2) Token must be an identifer
   (/Users/visy/dev/kick/hires2/script 2:2) Token must be an identifer
   (/Users/visy/dev/kick/hires2/script 3:2) Token must be an identifer

@@ -78,12 +78,16 @@ creditsprites.raw 	4000 	0
 credits.bit
 credits.clr
 
+# ordered dither + envmapping
 demo2a.prg	f00		2
 orditchars.bin 	5000 	2
 orditpic1.bin 	6400
 orditpic2.bin 	6800
 charscrollvic.bin 	a000	2
 endscroller.bin		
+
+envmap.bin 		9000 	2
+orditsin.bin 	9500 	2
 
 # third codeblock
 # vicscreen with "end of the line"

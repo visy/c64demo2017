@@ -9,7 +9,6 @@
 .label bolfiller=$1334
 .label restoreya=$3f1d
 .label bolscroll=$12db
-.label waitforrasters2=$3fc2
 .label bolerase_looper=$12bf
 .label bp1=$30c5
 .label cont_boleor=$109b
@@ -29,7 +28,7 @@
 .label ranbyteols=$1620
 .label frame=$312e
 .label wait=$3121
-.label partswitch=$3fc7
+.label partswitch=$3fc0
 .label restorey=$3089
 .label restorex=$3087
 .label blotable=$30e9
@@ -59,7 +58,7 @@
 .label bol_copyloop_target=$1590
 .label do_offsetting=$15cc
 .label no_part_hi_add2=$3011
-.label partswitch2=$3fd4
+.label partswitch2=$3fcd
 .label nobf=$10a9
 .label restorexa=$3f1b
 .label no_bolbytelres=$1618

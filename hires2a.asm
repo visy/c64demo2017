@@ -205,6 +205,71 @@ stabilizedirq:
     bne !loop-
 }
 
+    .macro copymem_add(src,src2,dst,size) {
+        lda #<src // set our source memory address to copy from, $6000
+        clc
+        adc $E0
+        sta $FB
+        lda #>src 
+        sta $FC
+        lda #<src2 // set our source memory address to copy from, $6000
+        sta $F8
+        lda #>src2
+        sta $F9
+
+        lda #<dst // set our destination memory to copy to, $5000
+        sta $FD 
+        lda #>dst
+        sta $FE
+
+        ldx #size // size of copy
+        ldy #$00
+
+    copyloop:
+        lda ($F8),y  // indirect index source memory address, starting at $00
+        clc
+        adc $E3
+        sbc ($FB),y  // indirect index source memory address, starting at $00
+        cmp #32
+        bcs toobig
+        sta ($FD),y  // indirect index dest memory address, starting at $00
+toobig:
+        iny
+        bne copyloop // loop until our dest goes over 255
+        inc $F9 // increment high order source memory address
+        inc $FC // increment high order source memory address
+        inc $FE // increment high order dest memory address
+        dex
+        bne copyloop // if we're not there yet, loop
+
+    }
+
+    .macro copymem(src,dst,size) {
+        lda #<src // set our source memory address to copy from, $6000
+        sta $FB
+        lda #>src 
+        sta $FC
+        lda #<dst // set our destination memory to copy to, $5000
+        sta $FD 
+        lda #>dst
+        sta $FE
+
+        ldx #size // size of copy
+        ldy #$00
+
+    copyloop:
+
+        lda ($FB),y  // indirect index source memory address, starting at $00
+        sta ($FD),y  // indirect index dest memory address, starting at $00
+        iny
+        bne copyloop // loop until our dest goes over 255
+        inc $FC // increment high order source memory address
+        inc $FE // increment high order dest memory address
+        dex
+        bne copyloop // if we're not there yet, loop
+
+    }
+
     .macro copymem_inc(src,dst,size) {
         lda #<src // set our source memory address to copy from, $6000
         sta $FB
@@ -327,15 +392,39 @@ start:
     lda #%00010000
     sta $d011
 
-
-
     lda #%00001000
     sta $d016
+
+    jsr $c90 // load envmap + sine
 
     FillScreenMemory($d800,1)
     lda #0
     sta $d021
-loop:
+    lda #0
+    sta $E1
+
+loop_envmap:
+    lda #2
+    sta $E3
+    inc $E1
+    ldx $E1
+    lda $9500,x
+    lsr
+    adc #10
+    sta $E0
+    copymem_add($9000,$6400,$5400,4)
+    copymem_add($9000,$6800,$5800,4)
+    copymem($5400,$4400,4)
+    copymem($5800,$4800,4)
+
+    lda part_hi
+    cmp #$31
+    beq loop_fadetowhite
+    jmp loop_envmap
+
+
+
+loop_fadetowhite:
     copymem_inc($6400,$4400,4)
     copymem_inc($6800,$4800,4)
     lda $F2
@@ -345,7 +434,7 @@ loop:
     jmp partswitch
 no_reset_color0:
 
-    jmp loop
+    jmp loop_fadetowhite
 
 flipper:
     .byte 0
@@ -363,6 +452,9 @@ short_irq:
     inc part_hi
 no_part_hi_add:
 
+    lda part_hi
+    cmp #$31
+    bcc no_inc
     inc $F0
     lda $F0
     cmp #7
@@ -450,10 +542,6 @@ restoreya: ldy #$00
 .pc = $3fc0 "partswitch"
 
 partswitch:
-    nop
-    nop
-    ldy #64
-    jsr wait
     lda #<nextirq
     sta $fffe
     lda #>nextirq
