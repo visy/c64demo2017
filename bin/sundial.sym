@@ -1,0 +1,6 @@
+.label wait=$11f1
+.label waiter1=$11f1
+.label start=$f00
+.label part_init=$11e4
+.label fadetab=$11fe
+.label loopforever=$11ee

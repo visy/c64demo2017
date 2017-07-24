@@ -1,7 +1,3 @@
-
-.var part_lo = $c1
-.var part_hi = $c2
-
 .macro StabilizeRaster() {
     //
     // Register a new irq handler for the next line.
@@ -66,8 +62,8 @@ stabilizedirq:
 
 .macro FillBitmap(addr, value) {
     ldx #$00
-    lda #value
 !loop:
+    lda #0
     sta addr,x
     sta (addr + $100),x
     sta (addr + $200),x
@@ -100,11 +96,14 @@ stabilizedirq:
     sta (addr + $1d00),x
     sta (addr + $1e00),x
     sta (addr + $1f00),x
+    ldy #1
+    jsr wait
     dex
     bne !loop-
 }
 
-    .macro PNGtoHIRES(PNGpicture,BMPData,ColData) {
+
+    .macro PNGtoHIRES_single(PNGpicture,BMPData,ColData,color,bgcolor) {
 
         .var Graphics = LoadPicture(PNGpicture)
 
@@ -146,23 +145,21 @@ stabilizedirq:
         .eval ColorTable.put(C64L_blue,14)
         .eval ColorTable.put(C64L_grey,15)
 
-
         .pc = BMPData "Hires Bitmap"
 
         .var ScreenMem = List()
         .for (var Line = 0 ; Line < 200 ; Line = Line + 8) {
             .for (var Block = 0 ; Block < 320 ; Block=Block+8) {
                 .var Coll1 = Graphics.getPixel(Block,Line)
-                .var Coll2 = 0
+                .var Coll2 = bgcolor
                 .for (var j = 0 ; j < 8 ; j++ ) {
                     .var ByteValue = 0
                     .for (var i = 0 ; i < 8 ; i++ ) {
-                        .if (Graphics.getPixel(Block,Line) != Graphics.getPixel(Block+i,Line+j)) .eval ByteValue = ByteValue + pow(2,7-i)
-                        .if (Graphics.getPixel(Block,Line) != Graphics.getPixel(Block+i,Line+j)) .eval Coll2 = Graphics.getPixel(Block+i,Line+j)
+                        .if (Graphics.getPixel(Block+i,Line+j) != 0) .eval ByteValue = ByteValue + pow(2,7-i)
                     }
                 .byte ByteValue
                 }
-            .var BlockColor = [ColorTable.get(Coll2)]*16+ColorTable.get(Coll1)
+            .var BlockColor = bgcolor*16+color
             .eval ScreenMem.add(BlockColor)
             }
         }
@@ -172,6 +169,69 @@ stabilizedirq:
             .byte ScreenMem.get(i)
         }
     }
+
+   .macro PNGtoHIRES_single_quote(PNGpicture,BMPData,color,bgcolor) {
+
+        .var Graphics = LoadPicture(PNGpicture)
+
+        // Graphics RGB Colors. Must be adapted to the graphics
+
+        .const C64Black   = 000 * 65536 + 000 * 256 + 000   
+        .const C64White   = 255 * 65536 + 255 * 256 + 255
+        .const C64Red     = 104 * 65536 + 055 * 256 + 043
+        .const C64Cyan    = 112 * 65536 + 164 * 256 + 178
+        .const C64Purple  = 111 * 65536 + 061 * 256 + 134
+        .const C64Green   = 088 * 65536 + 141 * 256 + 067
+        .const C64Blue    = 053 * 65536 + 040 * 256 + 121 
+        .const C64Yellow  = 184 * 65536 + 199 * 256 + 111
+        .const C64L_brown = 111 * 65536 + 079 * 256 + 037
+        .const C64D_brown = 067 * 65536 + 057 * 256 + 000
+        .const C64L_red   = 154 * 65536 + 103 * 256 + 089
+        .const C64D_grey  = 068 * 65536 + 068 * 256 + 068
+        .const C64Grey    = 108 * 65536 + 108 * 256 + 108
+        .const C64L_green = 154 * 65536 + 210 * 256 + 132
+        .const C64L_blue  = 108 * 65536 + 094 * 256 + 181
+        .const C64L_grey  = 149 * 65536 + 149 * 256 + 149
+
+        // Add the colors neatly into a Hashtable for easy lookup reference
+        .var ColorTable = Hashtable()
+        .eval ColorTable.put(C64Black,0)
+        .eval ColorTable.put(C64White,1)
+        .eval ColorTable.put(C64Red,2)
+        .eval ColorTable.put(C64Cyan,3)
+        .eval ColorTable.put(C64Purple,4)
+        .eval ColorTable.put(C64Green,5)
+        .eval ColorTable.put(C64Blue,6)
+        .eval ColorTable.put(C64Yellow,7)
+        .eval ColorTable.put(C64L_brown,8)
+        .eval ColorTable.put(C64D_brown,9)
+        .eval ColorTable.put(C64L_red,10)
+        .eval ColorTable.put(C64D_grey,11)
+        .eval ColorTable.put(C64Grey,12)
+        .eval ColorTable.put(C64L_green,13)
+        .eval ColorTable.put(C64L_blue,14)
+        .eval ColorTable.put(C64L_grey,15)
+
+        .pc = BMPData "Hires Bitmap"
+
+        .var ScreenMem = List()
+        .for (var Line = 0 ; Line < 24 ; Line = Line + 8) {
+            .for (var Block = 0 ; Block < 320 ; Block=Block+8) {
+                .var Coll1 = Graphics.getPixel(Block,Line)
+                .var Coll2 = bgcolor
+                .for (var j = 0 ; j < 8 ; j++ ) {
+                    .var ByteValue = 0
+                    .for (var i = 0 ; i < 8 ; i++ ) {
+                        .if (Graphics.getPixel(Block+i,Line+j) != 0) .eval ByteValue = ByteValue + pow(2,7-i)
+                    }
+                .byte ByteValue
+                }
+            .var BlockColor = bgcolor*16+color
+            .eval ScreenMem.add(BlockColor)
+            }
+        }
+    }
+
 
 .macro SetScreenMemory(address) {
 
@@ -205,44 +265,6 @@ stabilizedirq:
     bne !loop-
 }
 
-    .macro copymem_add(src,src2,dst,size) {
-        lda #<src // set our source memory address to copy from, $6000
-        clc
-        adc $E0
-        sta $FB
-        lda #>src 
-        sta $FC
-        lda #<src2 // set our source memory address to copy from, $6000
-        sta $F8
-        lda #>src2
-        sta $F9
-
-        lda #<dst // set our destination memory to copy to, $5000
-        sta $FD 
-        lda #>dst
-        sta $FE
-
-        ldx #size // size of copy
-        ldy #$00
-
-    copyloop:
-        lda ($F8),y  // indirect index source memory address, starting at $00
-        clc
-        adc $E3
-        sbc ($FB),y  // indirect index source memory address, starting at $00
-        cmp #32
-        bcs toobig
-        sta ($FD),y  // indirect index dest memory address, starting at $00
-toobig:
-        iny
-        bne copyloop // loop until our dest goes over 255
-        inc $F9 // increment high order source memory address
-        inc $FC // increment high order source memory address
-        inc $FE // increment high order dest memory address
-        dex
-        bne copyloop // if we're not there yet, loop
-
-    }
 
     .macro copymem(src,dst,size) {
         lda #<src // set our source memory address to copy from, $6000
@@ -260,9 +282,11 @@ toobig:
     copyloop:
 
         lda ($FB),y  // indirect index source memory address, starting at $00
+        //eor ($FD),y  // indirect index dest memory address, starting at $00
         sta ($FD),y  // indirect index dest memory address, starting at $00
         iny
         bne copyloop // loop until our dest goes over 255
+
         inc $FC // increment high order source memory address
         inc $FE // increment high order dest memory address
         dex
@@ -270,7 +294,7 @@ toobig:
 
     }
 
-    .macro copymem_inc(src,dst,size) {
+    .macro copymem_color(src,dst,size) {
         lda #<src // set our source memory address to copy from, $6000
         sta $FB
         lda #>src 
@@ -286,21 +310,25 @@ toobig:
     copyloop:
 
         lda ($FB),y  // indirect index source memory address, starting at $00
-        clc
-        sbc $F2
-        cmp #38
-        bcs no_over
-        cmp #0
-        bcc no_over
         //eor ($FD),y  // indirect index dest memory address, starting at $00
         sta ($FD),y  // indirect index dest memory address, starting at $00
-no_over:
         iny
         bne copyloop // loop until our dest goes over 255
+
         inc $FC // increment high order source memory address
         inc $FE // increment high order dest memory address
         dex
         bne copyloop // if we're not there yet, loop
+
+        ldx #0
+    copyloop2:
+
+        lda ($FB),y  // indirect index source memory address, starting at $00
+        //eor ($FD),y  // indirect index dest memory address, starting at $00
+        sta ($FD),y  // indirect index dest memory address, starting at $00
+        iny
+        cpy #$e8
+        bne copyloop2 // loop until our dest goes over 255
 
     }
 
@@ -361,325 +389,218 @@ no_over:
 
     }
 
+    .macro setsprites() {
+        lda #24
+        sta $F1
+        ldy #0
+        ldx #0
+    possprites:
+        lda $f1
+        sta $d000,x
+        lda #226
+        sta $d001,x
+        lda #0
+        sta $d027,y
+        lda #168
+        sta $63f8,y
+        lda $f1
+        clc
+        adc #48
+        sta $f1
+        inx
+        inx  
+        iny
+        cpy #8
+        bne possprites
+        lda #8
+        sta $d00e
 
-.plugin "se.triad.kickass.CruncherPlugins"
+    }
+
+    .macro revealsprites() {
+    ldx #0
+    stx $F0
+possprites0_:
+    ldx #0
+    ldy #1
+    jsr wait
+
+possprites0:
+    lda #226
+    clc
+    adc $F0
+    sta $d001,x
+    inx  
+    inx  
+    cpx #16
+    bne possprites0
+
+    inc $F0
+    lda $F0
+    cmp #25
+    bne possprites0_
+
+    }
+
+    .macro fadetext() {
+
+    lda #0
+    sta $F0
+    ldy #0
+coltest0:
+    ldx #255-16
+    ldy #1
+    jsr wait
+coltest:
+
+    lda $6370,x
+    cmp #1
+    beq no_alter
+    ldy $F0
+    lda fadetab,y
+    sta $6370,x
+no_alter:
+    dex
+    cpx #255
+    bne coltest
+    inc $F0
+    lda $F0
+    cmp #8
+    bne coltest0
+
+    }
+
+    .macro fadescreen() {
+
+    lda #0
+    sta $F0
+    ldy #0
+coltest0:
+    ldx #0
+    ldy #1
+    jsr wait
+coltest:
+
+    lda $6000,x
+    cmp #1
+    beq no_alter
+    ldy $F0
+    lda fadetab,y
+    sta $6000,x
+    sta $6100,x
+    sta $6200,x
+    cpx #32+80
+    bcs no_alter
+    sta $6300,x
+no_alter:
+    inx
+    cpx #0
+    bne coltest
+    inc $F0
+    lda $F0
+    cmp #8
+    bne coltest0
+
+    }
 
  .var music = LoadSid("intromusre.sid")
 
-.pc = $f00 "democode"
+.plugin "se.triad.kickass.CruncherPlugins"
+
+BasicUpstart2(start)
+.pc = $0f00 "democode"
+
 start:
-
-    lda #0
-    sta $F0
-    sta $F1
-    lda #30
-    sta $F2
-
-    sei
-    lda #<short_irq
-    sta $fffe
-    lda #>short_irq
-    sta $ffff
-    lda #$ff
-    sta $d012
-
-    cli
+    lda #2
+    sta $dd00
 
     lda #0
     sta $d020
-    sta $d021
-
-    lda #%00010000
+    lda #%00111011
     sta $d011
+    lda #%10000000 // bitmap at $4000, screen at $6000
+    sta $d018
 
-    lda #%00001000
-    sta $d016
+    lda #%11111111
+    sta $d015
 
-    FillScreenMemory($d800,1)
-    lda #0
-    sta $d021
-    lda #0
-    sta $E1
+    sta $d017
+    sta $d01d
 
-loop_envmap:
-    lda #2
-    sta $E3
-    // load 6400, sub envmap, store 5400
+    lda #%11000000
+    sta $d010
 
-    lda #<$6400
-    sta lx1+1
-    lda #>$6400
-    sta lx1+2
+    setsprites()
 
-    lda #<$9000
-    adc $f0
-    sta lx2+1
-    lda #>$9000
-    sta lx2+2
+    copymem($8400,$5c00-128,4)
+    copymem_color($7000,$6000,3)
 
-    lda #<$4400
-    sta lx3+1
-    lda #>$4400
-    sta lx3+2
+    ldy #255
+    jsr wait
 
-    ldy #0
-xl:
-    ldx #0
-xl1:
+    revealsprites()
 
-lx1:
-    lda $6400,x
-    clc 
-lx2:
-    sbc $9000,x
-    cmp #64
-    bcs no_x1
-lx3:
-    sta $4400,x
-no_x1:
-    inx
-    cpx #0
-    bne xl1
+    ldy #255
+    jsr wait
+    ldy #255
+    jsr wait
 
-    inc lx1+2
-    inc lx2+2
-    inc lx3+2
+    fadetext()
 
-    iny
-    cpy #4
-    bne xl
+    ldy #255
+    jsr wait
 
-    // load 6800, sub envmap, store 5800
+    setsprites()
+    copymem_color($7000,$6000,3)
+    copymem($8800,$5c00-128,4)
 
-    lda #<$6800
-    sta lx21+1
-    lda #>$6800
-    sta lx21+2
+    revealsprites()
 
-    lda #<$9000
-    adc $f0
-    sta lx22+1
-    lda #>$9000
-    sta lx22+2
+    ldy #255
+    jsr wait
+    ldy #255
+    jsr wait
 
-    lda #<$4800
-    sta lx23+1
-    lda #>$4800
-    sta lx23+2
+    fadetext()
 
-    ldy #0
-x2l:
-    ldx #0
-x2l1:
+    ldy #255
+    jsr wait
+    setsprites()
+    copymem_color($7000,$6000,3)
+    copymem($8000,$5c00-128,4)
 
-lx21:
-    lda $6800,x
-    clc 
-lx22:
-    sbc $9000,x
-    cmp #64
-    bcs no_x21
-lx23:
-    sta $4800,x
-no_x21:
-    inx
-    cpx #0
-    bne x2l1
+    revealsprites()
 
-    inc lx21+2
-    inc lx22+2
-    inc lx23+2
+    ldy #255
+    jsr wait
+    ldy #255
+    jsr wait
 
-    iny
-    cpy #4
-    bne x2l
-    
-    inc $F1
-    ldx $f1
-    lda $9500,x
-    lsr
-    adc #10
-    sta $F0
+    fadetext()
 
+    ldy #255
+    jsr wait
 
-    lda part_hi
-    cmp #$33
-    bcs loop_fadetowhite11
-    jmp loop_envmap
-
-
-loop_fadetowhite11:
-    lda #30
-    sta $F2
-    lda #0
-    sta $f0
-
-
-loop_fadetowhite:
- 
-    lda #<$6400
-    sta flx1+1
-    lda #>$6400
-    sta flx1+2
-
-    lda #<$4400
-    sta flx3+1
-    lda #>$4400
-    sta flx3+2
-
-    ldy #0
-fxl:
-    ldx #0
-fxl1:
-
-flx1:
-    lda $6400,x
-    clc 
-    sbc $F2
-    cmp #38
-    bcs no_over1
-    cmp #0
-    bcc no_over1
-flx3:
-    sta $4400,x
-no_over1:
-fno_x1:
-    inx
-    cpx #0
-    bne fxl1
-
-    inc flx1+2
-    inc flx3+2
-
-    iny
-    cpy #4
-    bne fxl
-
-    // load 6800, sub envmap, store 5800
-
-    lda #<$6800
-    sta flx21+1
-    lda #>$6800
-    sta flx21+2
-
-    lda #<$4800
-    sta flx23+1
-    lda #>$4800
-    sta flx23+2
-
-    ldy #0
-fx2l:
-    ldx #0
-fx2l1:
-
-flx21:
-    lda $6800,x
-    clc 
-    sbc $F2
-    cmp #38
-    bcs no_over2
-    cmp #0
-    bcc no_over2
-
-flx23:
-    sta $4800,x
-no_over2:
-fno_x21:
-    inx
-    cpx #0
-    bne fx2l1
-
-    inc flx21+2
-    inc flx23+2
-
-    iny
-    cpy #4
-    bne fx2l
-
-
-    lda $F2
-    cmp #210
-    bne no_reset_color0
-
-    jmp partswitch
-no_reset_color0:
-
-    jmp loop_fadetowhite
-
-flipper:
-    .byte 0
-
-short_irq:
-    sta restorea+1
-    stx restorex+1
-    sty restorey+1
-
-    inc $d019
-
-    inc part_lo
-    lda part_lo
-    bne no_part_hi_add
-    inc part_hi
-no_part_hi_add:
-
-    lda part_hi
-    cmp #$31
-    bcc no_inc
-    inc $F0
-    lda $F0
-    cmp #4
-    bne no_inc
-    lda #0
-    sta $F0
+    fadescreen()
+part_init:
 /*
-    ldx $F1
-    lda sintab,x
-    lsr
+    ldx #0
+    ldy #0
+    lda #music.startSong-1
+    jsr music.init
 */
-    dec $F2
-no_inc:
-
-    lda flipper
-    cmp #1
-    beq show_offsetted
-    lda #%00010100 // $400
-    sta $d018
-    lda #%00000000
-    sta $d016    
-    jmp do_flipper
-show_offsetted:
-    lda #%00100100 // $800
-    sta $d018
-    lda #%00000100
-    sta $d016
-do_flipper:
-    inc flipper
-    lda flipper
-    cmp #2
-    bne no_resetflip
-    lda #0
-    sta flipper
-no_resetflip:
-
-    jsr $c203 // le musica
-restorea: lda #$00
-restorex: ldx #$00
-restorey: ldy #$00
-    rti
+    bit $d011 // Wait for new frame
+    bpl *-3
+    bit $d011
+    bmi *-3
 
 
-waitforpart:
-    dey
-
-waiter0:
-    cpy part_hi
-    bcs waiter0
-    rts
-
+loopforever:
+    jmp loopforever
 
 wait:
 waiter1:
-    lda #64
+    lda #255
     cmp $D012
     bne *-3
     dey
@@ -687,35 +608,16 @@ waiter1:
     bne wait
     rts
 
-.pc = $3f00 "next part irq"
-nextirq:
-    sta restoreaa+1
-    stx restorexa+1
-    sty restoreya+1
+fadetab:
+.byte $01<<4, $0d<<4, $03<<4, $0c<<4, $04<<4, $02<<4, $09<<4, $00<<4
 
-    inc part_lo
-    lda part_lo
-    bne no_part_hi_add2
-    inc part_hi
-no_part_hi_add2:
+.pc = $6a00
 
-    jsr $c203 // le musica
+.fill 256,255 
 
-    lda #$ff
-    sta $d019
-restoreaa: lda #$00
-restorexa: ldx #$00
-restoreya: ldy #$00
-    rti
+:PNGtoHIRES_single("sundial.png",$4000,$7000,0,1)
+:PNGtoHIRES_single_quote("sunquote1.png",$8000,0,1)
+:PNGtoHIRES_single_quote("sunquote2.png",$8400,0,1)
+:PNGtoHIRES_single_quote("sunquote3.png",$8800,0,1)
 
-.pc = $3fc0 "partswitch"
 
-partswitch:
-    lda #<nextirq
-    sta $fffe
-    lda #>nextirq
-    sta $ffff
-
-    jsr $c90 // load part2 -> hires3.asm
-partswitch2:
-    jmp $f00

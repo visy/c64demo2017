@@ -68,10 +68,8 @@ boleye.bin		7400	32CA	3E8
 bolgreets.bin	6800	2
 bolcolor2.bin   d800!   
 
-#mc terminal pic
-terminal.bit
-terminal.chr
-terminal.d80
+# sundial data
+sundial.bin
 
 # top border sprites & hires pic
 creditsprites.raw 	4000 	0

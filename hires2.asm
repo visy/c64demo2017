@@ -209,6 +209,157 @@
 
     }
 
+    .macro copymem_color(src,dst,size) {
+        lda #<src // set our source memory address to copy from, $6000
+        sta $FB
+        lda #>src 
+        sta $FC
+        lda #<dst // set our destination memory to copy to, $5000
+        sta $FD 
+        lda #>dst
+        sta $FE
+
+        ldx #size // size of copy
+        ldy #$00
+
+    copyloop:
+
+        lda ($FB),y  // indirect index source memory address, starting at $00
+        //eor ($FD),y  // indirect index dest memory address, starting at $00
+        sta ($FD),y  // indirect index dest memory address, starting at $00
+        iny
+        bne copyloop // loop until our dest goes over 255
+
+        inc $FC // increment high order source memory address
+        inc $FE // increment high order dest memory address
+        dex
+        bne copyloop // if we're not there yet, loop
+
+        ldx #0
+    copyloop2:
+
+        lda ($FB),y  // indirect index source memory address, starting at $00
+        //eor ($FD),y  // indirect index dest memory address, starting at $00
+        sta ($FD),y  // indirect index dest memory address, starting at $00
+        iny
+        cpy #$e8
+        bne copyloop2 // loop until our dest goes over 255
+
+    }
+
+    .macro setsprites() {
+        lda #24
+        sta $F1
+        ldy #0
+        ldx #0
+    possprites:
+        lda $f1
+        sta $d000,x
+        lda #226
+        sta $d001,x
+        lda #0
+        sta $d027,y
+        lda #168
+        sta $63f8,y
+        lda $f1
+        clc
+        adc #48
+        sta $f1
+        inx
+        inx  
+        iny
+        cpy #8
+        bne possprites
+        lda #8
+        sta $d00e
+
+    }
+
+    .macro revealsprites() {
+    ldx #0
+    stx $F0
+possprites0_:
+    ldx #0
+    ldy #1
+    jsr wait
+
+possprites0:
+    lda #226
+    clc
+    adc $F0
+    sta $d001,x
+    inx  
+    inx  
+    cpx #16
+    bne possprites0
+
+    inc $F0
+    lda $F0
+    cmp #25
+    bne possprites0_
+
+    }
+
+    .macro fadetext() {
+
+    lda #0
+    sta $F0
+    ldy #0
+coltest0:
+    ldx #255-16
+    ldy #1
+    jsr wait
+coltest:
+
+    lda $6370,x
+    cmp #1
+    beq no_alter
+    ldy $F0
+    lda fadetab2,y
+    sta $6370,x
+no_alter:
+    dex
+    cpx #255
+    bne coltest
+    inc $F0
+    lda $F0
+    cmp #8
+    bne coltest0
+
+    }
+
+    .macro fadescreen() {
+
+    lda #0
+    sta $F0
+    ldy #0
+coltest0:
+    ldx #0
+    ldy #1
+    jsr wait
+coltest:
+
+    lda $6000,x
+    cmp #1
+    beq no_alter
+    ldy $F0
+    lda fadetab2,y
+    sta $6000,x
+    sta $6100,x
+    sta $6200,x
+    cpx #32+80
+    bcs no_alter
+    sta $6300,x
+no_alter:
+    inx
+    cpx #0
+    bne coltest
+    inc $F0
+    lda $F0
+    cmp #8
+    bne coltest0
+
+    }
 
 
 .pc = $f00 "democode"
@@ -799,38 +950,85 @@ no_incflasheor2:
 
 nobols:
 
-koalapic: // logoscene
+sundial:
+    jsr $c90 // load sundial data
 
-    jsr $c90 // load from disk (bit,chr,d80)
-
-    lda #$d8
-    sta $d016
-    lda #$19
-    sta $d018
-    lda #$3b
-    sta $d011
     lda #0
     sta $d020
-    lda #0 // bgcolor
-    sta $d021
+    lda #%00111011
+    sta $d011
+    lda #%10000000 // bitmap at $4000, screen at $6000
+    sta $d018
+
+    lda #%11111111
+    sta $d015
+
+    sta $d017
+    sta $d01d
+
+    lda #%11000000
+    sta $d010
+
+    setsprites()
+
+    copymem($8400,$5c00-128,4)
+    copymem_color($7000,$6000,3)
+
+    ldy #255
+    jsr wait
+
+    revealsprites()
+
+    ldy #255
+    jsr wait
+    ldy #255
+    jsr wait
+
+    fadetext()
+
+    ldy #255
+    jsr wait
+
+    setsprites()
+    copymem_color($7000,$6000,3)
+    copymem($8800,$5c00-128,4)
+
+    revealsprites()
+
+    ldy #255
+    jsr wait
+    ldy #255
+    jsr wait
+
+    fadetext()
+
+    ldy #255
+    jsr wait
+    setsprites()
+    copymem_color($7000,$6000,3)
+    copymem($8000,$5c00-128,4)
+
+    revealsprites()
+
+    ldy #255
+    jsr wait
+    ldy #255
+    jsr wait
+
+    fadetext()
+
+    ldy #255
+    jsr wait
+
+    fadescreen()
 
 
-    ldx #0
-
-koalaloop:
-    .for (var i=0; i<4; i++) {
-        lda $9600+i*$100,x    // copy color to color ram
-        sta $d800+i*$100,x
-    }
-    inx
-    bne koalaloop
-
-    ldy #$29
+    ldy #$2a
     jsr waitforpart
 
     :centerwipeoutmc_trans(3)
 
-    ldy #$2a
+    ldy #$2b
     jsr waitforpart
 
 borderopen:
@@ -838,6 +1036,9 @@ borderopen:
     jsr $c90 // load creditsprites
     lda #0
     sta frame
+
+    lda #$00
+    sta $d017
 
     lda #%00111011
     sta $d011
@@ -897,14 +1098,23 @@ waitforrasters:
     sta $ffff
     cli
 
-    ldy #$2d
+    ldy #$2e
     jsr waitforpart
 
 go_partswitch:
+    FillBitmap($4000,0)
+    FillBitmap($5000,0)
+    FillBitmap($6000,0)
+    FillBitmap($7000,0)
+    FillBitmap($8000,0)
+    FillBitmap($9000,0)
+
     jmp partswitch
 
 fadetab:
     .byte $01,$0d,$07,$0f,$03,$05,$0a,$0c,$0e,$08,$04,$02,$0b,$06,$09,$00,$09,$06,$0b,$02,$04,$08,$0e,$0c,$0a,$05,$03,$0f,$07,$0d
+fadetab2:
+.byte $01<<4, $0d<<4, $03<<4, $0c<<4, $04<<4, $02<<4, $09<<4, $00<<4
 
 faders:
     .byte 0,1,2,3,4

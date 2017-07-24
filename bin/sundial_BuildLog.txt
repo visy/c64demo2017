@@ -1,0 +1,22 @@
+parsing
+flex pass 1
+flex pass 2
+flex pass 3
+Output pass
+
+Memory Map
+----------
+Default-segment:
+  $0801-$080c Basic
+  $080e-$080d Basic End
+  $0f00-$1205 democode
+  $4000-$5f3f Hires Bitmap
+  $6a00-$6aff Unnamed
+  $7000-$73e7 Hires Color Data
+  $8000-$83bf Hires Bitmap
+  $8400-$87bf Hires Bitmap
+  $8800-$8bbf Hires Bitmap
+
+Writing prg file: /Users/visy/dev/kick/hires2/bin/sundial_Compiled.prg
+Writing Vice symbol file: /Users/visy/dev/kick/hires2/bin/sundial.vs
+Writing Symbol file: bin/sundial.sym
