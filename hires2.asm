@@ -341,16 +341,34 @@ coltest:
 
     lda $6000,x
     cmp #1
-    beq no_alter
+    beq no_alter1
     ldy $F0
     lda fadetab2,y
     sta $6000,x
+no_alter1:
+    lda $6100,x
+    cmp #1
+    beq no_alter2
+    ldy $F0
+    lda fadetab2,y
     sta $6100,x
+no_alter2:
+    lda $6200,x
+    cmp #1
+    beq no_alter3
+    ldy $F0
+    lda fadetab2,y
     sta $6200,x
+no_alter3:
+    lda $6300,x
+    cmp #1
+    beq no_alter4
     cpx #32+80
-    bcs no_alter
+    bcs no_alter4
+    ldy $F0
+    lda fadetab2,y
     sta $6300,x
-no_alter:
+no_alter4:
     inx
     cpx #0
     bne coltest
@@ -1022,18 +1040,22 @@ sundial:
 
     fadescreen()
 
-
-    ldy #$2a
-    jsr waitforpart
-
-    :centerwipeoutmc_trans(3)
+    lda $d011
+    eor #%00010000 // off
+    sta $d011
 
     ldy #$2b
     jsr waitforpart
 
+
 borderopen:
     
     jsr $c90 // load creditsprites
+
+    lda $d011
+    eor #%00010000 // on
+    sta $d011
+
     lda #0
     sta frame
 
