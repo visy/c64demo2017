@@ -14,7 +14,7 @@
 .label cont_boleor=$109b
 .label borderopen=$19a4
 .label bp2=$30ce
-.label faders=$1cc3
+.label faders=$1cc0
 .label nobols=$1691
 .label do_fine=$15bb
 .label restoreaa=$3f19
@@ -42,18 +42,18 @@
 .label bol_copyloop_x=$158d
 .label fillloop2=$162a
 .label fillloop3=$1633
-.label go_partswitch=$1a30 {
+.label go_partswitch=$1a2d {
 }
 .label no_finenull=$1618
 .label no_bloslow=$109b
 .label bol_no_src_inc=$15d7
 .label bolbufflipped=$160c
-.label fadetab2=$1cbb
+.label fadetab2=$1cb8
 .label restorey2=$30b7
 .label wait2=$312e
 .label frame2=$313c
-.label waitforrasters=$1a1a
-.label fadetab=$1c9d
+.label waitforrasters=$1a17
+.label fadetab=$1c9a
 .label sundial=$1691
 .label loopere=$30ba
 .label costab=$bb00

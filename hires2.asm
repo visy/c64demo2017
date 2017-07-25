@@ -1073,8 +1073,7 @@ borderopen:
     lda #%01001000
     sta $d018
 
-    lda $d016
-    and #%11101111
+    lda #%11001000
     sta $d016
 
     // Setup some sprites
