@@ -1,19 +1,23 @@
 broken by quadtrip
 a c64 trackmo for assembly 2017
 
-code   by visy + ferris
-gfx    by visy + ZanaGB
-music  by noby
+code  by visy
+gfx   by visy + ZanaGB
+music by Jammer + psycho8580
 
 and
 
 loader by lft
 
-some words about the tech:
+some words:
 
-- the grayscale fading dither part uses 32 brightness levels and iterative dither with a 4px varying x-scroll to fake a 80x25 flicker image
-- the 4x4 mode uses three brightness level: off, outlined and filled, all 256 chars used
-- i ended up writing four processing scripts to do conversion to the custom formats & simulate modes in addition to the usual kickasm converter macros
+- the grayscale fading dither part uses 32 brightness levels and iterative 
+  dither with a 4px varying x-scroll to fake a 80x25 flicker image
+- the 4x4 mode uses three brightness level: off, outlined and filled, all 256
+  chars used
+- i ended up writing four processing scripts to do conversion to the custom 
+  formats & simulate modes in addition to the usual kickasm converter macros
+- we're all broken in various ways
 
 tools used:
 
@@ -32,4 +36,6 @@ infiltrator disassembler
 charpad
 spritepad
 
-special greets to jope, ptoing & lft for testing help
+special greets to jope, ptoing & lft for testing help, groente for pointers 
+about some graphics code and Linus/Multistyle Labs for getting me in touch with 
+Jammer & psycho8580

@@ -1102,13 +1102,13 @@ borderopen:
     lda #67-45+24*1
     sta $d002
     sty $d003
-    lda #68-45+24*2
+    lda #68-46+24*2
     sta $d004
     sty $d005
-    lda #69-45+24*3
+    lda #69-44+24*3
     sta $d006
     sty $d007
-    lda #69-45+24*4
+    lda #69-38+24*4
     sta $d008
     sty $d009
 
