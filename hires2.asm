@@ -144,27 +144,27 @@
 
     .macro copymem(src,dst,size) {
         lda #<src // set our source memory address to copy from, $6000
-        sta $FB
+        sta $EB
         lda #>src 
-        sta $FC
+        sta $EC
         lda #<dst // set our destination memory to copy to, $5000
-        sta $FD 
+        sta $ED 
         lda #>dst
-        sta $FE
+        sta $EE
 
         ldx #size // size of copy
         ldy #$00
 
     copyloop:
 
-        lda ($FB),y  // indirect index source memory address, starting at $00
+        lda ($EB),y  // indirect index source memory address, starting at $00
         //eor ($FD),y  // indirect index dest memory address, starting at $00
-        sta ($FD),y  // indirect index dest memory address, starting at $00
+        sta ($ED),y  // indirect index dest memory address, starting at $00
         iny
         bne copyloop // loop until our dest goes over 255
 
-        inc $FC // increment high order source memory address
-        inc $FE // increment high order dest memory address
+        inc $EC // increment high order source memory address
+        inc $EE // increment high order dest memory address
         dex
         bne copyloop // if we're not there yet, loop
 
@@ -172,27 +172,27 @@
 
     .macro copymem_eor_short(src,dst,size) {
         lda #<src // set our source memory address to copy from, $6000
-        sta $FB
+        sta $DB
         lda #>src 
-        sta $FC
+        sta $DC
         lda #<dst // set our destination memory to copy to, $5000
-        sta $FD 
+        sta $DD 
         lda #>dst
-        sta $FE
+        sta $DE
 
         ldx #size // size of copy
         ldy #$00
 
     copyloop:
 
-        lda ($FB),y  // indirect index source memory address, starting at $00
-        eor ($FD),y  // indirect index dest memory address, starting at $00
-        sta ($FD),y  // indirect index dest memory address, starting at $00
+        lda ($DB),y  // indirect index source memory address, starting at $00
+        eor ($DD),y  // indirect index dest memory address, starting at $00
+        sta ($DD),y  // indirect index dest memory address, starting at $00
         iny
         bne copyloop // loop until our dest goes over 255
 
-        inc $FC // increment high order source memory address
-        inc $FE // increment high order dest memory address
+        inc $DC // increment high order source memory address
+        inc $DE // increment high order dest memory address
         dex
         bne copyloop // if we're not there yet, loop
 
@@ -200,9 +200,9 @@
 
     copyloop2:
 
-        lda ($FB),y  // indirect index source memory address, starting at $00
-        eor ($FD),y  // indirect index dest memory address, starting at $00
-        sta ($FD),y  // indirect index dest memory address, starting at $00
+        lda ($DB),y  // indirect index source memory address, starting at $00
+        eor ($DD),y  // indirect index dest memory address, starting at $00
+        sta ($DD),y  // indirect index dest memory address, starting at $00
         iny
         cpy #190
         bne copyloop2 // loop until our dest goes over 255
@@ -211,36 +211,36 @@
 
     .macro copymem_color(src,dst,size) {
         lda #<src // set our source memory address to copy from, $6000
-        sta $FB
+        sta $EB
         lda #>src 
-        sta $FC
+        sta $EC
         lda #<dst // set our destination memory to copy to, $5000
-        sta $FD 
+        sta $ED 
         lda #>dst
-        sta $FE
+        sta $EE
 
         ldx #size // size of copy
         ldy #$00
 
     copyloop:
 
-        lda ($FB),y  // indirect index source memory address, starting at $00
+        lda ($EB),y  // indirect index source memory address, starting at $00
         //eor ($FD),y  // indirect index dest memory address, starting at $00
-        sta ($FD),y  // indirect index dest memory address, starting at $00
+        sta ($ED),y  // indirect index dest memory address, starting at $00
         iny
         bne copyloop // loop until our dest goes over 255
 
-        inc $FC // increment high order source memory address
-        inc $FE // increment high order dest memory address
+        inc $EC // increment high order source memory address
+        inc $EE // increment high order dest memory address
         dex
         bne copyloop // if we're not there yet, loop
 
         ldx #0
     copyloop2:
 
-        lda ($FB),y  // indirect index source memory address, starting at $00
+        lda ($EB),y  // indirect index source memory address, starting at $00
         //eor ($FD),y  // indirect index dest memory address, starting at $00
-        sta ($FD),y  // indirect index dest memory address, starting at $00
+        sta ($ED),y  // indirect index dest memory address, starting at $00
         iny
         cpy #$e8
         bne copyloop2 // loop until our dest goes over 255
@@ -383,12 +383,14 @@ no_alter4:
 .pc = $f00 "democode"
 
 part_init:
-
+    lda #$ff
+    sta $d012
 
 bols:
+/*
     ldy #$14
     jsr waitforpart
-
+*/
     lda $d011
     eor #%00010000 // on
     sta $d011
@@ -551,9 +553,11 @@ bolop:
     bne no_bloslow
     lda #0
     sta $ee
+
     ldx #1
     ldy #1
     jsr wait
+
     :copymem_eor_short($4400,$4400+40,3)
 
     inc frame2
@@ -822,7 +826,7 @@ copy_done:
     inc $F5
 
     ldy #1
-    jsr wait
+    jsr wait2
 
 
     lda $F5
@@ -900,10 +904,10 @@ ranbyteols:
 // ranbyteols
 
     lda #0
-    sta $FA
-    sta $FC
-    sta $FD
-    sta $FB
+    sta $DA
+    sta $DC
+    sta $DD
+    sta $DB
 
 fillloop2:
     ldx #255
@@ -912,7 +916,7 @@ fillloop2:
     ldx #255
 
 fillloop3:
-    lda $FB
+    lda $DB
     beq doEor2
     asl
     beq noEor2
@@ -920,14 +924,14 @@ fillloop3:
 doEor2:  
     eor #$1d
 noEor2:  
-    sta $FB
+    sta $DB
 
     sta $43ff,x
     sta $44ff,x
     sta $45ff,x
     sta $46ff,x
 
-    eor $FC
+    eor $DC
     sta $d7ff,x
     sta $d8ff,x
     sta $d9ff,x
@@ -937,16 +941,16 @@ noEor2:
 
     dex
 
-    inc $FD
+    inc $DD
 
 
-    lda $FD
+    lda $DD
     cmp #32
     bne no_incflasheor2
     lda #0
-    sta $FD
-    inc $FC
-    inc $FA
+    sta $DD
+    inc $DC
+    inc $DA
 
     ldy part_hi
     cpy #$27
@@ -957,7 +961,7 @@ no_incflasheor2:
     sta $4600,x
     sta $4700,x
 
-    eor $FC
+    eor $DC
 
     sta $d800,x
     sta $d900,x
@@ -1317,14 +1321,26 @@ waiter0:
     bcs waiter0
     rts
 
+.pc = * "wait"
 wait:
 waiter1:
-    lda #251
+    lda #64
     cmp $D012
     bne *-3
     dey
     cpy #0
     bne wait
+    rts
+
+
+wait2:
+waiter2:
+    lda #248
+    cmp $D012
+    bne *-3
+    dey
+    cpy #0
+    bne wait2
     rts
 
 frame:

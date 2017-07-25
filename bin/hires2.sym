@@ -2,13 +2,14 @@
 .label sintab=$ba00
 .label waiter1=$3121
 .label waiter0=$311c
-.label bolchars=$3130
+.label bolchars=$313d
 .label bolpix=$30bd
 .label nextirq=$3f00
 .label bolfiller=$1334
 .label restoreya=$3f1d
 .label bolscroll=$12db
 .label bolerase_looper=$12bf
+.label waiter2=$312e
 .label bp1=$30c5
 .label cont_boleor=$109b
 .label borderopen=$19a4
@@ -22,10 +23,10 @@
 .label bolend=$12c2 {
 }
 .label costab2=$bd00
-.label bols=$f00
+.label bols=$f05
 .label copy_done=$15a0
 .label ranbyteols=$1620
-.label frame=$312e
+.label frame=$313b
 .label wait=$3121
 .label partswitch=$3fc0
 .label restorey=$3089
@@ -49,7 +50,8 @@
 .label bolbufflipped=$160c
 .label fadetab2=$1cbb
 .label restorey2=$30b7
-.label frame2=$312f
+.label wait2=$312e
+.label frame2=$313c
 .label waitforrasters=$1a1a
 .label fadetab=$1c9d
 .label sundial=$1691

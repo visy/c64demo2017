@@ -573,6 +573,8 @@ envmap:
         }
     }
 
+
+
 .pc = $c400  "sintab"
 sintab:
     .fill 256, 64+64.5*(sin(toRadians(i*360/128))) // Generates a sine curve

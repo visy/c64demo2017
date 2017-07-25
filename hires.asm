@@ -474,27 +474,27 @@ checkup:
 
     .macro copymem_eor(src,dst,size) {
         lda #<src // set our source memory address to copy from, $6000
-        sta $FB
+        sta $EB
         lda #>src 
-        sta $FC
+        sta $EC
         lda #<dst // set our destination memory to copy to, $5000
-        sta $FD 
+        sta $ED 
         lda #>dst
-        sta $FE
+        sta $EE
 
         ldx #size // size of copy
         ldy #$00
 
     copyloop:
 
-        lda ($FB),y  // indirect index source memory address, starting at $00
-        eor ($FD),y  // indirect index dest memory address, starting at $00
-        sta ($FD),y  // indirect index dest memory address, starting at $00
+        lda ($EB),y  // indirect index source memory address, starting at $00
+        eor ($ED),y  // indirect index dest memory address, starting at $00
+        sta ($ED),y  // indirect index dest memory address, starting at $00
         iny
         bne copyloop // loop until our dest goes over 255
 
-        inc $FC // increment high order source memory address
-        inc $FE // increment high order dest memory address
+        inc $EC // increment high order source memory address
+        inc $EE // increment high order dest memory address
         dex
         bne copyloop // if we're not there yet, loop
 
@@ -502,27 +502,27 @@ checkup:
 
     .macro copymem_eor_short(src,dst,size) {
         lda #<src // set our source memory address to copy from, $6000
-        sta $FB
+        sta $EB
         lda #>src 
-        sta $FC
+        sta $EC
         lda #<dst // set our destination memory to copy to, $5000
-        sta $FD 
+        sta $ED 
         lda #>dst
-        sta $FE
+        sta $EE
 
         ldx #size // size of copy
         ldy #$00
 
     copyloop:
 
-        lda ($FB),y  // indirect index source memory address, starting at $00
-        eor ($FD),y  // indirect index dest memory address, starting at $00
-        sta ($FD),y  // indirect index dest memory address, starting at $00
+        lda ($EB),y  // indirect index source memory address, starting at $00
+        eor ($ED),y  // indirect index dest memory address, starting at $00
+        sta ($ED),y  // indirect index dest memory address, starting at $00
         iny
         bne copyloop // loop until our dest goes over 255
 
-        inc $FC // increment high order source memory address
-        inc $FE // increment high order dest memory address
+        inc $EC // increment high order source memory address
+        inc $EE // increment high order dest memory address
         dex
         bne copyloop // if we're not there yet, loop
 
@@ -530,9 +530,9 @@ checkup:
 
     copyloop2:
 
-        lda ($FB),y  // indirect index source memory address, starting at $00
-        eor ($FD),y  // indirect index dest memory address, starting at $00
-        sta ($FD),y  // indirect index dest memory address, starting at $00
+        lda ($EB),y  // indirect index source memory address, starting at $00
+        eor ($ED),y  // indirect index dest memory address, starting at $00
+        sta ($ED),y  // indirect index dest memory address, starting at $00
         iny
         cpy #190
         bne copyloop2 // loop until our dest goes over 255
@@ -541,27 +541,27 @@ checkup:
 
     .macro copymem(src,dst,size) {
         lda #<src // set our source memory address to copy from, $6000
-        sta $FB
+        sta $EB
         lda #>src 
-        sta $FC
+        sta $EC
         lda #<dst // set our destination memory to copy to, $5000
-        sta $FD 
+        sta $ED 
         lda #>dst
-        sta $FE
+        sta $EE
 
         ldx #size // size of copy
         ldy #$00
 
     copyloop:
 
-        lda ($FB),y  // indirect index source memory address, starting at $00
+        lda ($EB),y  // indirect index source memory address, starting at $00
         //eor ($FD),y  // indirect index dest memory address, starting at $00
-        sta ($FD),y  // indirect index dest memory address, starting at $00
+        sta ($ED),y  // indirect index dest memory address, starting at $00
         iny
         bne copyloop // loop until our dest goes over 255
 
-        inc $FC // increment high order source memory address
-        inc $FE // increment high order dest memory address
+        inc $EC // increment high order source memory address
+        inc $EE // increment high order dest memory address
         dex
         bne copyloop // if we're not there yet, loop
 
@@ -569,27 +569,27 @@ checkup:
 
     .macro copymem_bitmap(src,dst) {
         lda #<src // set our source memory address to copy from, $6000
-        sta $FB
+        sta $EB
         lda #>src 
-        sta $FC
+        sta $EC
         lda #<dst // set our destination memory to copy to, $5000
-        sta $FD 
+        sta $ED 
         lda #>dst
-        sta $FE
+        sta $EE
 
         ldx #31 // size of copy
         ldy #$00
 
     copyloop:
 
-        lda ($FB),y  // indirect index source memory address, starting at $00
+        lda ($EB),y  // indirect index source memory address, starting at $00
         //eor ($FD),y  // indirect index dest memory address, starting at $00
-        sta ($FD),y  // indirect index dest memory address, starting at $00
+        sta ($ED),y  // indirect index dest memory address, starting at $00
         iny
         bne copyloop // loop until our dest goes over 255
 
-        inc $FC // increment high order source memory address
-        inc $FE // increment high order dest memory address
+        inc $EC // increment high order source memory address
+        inc $EE // increment high order dest memory address
         dex
         bne copyloop // if we're not there yet, loop
 
@@ -597,9 +597,9 @@ checkup:
 
     copyloop2:
 
-        lda ($FB),y  // indirect index source memory address, starting at $00
+        lda ($EB),y  // indirect index source memory address, starting at $00
         //eor ($FD),y  // indirect index dest memory address, starting at $00
-        sta ($FD),y  // indirect index dest memory address, starting at $00
+        sta ($ED),y  // indirect index dest memory address, starting at $00
         iny
         cpy #64
         bne copyloop2 // loop until our dest goes over 255
@@ -609,32 +609,32 @@ checkup:
 
     .macro copymem_line(src,dst) {
         lda #<src // set our source memory address to copy from, $6000
-        sta $FB
+        sta $EB
         lda #>src 
-        sta $FC
+        sta $EC
         lda #<dst // set our destination memory to copy to, $5000
-        sta $FD 
+        sta $ED 
         lda #>dst
-        sta $FE
+        sta $EE
 
         ldy #$00
 
     copyloop:
 
-        lda ($FB),y  // indirect index source memory address, starting at $00
+        lda ($EB),y  // indirect index source memory address, starting at $00
         //eor ($FD),y  // indirect index dest memory address, starting at $00
-        sta ($FD),y  // indirect index dest memory address, starting at $00
+        sta ($ED),y  // indirect index dest memory address, starting at $00
         iny
         bne copyloop // loop until our dest goes over 255
 
-        inc $FC // increment high order source memory address
-        inc $FE // increment high order dest memory address
+        inc $EC // increment high order source memory address
+        inc $EE // increment high order dest memory address
 
     copyloop2:
 
-        lda ($FB),y  // indirect index source memory address, starting at $00
+        lda ($EB),y  // indirect index source memory address, starting at $00
         //eor ($FD),y  // indirect index dest memory address, starting at $00
-        sta ($FD),y  // indirect index dest memory address, starting at $00
+        sta ($ED),y  // indirect index dest memory address, starting at $00
         iny
         cpy #65
         bne copyloop2 // loop until our dest goes over 255
@@ -643,16 +643,16 @@ checkup:
 
     .macro clear_line(dst) {
         lda #<dst // set our destination memory to copy to, $5000
-        sta $FD 
+        sta $ED 
         lda #>dst
-        sta $FE
+        sta $EE
 
         ldy #$00
 
     copyloop:
 
         lda #0
-        sta ($FD),y  // indirect index dest memory address, starting at $00
+        sta ($ED),y  // indirect index dest memory address, starting at $00
         iny
         bne copyloop // loop until our dest goes over 255
 
@@ -661,7 +661,7 @@ checkup:
     copyloop2:
 
         lda #0
-        sta ($FD),y  // indirect index dest memory address, starting at $00
+        sta ($ED),y  // indirect index dest memory address, starting at $00
         iny
         cpy #64
         bne copyloop2 // loop until our dest goes over 255
@@ -670,21 +670,21 @@ checkup:
 
     .macro copymem_colorline(src,dst) {
         lda #<src // set our source memory address to copy from, $6000
-        sta $FB
+        sta $EB
         lda #>src 
-        sta $FC
+        sta $EC
         lda #<dst // set our destination memory to copy to, $5000
-        sta $FD 
+        sta $ED 
         lda #>dst
-        sta $FE
+        sta $EE
 
         ldy #0
 
     copyloop:
 
-        lda ($FB),y  // indirect index source memory address, starting at $00
+        lda ($EB),y  // indirect index source memory address, starting at $00
         //eor ($FD),y  // indirect index dest memory address, starting at $00
-        sta ($FD),y  // indirect index dest memory address, starting at $00
+        sta ($ED),y  // indirect index dest memory address, starting at $00
         iny
         cpy #40
         bne copyloop // loop until our dest goes over 255
@@ -693,13 +693,13 @@ checkup:
 
     .macro clear_colorline(dst) {
         lda #<dst // set our destination memory to copy to, $5000
-        sta $FD 
+        sta $ED 
         lda #>dst
-        sta $FE
+        sta $EE
         ldy #0
     copyloop:
         lda #0    
-        sta ($FD),y  // indirect index dest memory address, starting at $00
+        sta ($ED),y  // indirect index dest memory address, starting at $00
         iny
         cpy #40
         bne copyloop // loop until our dest goes over 255
@@ -910,12 +910,19 @@ real_start:
     sta $d011
 
     FillScreenMemory($0400,$20)
-    lda $d011
-    eor #%00010000 // off
-    sta $d011
 
     ldy #64
     jsr wait
+
+    lda #$02   // set vic bank #1 with the dkd loader way
+    and #$03
+    eor #$3f
+    sta $dd02
+
+    FillScreenMemory($4400,255)
+
+
+    FillScreenMemory($d800,$01)
 
     ldx #0
 fadetowhite:
@@ -931,50 +938,28 @@ fadetowhite:
     bne fadetowhite
     jmp demo_init
 
-    // demo init
-demo_init:
+    lda #1
+    sta $d020
+    sta $d021
     lda $d011
     eor #%00010000 // off
     sta $d011
 
-    lda #0
-    sta $d020
-    sta $d021
+    // demo init
+demo_init:
 
     // Set up raster interrupt.
     lda     #$3b
     sta     $d011
-    lda     #200
+    lda     #255
     sta     $d012
     lda     #$01
     sta     $d01a
 
     lsr     $d019
 
-    // This causes the CPU to see RAM instead of KERNAL and
-    // BASIC ROM at $E000-$FFFF and $A000-$BFFF respectively.
-    //
-    // This causes the CPU to see RAM everywhere except for
-    // $D000-$E000, where the VIC-II, SID, CIA's etc are located.
-    //
-    lda #$35
-    sta $01
-
-    ldx #0
-    ldy #0
-
     lda #0
     sta $d1
-
-
-    lda $d011
-    eor #%00010000
-    sta $d011
-
-    lda #$02   // set vic bank #1 with the dkd loader way
-    and #$03
-    eor #$3f
-    sta $dd02
 
     lda #$d8
     sta $d016
@@ -996,6 +981,7 @@ demo_init:
 
     ldy #1
     jsr waitforpart
+
 
 titlepics:
 
@@ -1020,6 +1006,10 @@ titlepics:
     lda #%01001000
     sta $d018
 
+
+    jsr $c90
+
+
     ldy #3
     jsr waitforpart
 
@@ -1032,12 +1022,9 @@ titlepics:
     FillBitmap($4000,0)
 
 koalapic: // logoscene
-
-
-    jsr $c90 // load from disk (bit,chr,d80)
-
-    ldy #4
-    jsr waitforpart
+    copymem($ee00,$4000,1)
+    copymem($8000,$6000,30)
+    copymem($e000,$4400,8)
 
     lda #$d8
     sta $d016
@@ -1051,7 +1038,7 @@ koalapic: // logoscene
     sta $d021
 
     // Setup some sprites
-    lda #%00111111
+    lda #%00000111
     sta $d015
 
     lda #0
@@ -1098,11 +1085,12 @@ koalapic: // logoscene
     sta $d00a
     sty $d00b
 
+
     ldx #0
 
 koalaloop:
     .for (var i=0; i<4; i++) {
-        lda $9600+i*$100,x    // copy color to color ram
+        lda $e400+i*$100,x    // copy color to color ram
         sta $d800+i*$100,x
     }
     inx
@@ -1148,167 +1136,84 @@ sprlogomove:
     lda #%00000000
     sta $d015
 
-    lda #7
-    sta $FA
-fade_screen1:
-    ldy #1
-    jsr wait
-    ldx $FA
-    lda fade_border_tab,x
-    sta $d020
-    dex
-    stx $FA
-    cpx #0
-    bne fade_screen1
+metropart:
+    jsr $c90
 
-dotball:
+    lda #0
+    sta $d012
 
-// 16x16
-    lda #$11
+    lda #2
+    sta $C9
+
+    lda #%00111011
     sta $d011
 
-    lda #6
-    sta $d020
-    sta $d021
+    lda #%11001000
+    sta $d016
+    lda #0
 
-    :FillScreenMemory($d800,(0<<4) + 1) // color ram
-    :FillScreenMemory($4400, 0) // screen mem
-    :FillScreenMemory($6000, 0) // character mem aka 128x128 "framebuffer"
-    :FillScreenMemory($63e8, 0) // character mem
-    :FillScreenMemory($63e8+$3e8*1, 0) // character mem
-    :FillScreenMemory($63e8+$3e8*2, 0) // character mem
-    lda #%00011000
-    sta $d018
+    SetScreenMemory(screen_memory - vic_base)
+    SetBitmapAddress(bitmap_address - vic_base)
 
+    copymem($5000,$a000,4)
+    lda #0
+    sta $F0
 
-loop16:
-    ldy #1
+metroloop:
+    lda #200
+    clc
+    sbc $F0
+    tay
+    jsr wait
+    ldy #5
+    jsr wait
+    copymem($9000,$5000,4)
+    ldy #5
+    jsr wait
+    copymem($a000,$5000,4)
+    ldy #5
+    jsr wait
+    copymem($9000,$5000,4)
+    ldy #5
+    jsr wait
+    copymem($a000,$5000,4)
+    ldy #5
+    jsr wait
+    ldy #5
+    jsr wait
+    copymem($9000,$5000,4)
+    ldy #5
+    jsr wait
+    copymem($a000,$5000,4)
+    ldy #5
     jsr wait
 
-
-    lda #$44
-    sta i162+2
-    lda index16
-    tax
-    clc
-    lda sintab,x
-
-    sta $FC
-    cmp #128
-    bcc over_half_sin
-    lda #$65 // adc zp
-    sta sinop
-
-    lda $FC
-    clc
-    ror
-    clc
-    ror
-    clc
-    ror
-    clc
-    sta $FC
-    lda #32
-    sbc $FC
-    sta $FC
-
-    jmp no_neg_sin
-over_half_sin:
-    lda $FC
-    clc
-    ror
-    clc
-    ror
-    clc
-    ror
-    clc
-    sta $FC
-
-    lda #$e5 // sbc zp
-    sta sinop
-
-no_neg_sin:
-    
-    lda #4*40+12
-    clc
-sinop:
-    adc $FC
-
-    sta i162+1
-    jsr init16 // address for 16x16 screen pos
-    lda #0
-    ldx index16
-    clc
-    adc sintab,x 
-    clc
-    adc #64
-    tax
-    lda index16
-    clc
-    adc index16+1
-    and #255
-    tay
-    lda #63
-    adc costab,y
-    tay
-
-    jsr putpix16
-
-    inc frame
-    inc index16
-
-    lda index16
-    cmp #255
-    bne no_index_clear
-    lda #0
-    sta index16
-    :FillScreenMemory($4400, 0) // screen mem
-
-no_index_clear:
-
-    lda frame
-    cmp #32
-    bne no_fres
-
-    inc index16+1
-    lda #0
-    sta frame
-    lda index16+1
+    inc $F0
+    lda $F0
     cmp #5
-    beq exit16
+    bne metroloop0
+    jmp metrodone
+metroloop0:
+    jmp metroloop
+metrodone:
 
-no_fres:
-    copymem_eor($6000,$6081,4)
-
-    jmp loop16
-
-fade_border_tab:
-    .byte 14,8,4,11,10,9,6,0
-
-exit16:
-
-    :centerwipeout16_trans(3)
-
-    lda #0
-    sta $FA
-// hires part
-fade_border1:
-    ldx #255
     ldy #7
-    jsr wait
-    ldx $FA
-    lda fade_border_tab,x
-    sta $d020
-    inx
-    stx $FA
-    cpx #7
-    bne fade_border1
+    jsr waitforpart
 
+    lda #0
+    sta $C9
+    lda #<short_irq
+    sta $fffe
+    lda #>short_irq
+    sta $ffff
+
+    lda #240
+    sta $d012
 
     lda #0
     sta $d020
-    sta $d021
 
+    :centerwipeout_trans(3)
 
     lda #%00111011
     sta $d011
@@ -1321,8 +1226,8 @@ fade_border1:
 
 dithersandpics:
 
-    copymem($9a00, $6000,32)
-    copymem($8000, $5000,10)
+    copymem($a000, $6000,32)
+    copymem($e800, $5000,10)
 
     ldy #8
     jsr waitforpart
@@ -1422,6 +1327,8 @@ index16:
 
 bitmask16:
      .byte $80,$40,$20,$10,$08,$04,$02,$01
+fade_border_tab:
+    .byte 14,8,4,11,10,9,6,0
 
 init16:
 
@@ -1452,6 +1359,8 @@ i162:
     rts
 
 dithers:
+    FillScreenMemory($4000,0)
+
     jsr $c90 // init to 8000, a000, e000
 
     // Setup some sprites
@@ -1920,6 +1829,22 @@ short_irq:
 
     inc $d019
 
+    lda $C9
+    cmp #2
+    bne no_border
+    lda #11
+    sta $d020
+
+    lda #50
+    sta $d012
+
+    lda #<short_irq2
+    sta $fffe
+    lda #>short_irq2
+    sta $ffff
+
+no_border:
+
     lda $d1
     cmp #0
     bne no_part_hi_add
@@ -1936,13 +1861,53 @@ restorex: ldx #$00
 restorey: ldy #$00
     rti
 
+short_irq2:
+    sta restorea2+1
+    stx restorex2+1
+    sty restorey2+1
+
+    inc $d019
+
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+
+    lda $C9
+    cmp #2
+    bne no_border2
+    lda #0
+    sta $d020
+
+    lda #240
+    sta $d012
+
+    lda #<short_irq
+    sta $fffe
+    lda #>short_irq
+    sta $ffff
+
+no_border2:
+
+restorea2: lda #$00
+restorex2: ldx #$00
+restorey2: ldy #$00
+    rti
+
 .pc = $3ff0 "partswitch"
 partswitch:
     jsr $c90 // load part1 -> hires2.asm
 .pc = * "partswitch_jmp"
 partswitch2:
     jmp $f00
-
 
 .pc = $ba00  "sintab" virtual
 sintab:

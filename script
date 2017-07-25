@@ -3,7 +3,7 @@
 # here, unless you specify an entry point with the -e option.
 
 demo.prg
-brore.sid		c000	7e
+Broken_001.sid	c000	7e
 title1.bin 		5000	0		3e8
 title1.bin 		6000	1000	1f40
 title2.bin 		8000	0		3e8
@@ -13,12 +13,17 @@ sinedata.bin	ba00	2
 title3.bin 		e000	1000	1f40
 
 #smoky pic
-logosprites.bin 4000	0
-smoky3.bit
-smoky3.chr
-smoky3.d80
-quadtrip.bit    9a00 	2
-quadtrip.clr    8000  	2
+logosprites.bin ee00	0
+smoky3.bit		8000	2
+smoky3.chr 		e000	2
+smoky3.d80      e400 	2 
+quadtrip.bit    a000 	2
+quadtrip.clr    e800  	2
+
+# metro
+metro1.clr 		5000	2
+metro1.bit 		6000	2
+metro2.clr 		9000	2
 
 # dithers
 dither1spr.bin  4000 	0

@@ -5,7 +5,7 @@ al C:1674 .no_incflasheor2
 al C:ba00 .sintab
 al C:3121 .waiter1
 al C:311c .waiter0
-al C:3130 .bolchars
+al C:313d .bolchars
 al C:176e .coltest__0
 al C:1845 .coltest__1
 al C:191c .coltest__2
@@ -17,6 +17,7 @@ al C:3f1d .restoreya
 al C:12db .bolscroll
 al C:10b0 .bolerase_loopx
 al C:12bf .bolerase_looper
+al C:312e .waiter2
 al C:1767 .coltest0__0
 al C:183e .coltest0__1
 al C:1915 .coltest0__2
@@ -40,10 +41,10 @@ al C:163c .doEor2
 al C:198a .no_alter4
 al C:12c2 .bolend
 al C:bd00 .costab2
-al C:f00 .bols
+al C:f05 .bols
 al C:15a0 .copy_done
 al C:1620 .ranbyteols
-al C:312e .frame
+al C:313b .frame
 al C:3121 .wait
 al C:3fc0 .partswitch
 al C:3089 .restorey
@@ -73,7 +74,8 @@ al C:15d7 .bol_no_src_inc
 al C:160c .bolbufflipped
 al C:1cbb .fadetab2
 al C:30b7 .restorey2
-al C:312f .frame2
+al C:312e .wait2
+al C:313c .frame2
 al C:1a1a .waitforrasters
 al C:1c9d .fadetab
 al C:1691 .sundial

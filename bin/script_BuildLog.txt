@@ -4,7 +4,7 @@ Got 76 errors while executing:
   (/Users/visy/dev/kick/hires2/script 2:2) Token must be an identifer
   (/Users/visy/dev/kick/hires2/script 3:2) Token must be an identifer
   (/Users/visy/dev/kick/hires2/script 5:5) Syntax error
-  (/Users/visy/dev/kick/hires2/script 6:7) Syntax error
+  (/Users/visy/dev/kick/hires2/script 6:11) Syntax error
   ...
 
 # First part contains the master demo routine and the music.

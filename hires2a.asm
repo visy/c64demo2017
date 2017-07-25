@@ -209,36 +209,36 @@ stabilizedirq:
         lda #<src // set our source memory address to copy from, $6000
         clc
         adc $E0
-        sta $FB
+        sta $EB
         lda #>src 
-        sta $FC
+        sta $EC
         lda #<src2 // set our source memory address to copy from, $6000
-        sta $F8
+        sta $E8
         lda #>src2
-        sta $F9
+        sta $E9
 
         lda #<dst // set our destination memory to copy to, $5000
-        sta $FD 
+        sta $ED 
         lda #>dst
-        sta $FE
+        sta $EE
 
         ldx #size // size of copy
         ldy #$00
 
     copyloop:
-        lda ($F8),y  // indirect index source memory address, starting at $00
+        lda ($E8),y  // indirect index source memory address, starting at $00
         clc
         adc $E3
         sbc ($FB),y  // indirect index source memory address, starting at $00
         cmp #32
         bcs toobig
-        sta ($FD),y  // indirect index dest memory address, starting at $00
+        sta ($ED),y  // indirect index dest memory address, starting at $00
 toobig:
         iny
         bne copyloop // loop until our dest goes over 255
-        inc $F9 // increment high order source memory address
-        inc $FC // increment high order source memory address
-        inc $FE // increment high order dest memory address
+        inc $E9 // increment high order source memory address
+        inc $EC // increment high order source memory address
+        inc $EE // increment high order dest memory address
         dex
         bne copyloop // if we're not there yet, loop
 
@@ -246,25 +246,25 @@ toobig:
 
     .macro copymem(src,dst,size) {
         lda #<src // set our source memory address to copy from, $6000
-        sta $FB
+        sta $EB
         lda #>src 
-        sta $FC
+        sta $EC
         lda #<dst // set our destination memory to copy to, $5000
-        sta $FD 
+        sta $ED 
         lda #>dst
-        sta $FE
+        sta $EE
 
         ldx #size // size of copy
         ldy #$00
 
     copyloop:
 
-        lda ($FB),y  // indirect index source memory address, starting at $00
-        sta ($FD),y  // indirect index dest memory address, starting at $00
+        lda ($EB),y  // indirect index source memory address, starting at $00
+        sta ($ED),y  // indirect index dest memory address, starting at $00
         iny
         bne copyloop // loop until our dest goes over 255
-        inc $FC // increment high order source memory address
-        inc $FE // increment high order dest memory address
+        inc $EC // increment high order source memory address
+        inc $EE // increment high order dest memory address
         dex
         bne copyloop // if we're not there yet, loop
 
@@ -272,20 +272,20 @@ toobig:
 
     .macro copymem_inc(src,dst,size) {
         lda #<src // set our source memory address to copy from, $6000
-        sta $FB
+        sta $EB
         lda #>src 
-        sta $FC
+        sta $EC
         lda #<dst // set our destination memory to copy to, $5000
-        sta $FD 
+        sta $ED 
         lda #>dst
-        sta $FE
+        sta $EE
 
         ldx #size // size of copy
         ldy #$00
 
     copyloop:
 
-        lda ($FB),y  // indirect index source memory address, starting at $00
+        lda ($EB),y  // indirect index source memory address, starting at $00
         clc
         sbc $F2
         cmp #38
@@ -293,12 +293,12 @@ toobig:
         cmp #0
         bcc no_over
         //eor ($FD),y  // indirect index dest memory address, starting at $00
-        sta ($FD),y  // indirect index dest memory address, starting at $00
+        sta ($ED),y  // indirect index dest memory address, starting at $00
 no_over:
         iny
         bne copyloop // loop until our dest goes over 255
-        inc $FC // increment high order source memory address
-        inc $FE // increment high order dest memory address
+        inc $EC // increment high order source memory address
+        inc $EE // increment high order dest memory address
         dex
         bne copyloop // if we're not there yet, loop
 
@@ -306,27 +306,27 @@ no_over:
 
     .macro copymem_eor_short(src,dst,size) {
         lda #<src // set our source memory address to copy from, $6000
-        sta $FB
+        sta $EB
         lda #>src 
-        sta $FC
+        sta $EC
         lda #<dst // set our destination memory to copy to, $5000
-        sta $FD 
+        sta $ED 
         lda #>dst
-        sta $FE
+        sta $EE
 
         ldx #size // size of copy
         ldy #$00
 
     copyloop:
 
-        lda ($FB),y  // indirect index source memory address, starting at $00
-        eor ($FD),y  // indirect index dest memory address, starting at $00
-        sta ($FD),y  // indirect index dest memory address, starting at $00
+        lda ($EB),y  // indirect index source memory address, starting at $00
+        eor ($ED),y  // indirect index dest memory address, starting at $00
+        sta ($ED),y  // indirect index dest memory address, starting at $00
         iny
         bne copyloop // loop until our dest goes over 255
 
-        inc $FC // increment high order source memory address
-        inc $FE // increment high order dest memory address
+        inc $EC // increment high order source memory address
+        inc $EE // increment high order dest memory address
         dex
         bne copyloop // if we're not there yet, loop
 
@@ -334,9 +334,9 @@ no_over:
 
     copyloop2:
 
-        lda ($FB),y  // indirect index source memory address, starting at $00
-        eor ($FD),y  // indirect index dest memory address, starting at $00
-        sta ($FD),y  // indirect index dest memory address, starting at $00
+        lda ($EB),y  // indirect index source memory address, starting at $00
+        eor ($ED),y  // indirect index dest memory address, starting at $00
+        sta ($ED),y  // indirect index dest memory address, starting at $00
         iny
         cpy #190
         bne copyloop2 // loop until our dest goes over 255
@@ -345,16 +345,16 @@ no_over:
 
    .macro set_line(dst,val) {
         lda #<dst // set our destination memory to copy to, $5000
-        sta $FD 
+        sta $ED 
         lda #>dst
-        sta $FE
+        sta $EE
 
         ldy #$00
 
     copyloop:
 
         lda #val
-        sta ($FD),y  // indirect index dest memory address, starting at $00
+        sta ($ED),y  // indirect index dest memory address, starting at $00
         iny
         cpy #40
         bne copyloop // loop until our dest goes over 255
