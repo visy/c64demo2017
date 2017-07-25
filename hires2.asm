@@ -857,7 +857,7 @@ bol_no_src_inc:
     sta bol_copyloop_x+1
     lda $FA
     sta bol_copyloop_x+2
-    cmp #$98
+    cmp #$9b
     beq boscroll_over
 
     lda $db
@@ -955,6 +955,7 @@ noEor2:
     ldy part_hi
     cpy #$27
     beq nobols
+
 no_incflasheor2:
     sta $4400,x
     sta $4500,x
