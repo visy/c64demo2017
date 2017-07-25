@@ -103,6 +103,76 @@ stabilizedirq:
 }
 
 
+    .macro PNGtoHIRES(PNGpicture,BMPData,ColData) {
+
+        .var Graphics = LoadPicture(PNGpicture)
+
+        // Graphics RGB Colors. Must be adapted to the graphics
+
+        .const C64Black   = 000 * 65536 + 000 * 256 + 000   
+        .const C64White   = 255 * 65536 + 255 * 256 + 255
+        .const C64Red     = 104 * 65536 + 055 * 256 + 043
+        .const C64Cyan    = 112 * 65536 + 164 * 256 + 178
+        .const C64Purple  = 111 * 65536 + 061 * 256 + 134
+        .const C64Green   = 088 * 65536 + 141 * 256 + 067
+        .const C64Blue    = 053 * 65536 + 040 * 256 + 121 
+        .const C64Yellow  = 184 * 65536 + 199 * 256 + 111
+        .const C64L_brown = 111 * 65536 + 079 * 256 + 037
+        .const C64D_brown = 067 * 65536 + 057 * 256 + 000
+        .const C64L_red   = 154 * 65536 + 103 * 256 + 089
+        .const C64D_grey  = 068 * 65536 + 068 * 256 + 068
+        .const C64Grey    = 108 * 65536 + 108 * 256 + 108
+        .const C64L_green = 154 * 65536 + 210 * 256 + 132
+        .const C64L_blue  = 108 * 65536 + 094 * 256 + 181
+        .const C64L_grey  = 149 * 65536 + 149 * 256 + 149
+
+        // Add the colors neatly into a Hashtable for easy lookup reference
+        .var ColorTable = Hashtable()
+        .eval ColorTable.put(C64Black,0)
+        .eval ColorTable.put(C64White,1)
+        .eval ColorTable.put(C64Red,2)
+        .eval ColorTable.put(C64Cyan,3)
+        .eval ColorTable.put(C64Purple,4)
+        .eval ColorTable.put(C64Green,5)
+        .eval ColorTable.put(C64Blue,6)
+        .eval ColorTable.put(C64Yellow,7)
+        .eval ColorTable.put(C64L_brown,8)
+        .eval ColorTable.put(C64D_brown,9)
+        .eval ColorTable.put(C64L_red,10)
+        .eval ColorTable.put(C64D_grey,11)
+        .eval ColorTable.put(C64Grey,12)
+        .eval ColorTable.put(C64L_green,13)
+        .eval ColorTable.put(C64L_blue,14)
+        .eval ColorTable.put(C64L_grey,15)
+
+
+        .pc = BMPData "Hires Bitmap"
+
+        .var ScreenMem = List()
+        .for (var Line = 0 ; Line < 200 ; Line = Line + 8) {
+            .for (var Block = 0 ; Block < 320 ; Block=Block+8) {
+                .var Coll1 = Graphics.getPixel(Block,Line)
+                .var Coll2 = 0
+                .for (var j = 0 ; j < 8 ; j++ ) {
+                    .var ByteValue = 0
+                    .for (var i = 0 ; i < 8 ; i++ ) {
+                        .if (Graphics.getPixel(Block,Line) != Graphics.getPixel(Block+i,Line+j)) .eval ByteValue = ByteValue + pow(2,7-i)
+                        .if (Graphics.getPixel(Block,Line) != Graphics.getPixel(Block+i,Line+j)) .eval Coll2 = Graphics.getPixel(Block+i,Line+j)
+                    }
+                .byte ByteValue
+                }
+            .var BlockColor = [ColorTable.get(Coll2)]*16+ColorTable.get(Coll1)
+            .eval ScreenMem.add(BlockColor)
+            }
+        }
+        .pc = ColData "Hires Color Data"
+    ScreenMemColors:
+        .for (var i = 0 ; i < 1000 ; i++ ) {
+            .byte ScreenMem.get(i)
+        }
+    }
+
+
     .macro PNGtoHIRES_single(PNGpicture,BMPData,ColData,color,bgcolor) {
 
         .var Graphics = LoadPicture(PNGpicture)
@@ -293,203 +363,81 @@ stabilizedirq:
 
 .plugin "se.triad.kickass.CruncherPlugins"
 
-.pc = $2000 "democode"
+BasicUpstart2($1000)
+
+.pc = $1000 "democode"
 
 start:
+    lda #2
+    sta $dd00
     lda #0
     sta $d020
     lda #%00111011
     sta $d011
     lda #%10000000 // bitmap at $4000, screen at $6000
     sta $d018
-    lda #%01111111
-    sta $d015
-    sta $d01d
-
-    lda #64+22
-    sta $F1
-    ldy #0
-    ldx #0
-possprites:
-    lda $f1
-    sta $d000,x
-    lda #246
-    sta $d001,x
-    lda #0
-    sta $d027,y
-    lda #$1f
-    sta $63f8,y
-    lda #255
-    lda $f1
-    clc
-    adc #24
-    sta $f1
-    inx
-    inx  
-    iny
-    cpy #8
-    bne possprites
-
-part_init:
-/*
-    ldx #0
-    ldy #0
-    lda #music.startSong-1
-    jsr music.init
-*/
-    bit $d011 // Wait for new frame
-    bpl *-3
-    bit $d011
-    bmi *-3
-
-    lda $d011
-    eor #%00010000 // off
-    sta $d011
-
-    lda #0
-    sta $F0 // crunchindex
-    B2_DECRUNCH(crunch_pic0)
-    lda #255
-    ldx #8
-filoop:
-    sta $47c0,x
-    dex
-    bne filoop
-
-
-    ldy #64
-    jsr wait
-
-    lda $d011
-    eor #%00010000 // on
-    sta $d011
-
-nextbitmap:
-loop1:
-
-    bit $d011 // Wait for new frame
-    bpl *-3
-    bit $d011
-    bmi *-3
-
-
-
-    lda #%00111011
-    sta $d011
-
-    jsr CalcNumLines // Call sinus substitute routine
-
-    lda #$30 // Wait for position where we want FLD to start
-    cmp $d012
-    bne *-3
-
-    ldx NumFLDLines
-    beq loop1 // Skip if we want 0 lines FLD
-loop2:
-    lda $d012 // Wait for beginning of next line
-    cmp $d012
-    beq *-3
-
-    clc // Do one line of FLD
-    lda $d011
-    adc #1
-    and #7
-    ora #$18
-    ora #%00100000
-    sta $d011
-
-    dex // Decrease counter
-    bne loop2 // Branch if counter not 0
-
-the_actual_effect:
-    lda do_one_fld_frame
-    cmp #0
-    beq no_turnon
-    lda $d011
-    eor #%00010000 // on
-    sta $d011
-    lda #0
-    sta do_one_fld_frame
-no_turnon:
-    jmp loop1 // Next frame
-
-CalcNumLines:
-do_calc_fld:
-    inc fldframe
-    lda fldframe
-    cmp #2
-    bne no_incfldframe
-    lda #0
-    sta fldframe
-    inc fldframe+1
-no_incfldframe:
-CalcNumLines2:
-    ldx #220
-    lda $c400,x
-    clc
-    sbc fldframe+1
-    sta NumFLDLines
-    cmp #5
-    bcs no_stop_fld
-    jmp stopfld
-no_stop_fld:
-    inc CalcNumLines2+1
-    rts
-stopfld:
-    ldy #255
-    jsr wait
-    ldy #255
-    jsr wait
-    ldy #255
-    jsr wait
-
-    FillBitmap($4000,0)
-
-    lda $d011
-    eor #%00010000 // off
-    sta $d011
-
-    lda #1
-    sta do_one_fld_frame
-
-    inc $F0
-    lda $F0
-    cmp #1
-    bne pic2
-    B2_DECRUNCH(crunch_pic1)
-    jmp donecru
-pic2:    
-loopforever:
-    ldy #60
-    jsr wait
 
     sei
-    lda #0
-    sta $d404
-    sta $d40b
-    sta $d412
-    sta $d418
+    lda #<short_irq
+    sta $314
+    lda #>short_irq
+    sta $315
+    lda #$7f
+    sta $dc0d
+    lda #$01
+    sta $d01a
 
+    lda #50
+    sta $F0
+    lda #0
+    sta $F1
+    sta $d012
+
+    lda #0
+    sta $d021
+
+    cli
+
+
+
+part_init:
+
+loopforever:
     jmp loopforever
-donecru:
-    lda #0
-    sta fldframe 
-    lda #75
-    sta fldframe+1 
-    lda #220
-    sta CalcNumLines2+1
-    lda #0
-    sta NumFLDLines
-    jmp nextbitmap
 
-no_new_fld_calc:
-    .byte 0
-NumFLDLines:
-    .byte 0
-do_one_fld_frame:
-    .byte 0
-fldframe:
-    .byte 0,75
+short_irq:
+
+    lda $F0
+    cmp #50
+    bne no_stab
+no_stab:
+    inc $F0
+    inc $F0
+    inc $F0
+
+    lda $d012
+    eor $d011
+    and #%00111011
+    sta $d011
+    lda $d012
+    eor $d016
+    and #%00000111
+    sta $d016
+
+    lda $F0
+    cmp #252
+    bcc no_null
+    inc $F1
+    lda #50
+    adc $F1
+    sta $F0
+no_null:
+    sta $d012
+
+    lda #$ff
+    sta $d019   //ACK interrupt so it can be called again
+
+    jmp $ea7e
 
 
 wait:
@@ -680,15 +628,5 @@ Tab:
     .byte %10000000 // 10
     .byte %11110000 // 13
 
-.pc = $2300 "crunchdata"
-
-.label crunch_pic0 = *
-.modify B2() {
-    :PNGtoHIRES_single("upscroll.png",$4000,$6000,0,1)
-}
-.label crunch_pic1 = *
-.modify B2() {
-    :PNGtoHIRES_single("upscroll2.png",$4000,$6000,0,1)
-}
-
+    :PNGtoHIRES("test.png",$4000,$6000)
 

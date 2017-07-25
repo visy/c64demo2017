@@ -1266,8 +1266,19 @@ foxglitch:
 
     :centerwipein_trans(3)
 
+
+waiterlooper:
+    lda $d012
+    rol
+    rol
+    rol
+    eor $d016
+    and #%00000111
+    sta $d016
+
     ldy #16
-    jsr waitforpart
+    cpy part_hi
+    bne waiterlooper
 
     :centerwipeout_trans(3)
 

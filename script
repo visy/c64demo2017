@@ -42,8 +42,8 @@ dither3spr.bin  4000 	0
 # hires pics
 d_fox.clr		9000	2
 d_fox.bit		a000	2
-d_broke.clr		8000	2
-d_broke.bit		e000	2
+feissi.clr		8000	2
+feissi.bit		e000	2
 
 d_bune.clr		9000	2
 d_bune.bit		a000	2
