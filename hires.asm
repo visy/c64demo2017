@@ -1280,6 +1280,9 @@ waiterlooper:
     cpy part_hi
     bne waiterlooper
 
+    lda #%11001000
+    sta $d016
+
     :centerwipeout_trans(3)
 
     jsr $c90 // load spacebunny
