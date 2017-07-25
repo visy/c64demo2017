@@ -661,7 +661,7 @@ do_flipper:
     sta flipper
 no_resetflip:
 
-    jsr $c203 // le musica
+    jsr $c003 // le musica
 restorea: lda #$00
 restorex: ldx #$00
 restorey: ldy #$00
@@ -699,7 +699,7 @@ nextirq:
     inc part_hi
 no_part_hi_add2:
 
-    jsr $c203 // le musica
+    jsr $c003 // le musica
 
     lda #$ff
     sta $d019

@@ -639,7 +639,7 @@ irq1:
     lda #>irq2
     sta $ffff
 
-    jsr $c203 // le musica
+    jsr $c003 // le musica
 
     lda #$ff
     sta $d019

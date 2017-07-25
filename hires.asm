@@ -787,6 +787,26 @@ checkup:
 .pc = $1000 "democode"
 
 start:
+    lda #1
+    sta $d1
+
+    lda #0
+    jsr $c000
+
+    sei
+    lda #<short_irq
+    sta $fffe
+    lda #>short_irq
+    sta $ffff
+    lda #$7f
+    sta $dc0d
+    lda #$01
+    sta $d01a
+
+    lda #255
+    sta $d012
+
+    cli
 
     lda #0
     sta $d020
@@ -884,6 +904,7 @@ sinus:
 fadetab:
     .byte $00, $06, $0b, $04, $0c, $03, $0d, $01
 real_start:
+
     lda $d011
     eor #%00010000 // off
     sta $d011
@@ -920,10 +941,6 @@ demo_init:
     sta $d020
     sta $d021
 
-    lda #0
-    jsr $c200
-
-
     // Set up raster interrupt.
     lda     #$3b
     sta     $d011
@@ -946,20 +963,9 @@ demo_init:
     ldx #0
     ldy #0
 
-    sei
-    lda #<short_irq
-    sta $fffe
-    lda #>short_irq
-    sta $ffff
-    lda #$7f
-    sta $dc0d
-    lda #$01
-    sta $d01a
+    lda #0
+    sta $d1
 
-    lda #255
-    sta $d012
-
-    cli
 
     lda $d011
     eor #%00010000
@@ -1914,13 +1920,17 @@ short_irq:
 
     inc $d019
 
+    lda $d1
+    cmp #0
+    bne no_part_hi_add
+
     inc part_lo
     lda part_lo
     bne no_part_hi_add
     inc part_hi
 no_part_hi_add:
 
-    jsr $c203 // le musica
+    jsr $c003 // le musica
 restorea: lda #$00
 restorex: ldx #$00
 restorey: ldy #$00

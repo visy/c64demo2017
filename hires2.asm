@@ -1201,7 +1201,7 @@ no_part_hi_add2:
     lda fadetab,x
     sta $d02b
 
-    jsr $c203 // le musica
+    jsr $c003 // le musica
 
     lda #$ff
     sta $d019
@@ -1349,7 +1349,7 @@ nextirq:
     inc part_hi
 no_part_hi_add:
 
-    jsr $c203 // le musica
+    jsr $c003 // le musica
 
     lda #$ff
     sta $d019
