@@ -721,6 +721,8 @@ bolfiller_x:
 // eye anim
     jsr $c90 // load eye data
 
+    copymem($e000,$4000,4)
+
     ldy #$17
     jsr waitforpart
 
@@ -790,8 +792,10 @@ bolfilc3:
 
     jsr $c90 // load color mask and scroller data
 
-    ldy #$1a
-    jsr waitforpart
+bolwaitter:
+    ldx #80
+    cpx part_lo
+    bcc bolwaitter
 
     :copymem($6800,$4400,4)
     FillScreenMemory($4800,0)

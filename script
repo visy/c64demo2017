@@ -55,7 +55,7 @@ sinedata.bin	ba00	2
 bolcolors.bin   d800!   
 
 # boleye
-boleye.bin		4000	2		3E8
+boleye.bin		e000	2		3E8
 boleye.bin		4400	3EA		3E8
 boleye.bin		4800	7D2		3E8
 boleye.bin		4c00	BBA		3E8
