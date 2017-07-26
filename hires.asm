@@ -1987,6 +1987,7 @@ sintab2:
 costab2:
     .fill 256,0
 
+PNGtoHIRES_single("tekstu.png",$5000,$6000,1,0)
 
 .print "vic_bank: " + toHexString(vic_bank)
 .print "vic_base: " + toHexString(vic_base)
