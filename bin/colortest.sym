@@ -1,0 +1,6 @@
+.label wait=$f82
+.label screenmemtab=$f50
+.label sintab=$f8f
+.label loop=$f25
+.label waiter1=$f82
+.label start=$f00

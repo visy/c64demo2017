@@ -1067,6 +1067,9 @@ borderopen:
     lda #$00
     sta $d017
 
+    lda #0
+    sta $d010
+
     lda #%00111011
     sta $d011
 
@@ -1077,7 +1080,7 @@ borderopen:
     sta $d016
 
     // Setup some sprites
-    lda #%00011111
+    lda #%00111111
     sta $d015
 
     lda #0
@@ -1093,6 +1096,8 @@ borderopen:
     sta $5000+$3fb
     lda #$4
     sta $5000+$3fc
+    lda #$5
+    sta $5000+$3fd
 
     ldy #30
 
@@ -1111,6 +1116,9 @@ borderopen:
     lda #69-38+24*4
     sta $d008
     sty $d009
+    lda #69-33+24*5
+    sta $d00a
+    sty $d00b
 
     lda #255
 waitforrasters:
@@ -1143,7 +1151,7 @@ fadetab2:
 .byte $01<<4, $0d<<4, $03<<4, $0c<<4, $04<<4, $02<<4, $09<<4, $00<<4
 
 faders:
-    .byte 0,1,2,3,4
+    .byte 0,1,2,3,4,5
 
 .pc = $3000 "raster irqs"
 irq1:    
@@ -1178,32 +1186,43 @@ no_part_hi_add2:
     inc faders+2
     inc faders+3 
     inc faders+4 
+    inc faders+5
 
     lda faders
     and #29
     tax
     lda fadetab,x
     sta $d027
+    
     lda faders+1
     and #29
     tax
     lda fadetab,x
     sta $d028
+    
     lda faders+2
     and #29
     tax
     lda fadetab,x
     sta $d029
+    
     lda faders+3
     and #29
     tax
     lda fadetab,x
     sta $d02a
+    
     lda faders+4
     and #29
     tax
     lda fadetab,x
     sta $d02b
+
+    lda faders+5
+    and #29
+    tax
+    lda fadetab,x
+    sta $d02c
 
     jsr $c003 // le musica
 
@@ -1221,7 +1240,7 @@ irq2:
 
     lda #$fa
     sta $d012
-    lda #%00011111
+    lda #%00111111
     sta $d015
 
     lda #$3b //If you want to display a bitmap pic, use #$3b instead

@@ -6,9 +6,9 @@ Output pass
 Memory Map
 ----------
 Default-segment:
-  $0f00-$1cc4 democode
-  $3000-$3120 raster irqs
-  $3121-$393c wait
+  $0f00-$1cd7 democode
+  $3000-$312f raster irqs
+  $3130-$394b wait
   $3f00-$3f1f next part irq
   $3fc0-$3fcf partswitch
   *$ba00-$baff sintab
