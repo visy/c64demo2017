@@ -38,7 +38,6 @@ al C:2fe4 .initic
 al C:3f72 .restorex2
 al C:bc00 .sintab2
 al C:2fe2 .ichar
-al C:6000 .ScreenMemColors
 al C:1208 .real_start
 al C:3313 .prgnum
 al C:2fe2 .init16

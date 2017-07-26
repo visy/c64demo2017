@@ -451,10 +451,26 @@ BasicUpstart2(start)
 .pc = $0f00 "democode"
 
 .macro putcol(xx,yy,col) {
+    lda xx
+    cmp #40
+    bcs no_put
+
+    lda yy
+    cmp #25
+    bcs no_put
+
+    lda xx
+    cmp #240
+    bcs no_put
+
+    lda yy
+    cmp #240
+    bcs no_put
+
     lda #col
-    sta $f1
+    sta $e1
     ldx xx
-    stx $F2
+    stx $e2
     ldy yy
     tya
     asl
@@ -463,12 +479,13 @@ BasicUpstart2(start)
     sta screenadd+1
     lda screenmemtab+1,x
     sta screenadd+2
-    ldy $F2
+    ldy $e2
 
-    lda $F1
+    lda $e1
 screenadd:
     sta $d800,y
 
+no_put:
 }
 start:
     lda #%10011011
@@ -480,14 +497,73 @@ start:
 
     FillScreenMemory($0400,90)
 
-loop:
-    lda #29
-    sta $F3
-    lda #14
-    sta $F4
-    putcol($f3,$f4,1)
 
-    jmp loop
+    ldy #255
+    jsr wait
+
+    .var a = $F0
+    .var a2 = $F1
+    .var a3 = $F2
+
+    lda #0
+    sta a
+    sta a2
+    sta a3
+    sta $F9
+
+nextloop:
+    lda #0
+    sta $F3
+
+loop:
+    inc a
+
+    lda a
+    cmp #0
+    bne no_a_adder
+    inc a2
+    lda a2
+    cmp #4
+    bne no_a2
+    lda a3
+    clc
+    adc #2
+    sta a3
+    lda #0
+    sta a2
+no_a2:
+no_a_adder:
+
+    lda a3
+
+    cmp #164
+    bcs no_trapixel
+
+    ldx a
+    lda tradata,x
+    adc a3
+    sta $F5
+
+
+    ldx a
+    lda tradata+256,x
+    adc #12
+    sta $F6
+
+    putcol($f5,$f6,0)
+no_trapixel:
+    inc $F3
+    lda $F3
+    cmp #32
+
+    bne loop
+    inc $F9
+
+    jmp nextloop
+
+.align $100
+tradata:
+.import c64 "tradata.bin"
 
 screenmemtab:
 .word $d800, $d828, $d850,$d878,$d8a0,$d8c8,$d8f0,$d918,$d940,$d968,$d990,$d9b8,$d9e0,$da08,$da30,$da58,$da80,$daa8,$dad0,$daf8,$db20,$db48,$db70,$db98,$dbc0
@@ -502,6 +578,5 @@ waiter1:
     bne wait
     rts
 
-sintab:
-    .fill 256, 64.5*abs(sin(toRadians(i*360/128))) // Generates a sine curve
+
 

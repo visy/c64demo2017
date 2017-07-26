@@ -379,6 +379,44 @@ no_alter4:
 
     }
 
+.macro putcol(xx,yy,col) {
+    lda xx
+    cmp #40
+    bcs no_put
+
+    lda yy
+    cmp #25
+    bcs no_put
+
+    lda xx
+    cmp #240
+    bcs no_put
+
+    lda yy
+    cmp #240
+    bcs no_put
+
+    lda #col
+    sta $e1
+    ldx xx
+    stx $e2
+    ldy yy
+    tya
+    asl
+    tax
+    lda screenmemtab,x
+    sta screenadd+1
+    lda screenmemtab+1,x
+    sta screenadd+2
+    ldy $e2
+
+    lda $e1
+screenadd:
+    sta $d800,y
+
+no_put:
+}
+
 
 .pc = $f00 "democode"
 
@@ -957,7 +995,7 @@ noEor2:
     inc $DA
 
     ldy part_hi
-    cpy #$27
+    cpy #$26
     beq nobols
 
 no_incflasheor2:
@@ -976,6 +1014,76 @@ no_incflasheor2:
     jmp fillloop2
 
 nobols:
+
+    .var a = $D0
+    .var a2 = $D1
+    .var a3 = $D2
+
+    lda #0
+    sta a
+    sta a2
+    sta a3
+    sta $D9
+    sta $D8
+
+nextloop:
+    lda #0
+    sta $D3
+
+loop:
+    inc a
+
+    lda a
+    cmp #0
+    bne no_a_adder
+    inc a2
+    lda a2
+    cmp #4
+    bne no_a2
+    lda a3
+    clc
+    adc #2
+    sta a3
+    lda #0
+    sta a2
+no_a2:
+no_a_adder:
+
+    lda a3
+
+    cmp #164
+    bcs no_trapixel
+
+    ldx a
+    lda tradata,x
+    adc a3
+    sta $D5
+
+
+    ldx a
+    lda tradata+256,x
+    adc #12
+    sta $D6
+
+    putcol($D5,$D6,0)
+no_trapixel:
+    inc $D3
+    lda $D3
+    cmp #32
+
+    bne loop
+    inc $D9
+    lda $D9
+    cmp #150
+    bne boltracont
+    inc $D8
+    lda $D8
+    cmp #11
+    beq boltradone
+boltracont:
+
+    jmp nextloop
+boltradone:
 
 sundial:
     jsr $c90 // load sundial data
@@ -1140,6 +1248,8 @@ waitforrasters:
     jsr waitforpart
 
 go_partswitch:
+
+
     FillBitmap($4000,0)
     FillBitmap($5000,0)
     FillBitmap($6000,0)
@@ -1148,6 +1258,14 @@ go_partswitch:
     FillBitmap($9000,0)
 
     jmp partswitch
+
+.align $100
+tradata:
+.import c64 "tradata.bin"
+
+screenmemtab:
+.word $d800, $d828, $d850,$d878,$d8a0,$d8c8,$d8f0,$d918,$d940,$d968,$d990,$d9b8,$d9e0,$da08,$da30,$da58,$da80,$daa8,$dad0,$daf8,$db20,$db48,$db70,$db98,$dbc0
+
 
 fadetab:
     .byte $01,$0d,$07,$0f,$03,$05,$0a,$0c,$0e,$08,$04,$02,$0b,$06,$09,$00,$09,$06,$0b,$02,$04,$08,$0e,$0c,$0a,$05,$03,$0f,$07,$0d

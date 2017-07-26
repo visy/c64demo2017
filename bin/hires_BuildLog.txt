@@ -14,8 +14,6 @@ Default-segment:
   $3f00-$3f76 Unnamed
   $3ff0-$3ff2 partswitch
   $3ff3-$3ff5 partswitch_jmp
-  $5000-$59ff Hires Bitmap
-  $6000-$613f Hires Color Data
   *$ba00-$baff sintab
   *$bb00-$bbff costab
   *$bc00-$bcff sintab2
