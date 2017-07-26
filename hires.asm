@@ -1969,6 +1969,11 @@ restorey2: ldy #$00
 
 .pc = $3ff0 "partswitch"
 partswitch:
+    lda #255
+waitforrasters:
+    cmp $d012
+    bne waitforrasters
+
     jsr $c90 // load part1 -> hires2.asm
 .pc = * "partswitch_jmp"
 partswitch2:

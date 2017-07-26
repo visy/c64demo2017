@@ -51,6 +51,7 @@ al C:1080 .do_calc_fld
 al C:332f .frame2
 al C:3f74 .restorey2
 al C:1000 .start
+al C:3ff2 .waitforrasters
 al C:1200 .fadetab
 al C:332d .loadfile
 al C:3f26 .no_border
@@ -58,7 +59,7 @@ al C:1268 .fadetowhite
 al C:bb00 .costab
 al C:1ad2 .metroloop0
 al C:1100 .sinus
-al C:3ff3 .partswitch2
+al C:3ffa .partswitch2
 al C:3f34 .no_part_hi_add
 al C:3317 .waitforpart
 al C:1305 .copyloop__0

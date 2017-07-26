@@ -12,8 +12,8 @@ Memory Map
 Default-segment:
   $1000-$3b2f democode
   $3f00-$3f76 Unnamed
-  $3ff0-$3ff2 partswitch
-  $3ff3-$3ff5 partswitch_jmp
+  $3ff0-$3ff9 partswitch
+  $3ffa-$3ffc partswitch_jmp
   *$ba00-$baff sintab
   *$bb00-$bbff costab
   *$bc00-$bcff sintab2

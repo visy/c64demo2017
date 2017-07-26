@@ -60,10 +60,11 @@
 .label frame2=$332f
 .label restorey2=$3f74
 .label start=$1000
+.label waitforrasters=$3ff2
 .label costab=$bb00
 .label metroloop0=$1ad2
 .label sinus=$1100
-.label partswitch2=$3ff3
+.label partswitch2=$3ffa
 .label no_part_hi_add=$3f34
 .label waitforpart=$3317
 .label short_irq2=$3f3e
