@@ -17,8 +17,8 @@ logosprites.bin ee00	0
 smoky3.bit		8000	2
 smoky3.chr 		e000	2
 smoky3.d80      e400 	2 
-quadtrip.bit    a000 	2
-quadtrip.clr    e800  	2
+quadlogo2.bit    a000 	2
+quadlogo2.clr    e800  	2
 
 # metro
 metro1.clr 		5000	2
@@ -44,6 +44,7 @@ d_fox.clr		9000	2
 d_fox.bit		a000	2
 feissi.clr		8000	2
 feissi.bit		e000	2
+tekstu.bit 		8400    2
 
 d_bune.clr		9000	2
 d_bune.bit		a000	2

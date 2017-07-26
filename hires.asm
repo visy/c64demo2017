@@ -706,6 +706,21 @@ checkup:
 
     }
 
+    .macro clear_colorline_blue(dst) {
+        lda #<dst // set our destination memory to copy to, $5000
+        sta $ED 
+        lda #>dst
+        sta $EE
+        ldy #0
+    copyloop:
+        lda #6    
+        sta ($ED),y  // indirect index dest memory address, starting at $00
+        iny
+        cpy #40
+        bne copyloop // loop until our dest goes over 255
+
+    }
+
     .macro PNGtoHIRES_single(PNGpicture,BMPData,ColData,color,bgcolor) {
 
         .var Graphics = LoadPicture(PNGpicture)
@@ -751,7 +766,7 @@ checkup:
         .pc = BMPData "Hires Bitmap"
 
         .var ScreenMem = List()
-        .for (var Line = 0 ; Line < 200 ; Line = Line + 8) {
+        .for (var Line = 0 ; Line < 64 ; Line = Line + 8) {
             .for (var Block = 0 ; Block < 320 ; Block=Block+8) {
                 .var Coll1 = Graphics.getPixel(Block,Line)
                 .var Coll2 = bgcolor
@@ -768,7 +783,7 @@ checkup:
         }
         .pc = ColData "Hires Color Data"
     ScreenMemColors:
-        .for (var i = 0 ; i < 1000 ; i++ ) {
+        .for (var i = 0 ; i < 320 ; i++ ) {
             .byte ScreenMem.get(i)
         }
     }
@@ -1155,7 +1170,7 @@ metropart:
     SetScreenMemory(screen_memory - vic_base)
     SetBitmapAddress(bitmap_address - vic_base)
 
-    copymem($5000,$a000,4)
+    copymem($5000,$f000,4)
     lda #0
     sta $F0
 
@@ -1170,13 +1185,13 @@ metroloop:
     copymem($9000,$5000,4)
     ldy #5
     jsr wait
-    copymem($a000,$5000,4)
+    copymem($f000,$5000,4)
     ldy #5
     jsr wait
     copymem($9000,$5000,4)
     ldy #5
     jsr wait
-    copymem($a000,$5000,4)
+    copymem($f000,$5000,4)
     ldy #5
     jsr wait
     ldy #5
@@ -1184,7 +1199,7 @@ metroloop:
     copymem($9000,$5000,4)
     ldy #5
     jsr wait
-    copymem($a000,$5000,4)
+    copymem($f000,$5000,4)
     ldy #5
     jsr wait
 
@@ -1210,12 +1225,16 @@ metrodone:
     lda #240
     sta $d012
 
-    lda #0
+    lda #6
     sta $d020
+    sta $d021
+    FillScreenMemory($5000,14)
+    FillBitmap($6000,0)
+    :centerwipeout_trans_blue(3)
 
-    :centerwipeout_trans(3)
 
-    lda #%00111011
+quadlogo:
+    lda #%00101011
     sta $d011
 
     lda #%11001000
@@ -1227,10 +1246,14 @@ metrodone:
 dithersandpics:
 
     copymem($a000, $6000,32)
-    copymem($e800, $5000,10)
+    copymem($e800, $5000,6)
+
+    lda #%00111011
+    sta $d011
 
     ldy #8
     jsr waitforpart
+
 
     jsr dithers
 afterdithers:
@@ -1284,6 +1307,11 @@ waiterlooper:
     sta $d016
 
     :centerwipeout_trans(3)
+
+    FillBitmap($6000,0)
+    FillScreenMemory($5000,1<<4)
+
+    copymem($8400,$6a00-64+32+32,10)
 
     jsr $c90 // load spacebunny
 
@@ -1376,6 +1404,9 @@ dithers:
     FillScreenMemory($4000,0)
 
     jsr $c90 // init to 8000, a000, e000
+
+    lda #0
+    sta $d020
 
     // Setup some sprites
     lda #%00000000
@@ -1525,6 +1556,18 @@ clear_y:
         :clear_colorline($5000+40*12-40*i)
     }
 }
+
+.macro centerwipeout_trans_blue(waittime) {
+    ldx #0
+    .for(var i=0;i<13;i++) { 
+        ldy #waittime
+        jsr wait
+        :clear_colorline_blue($5000+40*12+40*i)
+        :clear_colorline_blue($5000+40*12-40*i)
+    }
+}
+
+
 .macro centerwipein_trans(waittime) {
     :FillScreenMemory($5000,(0<<4)+0)
     :copymem($a000,$6000,32)
@@ -1935,6 +1978,7 @@ sintab2:
 .pc = $bd00 "costab2" virtual
 costab2:
     .fill 256,0
+
 
 .print "vic_bank: " + toHexString(vic_bank)
 .print "vic_base: " + toHexString(vic_base)
