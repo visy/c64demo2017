@@ -1401,9 +1401,17 @@ i162:
     rts
 
 dithers:
-    FillScreenMemory($4000,0)
 
     jsr $c90 // init to 8000, a000, e000
+
+    lda #%00101011
+    sta $d011
+
+    :FillBitmap($6000,0)
+    :FillScreenMemory($5000,0)
+
+    lda #%00111011
+    sta $d011
 
     lda #0
     sta $d020
@@ -1449,7 +1457,7 @@ dithers:
 
     :copymem_eor($8000,$6000,32)
 
-    lda #%00011111
+    lda #%00000111
     sta $d015
 
     ldy #10
@@ -1464,7 +1472,7 @@ dithers:
 
     :copymem_eor($a000,$6000,32)
 
-    lda #%00011111
+    lda #%00000111
     sta $d015
 
     ldy #11
@@ -1479,7 +1487,7 @@ dithers:
 
     :copymem_eor($e000,$6000,32)
 
-    lda #%00011111
+    lda #%00000111
     sta $d015
 
     ldy #12
