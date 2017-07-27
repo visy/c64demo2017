@@ -9,7 +9,7 @@ Memory Map
 Default-segment:
   $0801-$080c Basic
   $080e-$080d Basic End
-  $0f00-$103a democode
+  $0f00-$10ad democode
   $5000-$51fe Unnamed
   $6400-$67e7 Unnamed
   $6800-$6be7 Unnamed

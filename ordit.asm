@@ -399,6 +399,39 @@ start:
     lda #0
     sta $d021
 
+    copymem($6400,$4400,8)
+    copymem($6800,$4800,8)
+
+    lda #248
+    sta $a9
+forever:
+
+    lda #%00011011
+    sta $d011
+
+    lda #248
+    clc
+    sbc $a9
+waitfor:
+    cmp $d012
+    bne waitfor
+
+    lda #%01111011
+    sta $d011
+
+    lda #252
+waitfor2:
+    cmp $d012
+    bne waitfor2
+
+    dec $a9
+    lda $a9
+    cmp #0
+    beq jumpout
+    jmp forever
+jumpout:
+    lda #%00011011
+    sta $d011
 
 loop:
     lda #2

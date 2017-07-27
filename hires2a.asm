@@ -368,6 +368,13 @@ no_over:
 
 .pc = $f00 "democode"
 start:
+    FillScreenMemory($d800,0)
+
+    lda #%00001000
+    sta $d016
+
+    lda #%01111011
+    sta $d011
 
     lda #0
     sta $F0
@@ -389,17 +396,58 @@ start:
     sta $d020
     sta $d021
 
-    lda #%00010000
-    sta $d011
 
-    lda #%00001000
-    sta $d016
 
-    FillScreenMemory($d800,1)
     lda #0
     sta $d021
     lda #0
     sta $E1
+
+    copymem($6400,$4400,8)
+    copymem($6800,$4800,8)
+    lda #1
+    sta $a8
+
+    lda #247
+    sta $a9
+forever:
+
+    lda #%00010000
+    sta $d011
+
+    lda #248
+    clc
+    sbc $a9
+waitfor:
+    cmp $d012
+    bne waitfor
+
+    lda #%01111011
+    sta $d011
+
+    lda $a8
+    cmp #0
+    beq no_fuller
+    FillScreenMemory($d800,1)
+    lda #0
+    sta $a8
+no_fuller:
+    lda #252
+waitfor2:
+    cmp $d012
+    bne waitfor2
+
+    dec $a9
+    lda $a9
+    cmp #0
+    beq jumpout
+    jmp forever
+jumpout:
+    lda #%00010000
+    sta $d011
+
+    ldy #164
+    jsr wait
 
 loop_envmap:
     lda #2

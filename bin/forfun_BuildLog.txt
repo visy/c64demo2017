@@ -1,0 +1,13 @@
+parsing
+flex pass 1
+flex pass 2
+Output pass
+
+Memory Map
+----------
+Default-segment:
+  $1000-$11e1 Unnamed
+
+Writing prg file: /Users/visy/dev/kick/hires2/bin/forfun_Compiled.prg
+Writing Vice symbol file: /Users/visy/dev/kick/hires2/bin/forfun.vs
+Writing Symbol file: bin/forfun.sym
