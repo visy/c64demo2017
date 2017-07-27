@@ -1316,11 +1316,61 @@ waiterlooper:
 
     jsr $c90 // load spacebunny
 
+    ldy #17
+    jsr waitforpart
+
     lda #0
     sta $d020
 
-    ldy #17
-    jsr waitforpart
+    lda #0
+    sta $F0
+    ldy #0
+coltest0:
+    ldx #0
+    ldy #1
+    jsr wait
+coltest:
+
+    lda $5000,x
+    cmp #1
+    beq no_alter1
+    ldy $F0
+    lda fadetab2,y
+    sta $5000,x
+no_alter1:
+    lda $5100,x
+    cmp #1
+    beq no_alter2
+    ldy $F0
+    lda fadetab2,y
+    sta $5100,x
+no_alter2:
+    lda $5200,x
+    cmp #1
+    beq no_alter3
+    ldy $F0
+    lda fadetab2,y
+    sta $5200,x
+no_alter3:
+    lda $5300,x
+    cmp #1
+    beq no_alter4
+    cpx #32+80
+    bcs no_alter4
+    ldy $F0
+    lda fadetab2,y
+    sta $5300,x
+no_alter4:
+    inx
+    cpx #0
+    bne coltest
+    inc $F0
+    lda $F0
+    cmp #8
+    bne coltest0
+
+    ldy #64
+    jsr wait
 
     :centerwipein_trans(3)
 
@@ -1340,6 +1390,9 @@ waiterlooper:
 
 bols:
     jmp partswitch
+
+fadetab2:
+.byte $01<<4, $0d<<4, $03<<4, $0c<<4, $04<<4, $02<<4, $09<<4, $00<<4
 
 putpix16:
     lda #<$6000

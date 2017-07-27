@@ -1,0 +1,18 @@
+parsing
+flex pass 1
+flex pass 2
+flex pass 3
+Output pass
+
+Memory Map
+----------
+Default-segment:
+  $0801-$080c Basic Program Start
+  $0810-$0957 Main Program
+  $0a00-$0ac9 colours
+  $0b00-$0bc9 timing
+  $0c00-$0cff pattern
+
+Writing prg file: /Users/visy/dev/kick/hires2/bin/raster_Compiled.prg
+Writing Vice symbol file: /Users/visy/dev/kick/hires2/bin/raster.vs
+Writing Symbol file: bin/raster.sym
