@@ -1234,11 +1234,6 @@ borderopen:
     sta $d00a
     sty $d00b
 
-    lda #255
-waitforrasters:
-    cmp $d012
-    bne waitforrasters
-
     sei
     lda #<irq1
     sta $fffe
@@ -1248,6 +1243,49 @@ waitforrasters:
 
     ldy #$2e
     jsr waitforpart
+
+    lda #0
+    sta $d015
+
+    lda #<nextirq
+    sta $fffe
+    lda #>nextirq
+    sta $ffff
+
+    lda #0
+    sta $a9
+forever:
+
+    lda #%00111011
+    sta $d011
+
+    lda #252
+    clc
+    sbc $a9
+waitfor:
+    cmp $d012
+    bne waitfor
+
+    lda #%01111011
+    sta $d011
+
+no_fuller:
+    lda #254
+waitfor2:
+    cmp $d012
+    bne waitfor2
+
+    inc $a9
+    lda $a9
+    cmp #252
+    beq jumpout
+    jmp forever
+jumpout:
+
+    lda #255
+waitforrasters:
+    cmp $d012
+    bne waitforrasters
 
 go_partswitch:
 
@@ -1324,25 +1362,25 @@ no_part_hi_add2:
     lda fadetab,x
     sta $d028
     
-    lda faders+2
+    lda faders+1
     and #29
     tax
     lda fadetab,x
     sta $d029
     
-    lda faders+3
+    lda faders+2
     and #29
     tax
     lda fadetab,x
     sta $d02a
     
-    lda faders+4
+    lda faders+3
     and #29
     tax
     lda fadetab,x
     sta $d02b
 
-    lda faders+5
+    lda faders+4
     and #29
     tax
     lda fadetab,x

@@ -26,6 +26,7 @@ al C:12b9 .no_bloeraseslow
 al C:17f3 .possprites0___0
 al C:18ca .possprites0___1
 al C:19a1 .possprites0___2
+al C:1b2a .jumpout
 al C:10ac .bolerase
 al C:15a8 .fillloop1
 al C:15a8 .bol_copyloop_y
@@ -71,6 +72,7 @@ al C:18fe .coltest__1
 al C:19d5 .coltest__2
 al C:1a03 .coltest__3
 al C:3f00 .nextirq
+al C:1b18 .no_fuller
 al C:16c4 .loop
 al C:12db .bolscroll
 al C:10b0 .bolerase_loopx
@@ -91,6 +93,7 @@ al C:bd00 .costab2
 al C:f05 .bols
 al C:15c3 .copy_done
 al C:1643 .ranbyteols
+al C:1b0e .waitfor
 al C:1568 .bolwaitter
 al C:314a .frame
 al C:172c .screenadd
@@ -102,7 +105,8 @@ al C:17e1 .copyloop2__1
 al C:189b .copyloop2__2
 al C:1972 .copyloop2__3
 al C:163e .boscroll_over
-al C:1af8 .go_partswitch
+al C:1b1a .waitfor2
+al C:1b31 .go_partswitch
 al C:163b .no_finenull
 al C:109b .no_bloslow
 al C:15fa .bol_no_src_inc
@@ -111,7 +115,7 @@ al C:2050 .fadetab2
 al C:30c6 .restorey2
 al C:313d .wait2
 al C:314b .frame2
-al C:1ae2 .waitforrasters
+al C:1b2c .waitforrasters
 al C:174a .sundial
 al C:30c9 .loopere
 al C:bb00 .costab
@@ -126,6 +130,7 @@ al C:3f11 .no_part_hi_add
 al C:312a .waitforpart
 al C:f00 .part_init
 al C:309b .irq2
+al C:1b04 .forever
 al C:17fa .possprites0__0
 al C:18d1 .possprites0__1
 al C:19a8 .possprites0__2
