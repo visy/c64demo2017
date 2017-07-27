@@ -11,9 +11,10 @@ loader by lft
 
 some words:
 
+- this demo was made in three weeks, with 15 or so years of mental preparation
 - the grayscale fading dither part uses 32 brightness levels and iterative 
   dither with a 4px varying x-scroll to fake a 80x25 flicker image
-- the 4x4 mode uses three brightness level: off, outlined and filled, all 256
+- the 4x4 mode uses three brightness levels: off, outlined and filled, all 256
   chars used
 - i ended up writing four processing scripts to do conversion to the custom 
   formats & simulate modes in addition to the usual kickasm converter macros
@@ -37,5 +38,6 @@ charpad
 spritepad
 
 special greets to jope, ptoing & lft for testing help, groente for pointers 
-about some graphics code and Linus/Multistyle Labs for getting me in touch with 
-Jammer & psycho8580
+about some graphics code, Linus/Multistyle Labs for getting me in touch with 
+Jammer & psycho8580, noby for design pointers + support and 
+Radiant/Panda Design for kind words and encouragement
