@@ -850,7 +850,7 @@ bol_copyloop_y:
 
     ldx #255
 bol_copyloop_x:
-    lda $6828+40,x
+    lda $6828,x
 bol_copyloop_target:
     sta $4800,x 
     dex
