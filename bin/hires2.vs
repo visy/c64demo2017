@@ -58,6 +58,7 @@ al C:188b .copyloop__11
 al C:18b8 .copyloop__12
 al C:1962 .copyloop__13
 al C:198f .copyloop__14
+al C:15a8 .actualscroll
 al C:3094 .restorea
 al C:1774 .possprites__0
 al C:1850 .possprites__1

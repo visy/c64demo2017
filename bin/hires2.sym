@@ -83,6 +83,7 @@
 .label waitforpart=$312a
 .label part_init=$f00
 .label irq2=$309b
+.label actualscroll=$15a8
 .label restorea=$3094
 .label bolfiller_x=$1338
 .label bolfiller_y=$1334

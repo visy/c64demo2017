@@ -936,8 +936,8 @@ real_start:
 
     FillScreenMemory($4400,255)
 
-
     FillScreenMemory($d800,$01)
+
 
     ldx #0
 fadetowhite:
@@ -947,18 +947,13 @@ fadetowhite:
     sta $d021
 
     ldy #10
-    jsr wait
+    jsr wait3
+
     inx
     cpx #7
     bne fadetowhite
     jmp demo_init
 
-    lda #1
-    sta $d020
-    sta $d021
-    lda $d011
-    eor #%00010000 // off
-    sta $d011
 
     // demo init
 demo_init:
@@ -1034,7 +1029,13 @@ titlepics:
     lda #%00110000
     sta $d018
 
+    lda #%00101011
+    sta $d011
+
     FillBitmap($4000,0)
+
+    lda #%00111011
+    sta $d011
 
 koalapic: // logoscene
     copymem($ee00,$4000,1)
@@ -1607,6 +1608,16 @@ waiter1:
     bne wait
     rts
 
+wait3:
+waiter4:
+    lda #10
+    cmp $D012
+    bne *-3
+    dey
+    cpy #0
+    bne wait3
+    rts
+
 
 .var bres_x1 = $50
 .var bres_y1 = $51
@@ -1991,6 +2002,7 @@ sintab2:
 .pc = $bd00 "costab2" virtual
 costab2:
     .fill 256,0
+
 
 .print "vic_bank: " + toHexString(vic_bank)
 .print "vic_base: " + toHexString(vic_base)
