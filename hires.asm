@@ -1550,10 +1550,9 @@ dithers:
     sty $d009
 
 
-    ldy #120
-waitafafs:
-    cpy part_lo
-    bcs waitafafs
+    ldy #9
+    jsr waitforpart
+
 
     lda #%00000111
     sta $d015

@@ -1,15 +1,15 @@
 .label no_new_fld_calc=$10ab
 .label no_incfldframe=$1092
-.label waiter1=$316f
+.label waiter1=$316e
 .label short_irq=$3f00
-.label waiter0=$316a
+.label waiter0=$3169
 .label koalapic=$1403 {
 }
-.label clear_y=$3167
+.label clear_y=$3166
 .label toclr2=$1be7
 .label metroloop=$19c4
 .label afterdithers=$1c71
-.label waiter4=$317c
+.label waiter4=$317b
 .label bitclrs2=$1aec
 .label loop2=$105d
 .label loop1=$103f
@@ -21,23 +21,22 @@
 .label no_alter4=$28ed
 .label metrodone=$1acf
 .label titlepics=$12dc
-.label wait=$316f
+.label wait=$316e
 .label partswitch=$3ff0
 .label restorey=$3f3b
 .label restorex=$3f39
 .label initic=$2eaf
 .label real_start=$1208
 .label bitclr0=$1be4
-.label prgnum=$3165
+.label prgnum=$3164
 .label bitclr2=$1bed
 .label init16=$2ead
-.label waitafafs=$2fda
 .label putpix16=$2e80
 .label CalcNumLines=$1078
-.label hline_sto=$3189
+.label hline_sto=$3188
 .label do_calc_fld=$1080
 .label fadetab=$1200
-.label loadfile=$318c
+.label loadfile=$318b
 .label no_border=$3f26
 .label fadetowhite=$1268
 .label restorea=$3f37
@@ -47,7 +46,7 @@
 .label bitclrdone=$1bf0
 .label demo_init=$127e
 .label sintab=$ba00
-.label bolchars=$318f
+.label bolchars=$318e
 .label coltest=$28ad
 .label sprlogomove=$1933
 .label i162=$2eb2
@@ -60,7 +59,7 @@
 .label CalcNumLines2=$1092
 .label costab2=$bd00
 .label bols=$2e75
-.label frame=$318d
+.label frame=$318c
 .label fade_border_tab=$2ea5
 .label no_border2=$3f70
 .label restorex2=$3f72
@@ -69,10 +68,10 @@
 .label dithersandpics=$1c20 {
 }
 .label no_stop_fld=$10a4
-.label wait3=$317c
+.label wait3=$317b
 .label waiterlooper=$25a3
 .label fadetab2=$2e78
-.label frame2=$318e
+.label frame2=$318d
 .label restorey2=$3f74
 .label start=$1000
 .label waitforrasters=$3ff2
@@ -81,6 +80,6 @@
 .label sinus=$1100
 .label partswitch2=$3ffa
 .label no_part_hi_add=$3f34
-.label waitforpart=$3169
+.label waitforpart=$3168
 .label short_irq2=$3f3e
 .label restorea2=$3f70
