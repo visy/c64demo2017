@@ -1229,9 +1229,13 @@ metrodone:
     lda #6
     sta $d020
     sta $d021
-    FillScreenMemory($5000,14)
+    lda #%00011011
+    sta $d011
+
     FillBitmap($6000,0)
-    :centerwipeout_trans_blue(3)
+    FillScreenMemory($5000,6)
+    lda #%00111011
+    sta $d011
 
 
 quadlogo:
@@ -1304,13 +1308,15 @@ waiterlooper:
     cpy part_hi
     bne waiterlooper
 
-    lda #%11001000
+    lda #%11000000
     sta $d016
 
     :centerwipeout_trans(3)
 
     FillBitmap($6000,0)
     FillScreenMemory($5000,1<<4)
+    lda #%11001000
+    sta $d016
 
     copymem($8400,$6a00-64+32+32,10)
 
@@ -1458,7 +1464,10 @@ dithers:
 
     jsr $c90 // init to 8000, a000, e000
 
-    lda #%00101011
+    lda #0
+    sta $d020
+
+    lda #%00001011
     sta $d011
 
     :FillBitmap($6000,0)
