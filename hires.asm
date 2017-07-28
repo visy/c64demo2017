@@ -1216,37 +1216,70 @@ metrodone:
     ldy #7
     jsr waitforpart
 
+
     lda #0
     sta $C9
+
     lda #<short_irq
     sta $fffe
     lda #>short_irq
     sta $ffff
 
-    lda #240
-    sta $d012
-
     lda #6
     sta $d020
     sta $d021
-    lda #%00011011
-    sta $d011
 
-    FillBitmap($6000,0)
-    FillScreenMemory($5000,6)
-    lda #%00111011
-    sta $d011
+    ldy #8
+bitclrs2:
+    ldx #255
+bitclr:
+.for(var xx = 0; xx < 32;xx++) {
+    lda $6000+xx*$100,x
+    asl
+    sta $6000+xx*$100,x
+}
+    lda #6
+    sta $5000,x
+    sta $5100,x
+    sta $5200,x
+    sta $5300,x
 
+    dex
+    cpx #255
+    bne bitclr0
+    jmp toclr2
+bitclr0:
+    jmp bitclr
+toclr2:
+    dey
+    bne bitclr2
+    jmp bitclrdone
+bitclr2:
+    jmp bitclrs2
+bitclrdone:
+
+    ldy #128
+waitforrastersas1:
+    lda #255
+waitforrastersas:
+    cmp $d012
+    bne waitforrastersas
+    dey
+    bne waitforrastersas1
+
+    lda #%11001000
+    sta $d016
+
+    lda #240
+    sta $d012
 
 quadlogo:
     lda #%00101011
     sta $d011
 
-    lda #%11001000
-    sta $d016
-
     SetScreenMemory(screen_memory - vic_base)
     SetBitmapAddress(bitmap_address - vic_base)
+
 
 dithersandpics:
 
