@@ -1258,14 +1258,13 @@ bitclr2:
     jmp bitclrs2
 bitclrdone:
 
-    ldy #128
-waitforrastersas1:
-    lda #255
-waitforrastersas:
-    cmp $d012
-    bne waitforrastersas
-    dey
-    bne waitforrastersas1
+    ldy #255
+    jsr wait3
+    ldy #255
+    jsr wait3
+    ldy #210
+    jsr wait3
+
 
     lda #%11001000
     sta $d016
@@ -1504,7 +1503,9 @@ dithers:
     sta $d011
 
     :FillBitmap($6000,0)
-    :FillScreenMemory($5000,0)
+    :FillScreenMemory($5000,(11<<4) + 0)
+
+    :copymem_eor($8000,$6000,32)
 
     lda #%00111011
     sta $d011
@@ -1548,10 +1549,11 @@ dithers:
     sta $d008
     sty $d009
 
-    :FillBitmap($6000,0)
-    :FillScreenMemory($5000,(11<<4) + 0)
 
-    :copymem_eor($8000,$6000,32)
+    ldy #120
+waitafafs:
+    cpy part_lo
+    bcs waitafafs
 
     lda #%00000111
     sta $d015
@@ -1559,8 +1561,6 @@ dithers:
     ldy #10
     jsr waitforpart
 
-    lda #%00000000
-    sta $d015
 
     jsr $c90
 
@@ -1574,7 +1574,7 @@ dithers:
     ldy #11
     jsr waitforpart
 
-    lda #%00000000
+    lda #%00000111
     sta $d015
 
     jsr $c90
