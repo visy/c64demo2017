@@ -2098,6 +2098,8 @@ costab2:
     .fill 256,0
 
 
+
+
 .print "vic_bank: " + toHexString(vic_bank)
 .print "vic_base: " + toHexString(vic_base)
 .print "screen_memory: " + toHexString(screen_memory)

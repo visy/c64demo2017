@@ -838,7 +838,6 @@ bolwaitter:
     :copymem($6800,$4400,4)
     FillScreenMemory($4800,0)
 
-
 actualscroll:
 
 fillloop1:

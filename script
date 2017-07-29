@@ -72,7 +72,7 @@ boleye.bin		7400	32CA	3E8
 
 #actual text scroller part colors
 bolgreets.bin	6800	2
-bolcolor2.bin   d800!   
+colfade1.bin    d800! 	2   
 
 # sundial data
 sundial.bin
