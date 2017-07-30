@@ -1,0 +1,17 @@
+.label resety1=$27d5
+.label reseta2=$27fb
+.label start=$1000
+.label resetx1=$27d3
+.label resety2=$27ff
+.label resetx2=$27fd
+.label lab_a1=$27d0
+.label lab_a2=$27fa
+.label loop=$1052
+.label irq1=$1055
+.label lab_y1=$27d4
+.label irq3=$27d7
+.label irq2=$2000
+.label reseta1=$27d1
+.label lab_x1=$27d2
+.label lab_y2=$27fe
+.label lab_x2=$27fc
