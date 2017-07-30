@@ -1415,19 +1415,128 @@ no_alter4:
     lda #0
     sta $d020
 
+    // Setup some sprites
+    lda #%00000001
+    sta $d015
+
+    lda #0
+    sta $d01c
+
+    lda #0
+    sta $d027
+
+    lda #$0
+    sta $4400+$3f8
+
+    lda #80
+    ldy #124
+    sta $d000
+    sty $d001
+
     // glitch logo top & bot
     /*
     :copymem_eor($6000,$6000-1,5)
     :copymem_eor($6000+320*20,$6000+320*20-1,5)
     */
 
-    ldy #19
+    ldy #128
+    jsr wait
+
+    ldx #0
+eyefader:
+    lda eyefade1,x
+    sta $d027
+    ldy #8
+    jsr wait
+    inx
+    cpx #6
+    bne eyefader
+
+    ldy #128
+    jsr wait
+
+    ldx #5
+eyefader3:
+    lda eyefade1,x
+    sta $d027
+    ldy #8
+    jsr wait
+    inx
+    cpx #8
+    bne eyefader3
+
+    ldy #255
+    jsr wait
+
+    ldx #3
+eyemove0:
+    inc $d000
+    ldy #16
+    jsr wait
+    dex
+    bne eyemove0
+
+    ldy #128
+    jsr wait
+
+    ldx #3
+eyemove1:
+    dec $d000
+    ldy #16
+    jsr wait
+    dex
+    bne eyemove1
+
+    ldy #200
+    jsr wait
+
+    ldx #2
+eyemove2:
+    dec $d000
+    ldy #16
+    jsr wait
+    dex
+    bne eyemove2
+
+    ldy #128
+    jsr wait
+
+    ldx #2
+eyemove3:
+    inc $d000
+    ldy #16
+    jsr wait
+    dex
+    bne eyemove3
+
+    ldy #19 //19
     jsr waitforpart
+
+    ldx #4
+eyefader2:
+    lda eyefade,x
+    sta $d027
+    ldy #8
+    jsr wait
+    dex
+    cpx #255
+    bne eyefader2
+
+    lda #%00000000
+    sta $d015
+    ldy #32
+    jsr wait
 
     :centerwipeout_trans(3)
 
 bols:
     jmp partswitch
+
+eyefade:
+.byte $00,$09,$02,$04,$0a
+
+eyefade1:
+.byte $00,$06,$0b,$04,$0c,$05,$0c,$0a
 
 fadetab2:
 .byte $01<<4, $0d<<4, $03<<4, $0c<<4, $04<<4, $02<<4, $09<<4, $00<<4

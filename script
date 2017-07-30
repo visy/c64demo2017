@@ -48,6 +48,7 @@ tekstu.bit 		8400    2
 
 d_bune.clr		9000	2
 d_bune.bit		a000	2
+buneye.raw 		4000	0
 
 #second codeblock, goes to $f00
 demo2.prg		f00 	2
