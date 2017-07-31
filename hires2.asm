@@ -933,16 +933,100 @@ ranbyteols:
 
 // ranbyteols
 
+    // enable all sprites
+    lda #%11111111
+    sta $d015
+    // sprite 0 pos
+    lda #40
+    sta $d000
+    lda #80
+    sta $d001
+
+    lda #15
+    sta $d002
+    lda #60
+    sta $d003
+
+    lda #93
+    sta $d004
+    lda #69
+    sta $d005
+
+    lda #50
+    sta $d006
+    lda #100
+    sta $d007
+
+    lda #134
+    sta $d008
+    lda #120
+    sta $d009
+
+    lda #22
+    sta $d00a
+    lda #130
+    sta $d00b
+
+    lda #69
+    sta $d00c
+    lda #140
+    sta $d00d
+
+    lda #111
+    sta $d00e
+    lda #160
+    sta $d00f
+    
+    // sprite pointer
+    lda #$0
+    sta $47f8
+    sta $47f9
+    sta $47fa
+    sta $47fb
+    sta $47fc
+    sta $47fd
+    sta $47fe
+    sta $47ff
+
+    lda #$0
+    sta $d01b
+
+    // sprite color
+    lda #0
+    sta $d027
+    sta $d028
+    sta $d029
+    sta $d02a
+    sta $d02b
+    sta $d02c
+    sta $d02d
+    sta $d02e
+
+    // single color sprites
+    lda #0
+    sta $d01c
+
+    // stretch sprites
+    lda #$0
+    sta $d01d
+    lda #$00
+    sta $d017
+
     lda #0
     sta $DA
     sta $DC
     sta $DD
     sta $DB
+    sta $E9
+    sta $EA
 
 fillloop2:
     ldx #255
     ldy #1
     jsr wait
+
+    jsr do_birbs
+
     ldx #255
 
 fillloop3:
@@ -959,7 +1043,7 @@ noEor2:
     sta $43ff,x
     sta $44ff,x
     sta $45ff,x
-    sta $46ff,x
+    sta $46ff-23,x
 
     eor $DC
     sta $d7ff,x
@@ -990,7 +1074,7 @@ no_incflasheor2:
     sta $4400,x
     sta $4500,x
     sta $4600,x
-    sta $4700,x
+    sta $4700-23,x
 
     eor $DC
 
@@ -1066,10 +1150,11 @@ no_trapixel:
     bne boltracont
     inc $D8
     lda $D8
-    cmp #11
+    cmp #11  // 11
     beq boltradone
 boltracont:
 
+    jsr do_birbs2
     jmp nextloop
 boltradone:
 
@@ -1284,6 +1369,116 @@ go_partswitch:
     FillBitmap($9000,0)
 
     jmp partswitch
+
+do_birbs:
+    inc $E9
+    lda $E9
+    cmp #5
+    bne no_move
+    lda #0
+    sta $E9
+    inc $d000
+    inc $d001
+    inc $d002
+    inc $d004
+//    inc $d005
+    inc $d006
+    inc $d008
+    dec $d009
+    inc $d00a
+    inc $d00c
+    inc $d00e
+    dec $d00f
+
+
+no_move:
+
+    inc $EA
+    lda $EA
+    cmp #10
+    bne no_flap
+    lda #0
+    sta $EA
+
+    inc $47f8
+    inc $47f9
+    inc $47fa
+    inc $47fb
+    inc $47fc
+    inc $47fd
+    inc $47fe
+    inc $47ff
+
+    lda $47f8
+    cmp #4
+    bne no_nullspr
+    lda #0
+    sta $47f8
+    sta $47f9
+    sta $47fa
+    sta $47fb
+    sta $47fc
+    sta $47fd
+    sta $47fe
+    sta $47ff
+no_nullspr:
+no_flap:
+    rts
+
+do_birbs2:
+    inc $E9
+    lda $E9
+    cmp #25
+    bne no_move2
+    lda #0
+    sta $E9
+    inc $d000
+    inc $d001
+    inc $d002
+    inc $d004
+    inc $d005
+    inc $d006
+    inc $d008
+    dec $d009
+    inc $d00a
+    inc $d00c
+    inc $d00e
+    dec $d00f
+
+
+no_move2:
+
+    inc $EA
+    lda $EA
+    cmp #50
+    bne no_flap2
+    lda #0
+    sta $EA
+
+    inc $47f8
+    inc $47f9
+    inc $47fa
+    inc $47fb
+    inc $47fc
+    inc $47fd
+    inc $47fe
+    inc $47ff
+
+    lda $47f8
+    cmp #4
+    bne no_nullspr2
+    lda #0
+    sta $47f8
+    sta $47f9
+    sta $47fa
+    sta $47fb
+    sta $47fc
+    sta $47fd
+    sta $47fe
+    sta $47ff
+no_nullspr2:
+no_flap2:
+    rts
 
 .align $100
 tradata:
