@@ -1530,6 +1530,8 @@ eyefader2:
     :centerwipeout_trans(3)
 
 bols:
+    lda #%01110011
+    sta $d011
     jmp partswitch
 
 eyefade:

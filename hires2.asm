@@ -429,9 +429,6 @@ bols:
     ldy #$14
     jsr waitforpart
 */
-    lda $d011
-    eor #%00010000 // on
-    sta $d011
 
 
     // enable all sprites
@@ -519,23 +516,8 @@ bols:
     lda #$00
     sta $d017
 
-
-    // bols
-    lda #$11
-    sta $d011
-
     lda #%00011000
     sta $d018
-
-    lda #$02   // set vic bank #1 with the dkd loader way
-    and #$03
-    eor #$3f
-    sta $dd02
-
-    lda #0
-    sta $d020
-    lda #0
-    sta $d021
 
     :copymem(bolchars,$6000,8)
     :FillScreenMemory($4400, 0)
@@ -554,6 +536,11 @@ bols:
     sta frame
     sta frame2
     sta $d5
+
+    // bols
+    lda #$11
+    sta $d011
+
 bolop:
 
 //    :FillScreenMemory($4400, 0)
