@@ -1021,9 +1021,6 @@ ranbyteols:
     sta $EA
 
 fillloop2:
-    ldx #255
-    ldy #1
-    jsr wait
 
     jsr do_birbs
 
@@ -1059,7 +1056,7 @@ noEor2:
 
 
     lda $DD
-    cmp #32
+    cmp #128
     bne no_incflasheor2
     lda #0
     sta $DD

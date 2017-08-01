@@ -1054,7 +1054,7 @@ koalapic: // logoscene
     sta $d021
 
     // Setup some sprites
-    lda #%00000111
+    lda #%00111111
     sta $d015
 
     lda #0
@@ -1064,6 +1064,7 @@ koalapic: // logoscene
     sta $d027
     sta $d028
     sta $d029
+    lda #0
     sta $d02a
     sta $d02b
     sta $d02c
@@ -1074,11 +1075,11 @@ koalapic: // logoscene
     sta $4400+$3f9
     lda #$2
     sta $4400+$3fa
-    lda #$3
+    lda #$0
     sta $4400+$3fb
-    lda #$4
+    lda #$1
     sta $4400+$3fc
-    lda #$5
+    lda #$2
     sta $4400+$3fd
 
     ldy #50
@@ -1091,13 +1092,15 @@ koalapic: // logoscene
     lda #70+24*2
     sta $d004
     sty $d005
-    lda #70+24*3
+
+    ldy #52
+    lda #70
     sta $d006
     sty $d007
-    lda #70+24*4
+    lda #72+24*1
     sta $d008
     sty $d009
-    lda #70+24*5
+    lda #72+24*2
     sta $d00a
     sty $d00b
 
