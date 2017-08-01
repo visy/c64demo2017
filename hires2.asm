@@ -887,7 +887,7 @@ bol_no_src_inc:
     sta bol_copyloop_x+1
     lda $FA
     sta bol_copyloop_x+2
-    cmp #$9b
+    cmp #$9d
     beq boscroll_over
 
     lda $db
@@ -1309,11 +1309,58 @@ borderopen:
     sta $ffff
     cli
 
+    ldy #$2d
+    jsr waitforpart
+
+    ldy #255
+    jsr wait
+
+    lda #0
+    sta $E2
+spritesawayloop:
+    lda $d000
+    cmp #0
+    beq no_s0
+    dec $d000
+no_s0:
+    lda $d002
+    cmp #0
+    beq no_s1
+    dec $d002
+no_s1:
+    lda $d004
+    cmp #0
+    beq no_s2
+    dec $d004
+no_s2:
+    lda $d006
+    cmp #0
+    beq no_s3
+    dec $d006
+no_s3:
+    lda $d008
+    cmp #0
+    beq no_s4
+    dec $d008
+no_s4:
+    lda $d00a
+    cmp #0
+    beq no_s5
+    dec $d00a
+no_s5:
+    
+    ldy #1
+    jsr wait
+
+    inc $E2
+    lda $E2
+    cmp #156+24
+
+    bcc spritesawayloop
+
     ldy #$2e
     jsr waitforpart
 
-    lda #0
-    sta $d015
 
     lda #<nextirq
     sta $fffe
