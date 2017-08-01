@@ -649,10 +649,55 @@ fno_x21:
     cmp #210
     bne no_reset_color0
 
-    jmp partswitch
+    jmp to_partswitch
 no_reset_color0:
 
     jmp loop_fadetowhite
+
+to_partswitch:
+    
+    lda #0
+    sta $F1
+btow:
+    ldx $F1
+    lda towhite,x
+    sta $d020
+    ldy #8
+    jsr wait3
+    inc $F1
+    lda $F1
+    cmp #8
+    bne btow
+
+    ldy #64
+    jsr wait3
+
+    lda #%00000000
+    sta $d011
+    
+    lda #$0d
+    sta $d020
+    ldy #16
+    jsr wait3
+    lda #$0f
+    sta $d020
+    ldy #16
+    jsr wait3
+    lda #$0e
+    sta $d020
+    ldy #16
+    jsr wait3
+    lda #$04
+    sta $d020
+    ldy #16
+    jsr wait3
+    lda #$0b
+    sta $d020
+
+    jmp partswitch
+
+towhite:
+.byte $00, $06, $0b, $04, $0c, $03, $0d, $01
 
 flipper:
     .byte 0
@@ -733,6 +778,16 @@ waiter1:
     dey
     cpy #0
     bne wait
+    rts
+
+wait3:
+waiter2:
+    lda #0
+    cmp $D012
+    bne *-3
+    dey
+    cpy #0
+    bne wait3
     rts
 
 .pc = $3f00 "next part irq"

@@ -238,9 +238,6 @@ part_init:
 
 charrotator:
 
-    lda #%01010011
-    sta $d011
-
     // Setup some sprites
     lda #%11101111
     sta $d015
@@ -354,6 +351,7 @@ charrotator:
     cli
 */
 
+
     // chars on screen
     ldx #8
 scrollerinit:
@@ -417,6 +415,9 @@ scrollerinit:
     ldy #xx
     jsr putpix16
     }
+
+    lda #%01010011
+    sta $d011
 
 do_pixel:
     clc

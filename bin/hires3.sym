@@ -19,7 +19,7 @@
 .label copyscroll_loopx=$134d
 .label i162=$13b5
 .label init16=$13b0
-.label scrollerinit=$1077
+.label scrollerinit=$1072
 .label scrollchar_offset=$1350
 .label putpix16=$138b
 .label ycopy1=$130e

@@ -19,7 +19,7 @@ al C:11d8 .do_pixel
 al C:134d .copyscroll_loopx
 al C:13b5 .i162
 al C:13b0 .init16
-al C:1077 .scrollerinit
+al C:1072 .scrollerinit
 al C:1350 .scrollchar_offset
 al C:138b .putpix16
 al C:130e .ycopy1
@@ -39,7 +39,7 @@ al C:3000 .irq1
 al C:bd00 .costab2
 al C:f00 .part_init
 al C:f20 .copyloop__0
-al C:1040 .copyloop__1
+al C:103b .copyloop__1
 al C:302f .irq2
 al C:3028 .restorea
 al C:13e1 .frame
