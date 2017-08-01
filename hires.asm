@@ -1373,7 +1373,7 @@ afterdithers:
     ldy #13
     jsr waitforpart
 
-    ldy #255
+    ldy #100
     jsr wait 
     lda #0
     sta $f0
