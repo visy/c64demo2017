@@ -40,8 +40,8 @@ dither3spr.bin  4000 	0
 #d_dither2.bin	9000	2
 
 # hires pics
-d_fox.clr		9000	2
-d_fox.bit		a000	2
+d_fox1.clr		9000	2
+d_fox1.bit		a000	2
 feissi.clr		8000	2
 feissi.bit		e000	2
 tekstu.bit 		8400    2

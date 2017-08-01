@@ -500,6 +500,36 @@ checkup:
 
     }
 
+    .macro copymem_eor2(src,dst,size) {
+        lda #<src // set our source memory address to copy from, $6000
+        sta $EB
+        lda #>src 
+        sta $EC
+        lda #<dst // set our destination memory to copy to, $5000
+        sta $ED 
+        lda #>dst
+        sta $EE
+
+        ldx #size // size of copy
+        ldy #$00
+
+    copyloop:
+
+        lda ($EB),y  // indirect index source memory address, starting at $00
+        eor ($ED),y  // indirect index dest memory address, starting at $00
+        sta ($ED),y  // indirect index dest memory address, starting at $00
+        iny
+        cpy #92
+        bne copyloop // loop until our dest goes over 255
+
+        inc $EC // increment high order source memory address
+        inc $EE // increment high order dest memory address
+        dex
+        bne copyloop // if we're not there yet, loop
+
+    }
+
+
     .macro copymem_eor_short(src,dst,size) {
         lda #<src // set our source memory address to copy from, $6000
         sta $EB
@@ -802,6 +832,20 @@ checkup:
 .pc = $1000 "democode"
 
 start:
+init_text:  ldx #$00         // init X register with $00
+loop_text:  lda line1,x      // read characters from line1 table of text...
+           sta $0428,x      // ...and store in screen ram near the center
+
+           inx 
+           cpx #$28         // finished when all 40 cols of a line are processed
+           bne loop_text    // loop if we are not done yet
+
+    ldy #255
+    jsr wait
+    ldy #255
+    jsr wait
+
+
     lda #1
     sta $d1
 
@@ -912,6 +956,9 @@ NumFLDLines:
 
 fldframe:
     .byte 0,0
+
+line1: .text "    **** only 8580 sid working ****     "
+
 .align $100
 sinus:
     .fill 256, 64.5*abs(sin(toRadians(i*360/128))) // Generates a sine curve
@@ -1297,32 +1344,65 @@ dithersandpics:
 
     jsr dithers
 afterdithers:
+    lda #%01111011
+    sta $d011
+    
+    FillBitmap($6000,255)
+    lda #%00111011
+    sta $d011
+
+    lda #00
+    sta $d020
+    sta $d021
+    ldy #24
+    jsr wait
+    lda #6
+    sta $d020
+    sta $d021
+    ldy #24
+    jsr wait
+    lda #11
+    sta $d020
+    sta $d021
 
     jsr $c90 // load fox && broke
 
-    :centerwipein_trans(3)
+
+    :centerwipein_trans3(3)
 
     ldy #13
     jsr waitforpart
 
-    ldy #100
+    ldy #255
     jsr wait 
     lda #0
     sta $f0
 foxglitch:
-    copymem_eor($6c40,$6c48,6) 
+    copymem_eor2($7020+64+64,$7028+64+64,1) 
+    copymem_eor2($7160+64+64,$7168+64+64,1) 
+    copymem_eor2($72a0+64+64,$72a8+64+64,1) 
     ldy #1
     jsr wait
 
     inc $f0
     lda $f0
-    cmp #220
     bne foxglitch
 
     ldy #15
     jsr waitforpart
 
     :centerwipeout_trans(3)
+
+    lda #11
+    sta $d020
+    ldy #16
+    jsr wait
+    lda #6
+    sta $d020
+    ldy #16
+    jsr wait
+    lda #0
+    sta $d020
 
     copymem($8000,$9000,10)
     copymem($e000,$a000,32)
@@ -1787,6 +1867,19 @@ clear_y:
 
 .macro centerwipein_trans(waittime) {
     :FillScreenMemory($5000,(0<<4)+0)
+    :copymem($a000,$6000,32)
+
+    ldx #0
+    .for(var i=0;i<13;i++) { 
+        ldy #waittime
+        jsr wait
+        :copymem_colorline($9000+40*12+40*i,$5000+40*12+40*i)
+        :copymem_colorline($9000+40*12-40*i,$5000+40*12-40*i)
+    }
+}
+
+.macro centerwipein_trans3(waittime) {
+    :FillScreenMemory($5000,(11<<4)+11)
     :copymem($a000,$6000,32)
 
     ldx #0
