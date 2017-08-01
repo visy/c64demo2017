@@ -1076,18 +1076,18 @@ titlepics:
     lda #%00110000
     sta $d018
 
-    lda #%00101011
+    lda #%01101011
     sta $d011
 
     FillBitmap($4000,0)
-
-    lda #%00111011
-    sta $d011
 
 koalapic: // logoscene
     copymem($ee00,$4000,1)
     copymem($8000,$6000,30)
     copymem($e000,$4400,8)
+
+    lda #%00111011
+    sta $d011
 
     lda #$d8
     sta $d016
@@ -1256,7 +1256,7 @@ metroloop:
 
     inc $F0
     lda $F0
-    cmp #5
+    cmp #6
     bne metroloop0
     jmp metrodone
 metroloop0:
@@ -1509,9 +1509,9 @@ no_alter4:
     sta $d027
 
     lda #$0
-    sta $4400+$3f8
+    sta $5000+$3f8
 
-    lda #80
+    lda #80-2
     ldy #124
     sta $d000
     sty $d001
@@ -1592,8 +1592,56 @@ eyemove3:
     dex
     bne eyemove3
 
+    ldy #128
+    jsr wait
+
+    lda #0
+    sta $F1
+blink0:
+    lda $F1
+    sta $5000+$3f8
+
+    ldy #2
+    jsr wait
+
+    inc $F1
+    lda $F1
+    cmp #7
+    bne blink0
+
+    lda #6
+    sta $F1
+blink1:
+
+    lda $F1
+    sta $5000+$3f8
+
+    ldy #2
+    jsr wait
+
+    dec $F1
+    lda $F1 
+    cmp #255
+    bne blink1
+
     ldy #19 //19
     jsr waitforpart
+
+    lda #0
+    sta $F1
+blink2:
+
+    lda $F1
+    sta $5000+$3f8
+
+    ldy #2
+    jsr wait
+
+    inc $F1
+    lda $F1
+    cmp #8
+    bne blink2
+
 
     ldx #4
 eyefader2:
