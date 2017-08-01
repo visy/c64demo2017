@@ -1348,22 +1348,25 @@ afterdithers:
     sta $d011
     
     FillBitmap($6000,255)
-    lda #%00111011
+    lda #%00101011
     sta $d011
 
     lda #00
     sta $d020
     sta $d021
-    ldy #24
+    ldy #20
     jsr wait
     lda #6
     sta $d020
     sta $d021
-    ldy #24
+    ldy #20
     jsr wait
     lda #11
     sta $d020
     sta $d021
+
+    lda #%00111011
+    sta $d011
 
     jsr $c90 // load fox && broke
 
