@@ -967,8 +967,7 @@ fadetab:
     .byte $00, $06, $0b, $04, $0c, $03, $0d, $01
 real_start:
 
-    lda $d011
-    eor #%00010000 // off
+    lda #%00101011
     sta $d011
 
     FillScreenMemory($0400,$20)
@@ -1002,12 +1001,11 @@ fadetowhite:
     jmp demo_init
 
 
+
     // demo init
 demo_init:
 
     // Set up raster interrupt.
-    lda     #$3b
-    sta     $d011
     lda     #255
     sta     $d012
     lda     #$01
@@ -1030,9 +1028,9 @@ demo_init:
     sta $d021
 
     FillScreenMemory($4000,%00010001)
-
-    SetHiresBitmapMode()
-
+    lda $d016
+    and #%11101111
+    sta $d016
     lda #%00111011
     sta $d011
 
