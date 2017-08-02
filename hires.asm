@@ -1353,12 +1353,13 @@ afterdithers:
     lda #0
     sta $F1
 btow:
+    ldy #8
+    jsr wait4
+
     ldx $F1
     lda towhite,x
     sta $d020
     sta $d021
-    ldy #8
-    jsr wait3
     inc $F1
     lda $F1
     cmp #8
@@ -1371,22 +1372,22 @@ btow:
     sta $d020
     sta $d021
     ldy #16
-    jsr wait3
+    jsr wait4
     lda #$0f
     sta $d020
     sta $d021
     ldy #16
-    jsr wait3
+    jsr wait4
     lda #$0e
     sta $d020
     sta $d021
     ldy #16
-    jsr wait3
+    jsr wait4
     lda #$04
     sta $d020
     sta $d021
     ldy #16
-    jsr wait3
+    jsr wait4
     lda #$0b
     sta $d020
     sta $d021
