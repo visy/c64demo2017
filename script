@@ -3,7 +3,7 @@
 # here, unless you specify an entry point with the -e option.
 
 demo.prg
-Broken_003.sid	c000	7e
+Broken.sid		c000	7e
 title1.bin 		5000	0		3e8
 title1.bin 		6000	1000	1f40
 title2.bin 		8000	0		3e8

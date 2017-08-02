@@ -1351,17 +1351,45 @@ afterdithers:
     lda #%00101011
     sta $d011
 
-    lda #00
+
+    lda #0
+    sta $F1
+btow:
+    ldx $F1
+    lda towhite,x
     sta $d020
     sta $d021
-    ldy #20
-    jsr wait
-    lda #6
+    ldy #8
+    jsr wait3
+    inc $F1
+    lda $F1
+    cmp #8
+    bne btow
+
+    ldy #64
+    jsr wait4
+    
+    lda #$0d
     sta $d020
     sta $d021
-    ldy #20
-    jsr wait
-    lda #11
+    ldy #16
+    jsr wait3
+    lda #$0f
+    sta $d020
+    sta $d021
+    ldy #16
+    jsr wait3
+    lda #$0e
+    sta $d020
+    sta $d021
+    ldy #16
+    jsr wait3
+    lda #$04
+    sta $d020
+    sta $d021
+    ldy #16
+    jsr wait3
+    lda #$0b
     sta $d020
     sta $d021
 
@@ -1970,6 +1998,18 @@ waiter4:
     bne wait3
     rts
 
+wait4:
+waiter2:
+    lda #0
+    cmp $D012
+    bne *-3
+    dey
+    cpy #0
+    bne wait4
+    rts
+
+towhite:
+.byte $00, $06, $0b, $04, $0c, $03, $0d, $01
 
 .var bres_x1 = $50
 .var bres_y1 = $51

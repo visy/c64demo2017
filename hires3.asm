@@ -227,6 +227,9 @@
 
 start:
 part_init:
+    lda #%11000000
+    sta $d016
+
     sei
      lda #<irq1
      sta $fffe
@@ -265,22 +268,22 @@ charrotator:
     lda #%00001010
     sta $d010
 
-    lda #24
+    lda #24+7
     ldy #54
     sta $d000
     sty $d001
 
-    lda #64
+    lda #64-8
     ldy #54
     sta $d002
     sty $d003
 
-    lda #24
+    lda #24+7
     ldy #225
     sta $d004
     sty $d005
 
-    lda #64
+    lda #64-8
     ldy #225
     sta $d006
     sty $d007
@@ -367,7 +370,7 @@ scrollerinit:
     sta $f6
 
     // finescroll
-    lda #%11001111
+    lda #%11000111
     sta $f3
     lda #0
     sta $f4 // flag for doing 8x scroll
@@ -607,7 +610,7 @@ i162:
     rts
 
 wait:
-waiter1:
+    er1:
     lda #255
     cmp $D012
     bne *-3
@@ -631,7 +634,7 @@ irq1:
 
     inc $d019
 
-    lda #%11001000
+    lda #%11000000
     sta $d016
     lda #$91
     sta $d012
@@ -660,9 +663,9 @@ irq2:
 
     dec $f3
     lda $f3
-    cmp #%11000111
+    cmp #%10111111
     bne no_finereset
-    lda #%11001111
+    lda #%11000111
     sta $f3
     lda #1
     sta $f4
