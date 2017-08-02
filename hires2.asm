@@ -1156,12 +1156,12 @@ boltracont:
 boltradone:
 
 sundial:
+    lda #%01111011
+    sta $d011
     jsr $c90 // load sundial data
 
     lda #0
     sta $d020
-    lda #%00111011
-    sta $d011
     lda #%10000000 // bitmap at $4000, screen at $6000
     sta $d018
 
@@ -1173,6 +1173,9 @@ sundial:
 
     lda #%11000000
     sta $d010
+
+    lda #%00111011
+    sta $d011
 
     setsprites()
 
