@@ -832,19 +832,22 @@ checkup:
 .pc = $1000 "democode"
 
 start:
-init_text:  ldx #$00         // init X register with $00
-loop_text:  lda line1,x      // read characters from line1 table of text...
-           sta $0428,x      // ...and store in screen ram near the center
+    lda #0
+    sta $d020
+    sta $d021
 
-           inx 
-           cpx #$28         // finished when all 40 cols of a line are processed
-           bne loop_text    // loop if we are not done yet
+
+    copymem($4000,$0400,4)
+    copymem($4400,$d800,4)
 
     ldy #255
     jsr wait
     ldy #255
     jsr wait
+    ldy #255
+    jsr wait
 
+    jsr $c90 // first demopart data + music
 
     lda #1
     sta $d1
