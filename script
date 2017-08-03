@@ -3,9 +3,6 @@
 # here, unless you specify an entry point with the -e option.
 
 demo.prg
-pet00.scr 		4000	2
-pet00.clr 		4400	2
-
 Broken.sid		c000	7e
 title1.bin 		5000	0		3e8
 title1.bin 		6000	1000	1f40

@@ -7,8 +7,8 @@ Memory Map
 ----------
 Default-segment:
   $0f00-$225d democode
-  $3000-$312f raster irqs
-  $3130-$394b wait
+  $3000-$31e6 raster irqs
+  $31e7-$3a0f wait
   $3f00-$3f1f next part irq
   $3fc0-$3fcf partswitch
   *$ba00-$baff sintab

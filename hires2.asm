@@ -731,10 +731,9 @@ bolfiller_x:
     sta $F6
     sta $F7
     sta $F8
-
+    sta $d015
     lda #0
     sta $F5
-
 
     lda #0
     sta $DB // bytelbuf
@@ -825,6 +824,29 @@ bolwaitter:
     :copymem($6800,$4400,4)
     FillScreenMemory($4800,0)
 
+    lda #%00000001
+    sta $d015
+    lda #0
+    sta $d027
+    lda #55
+    sta $d000
+    lda #52-9
+    sta $d001
+    lda #1
+    sta $d01d
+    lda #%00000001
+    sta $d010    
+
+    sei
+
+    lda #52
+    sta $d012
+    lda #<irq_sc1
+    sta $fffe
+    lda #>irq_sc1
+    sta $ffff
+    cli
+
 actualscroll:
 
 fillloop1:
@@ -849,14 +871,19 @@ bol_copyloop_target:
 
 copy_done:
 
+    lda #5
+    sta $47f8
+    sta $4bf8
+
     lda #%00011111
     clc
     sbc $f5
     sta $d011
+
     inc $F5
 
     ldy #1
-    jsr wait2
+    jsr wait5
 
 
     lda $F5
@@ -925,6 +952,16 @@ no_finenull:
 
 boscroll_over:
 
+    sei
+    lda #<nextirq
+    sta $fffe
+    lda #>nextirq
+    sta $ffff
+    lda #$ff
+    sta $d012
+    cli
+    lda #%00011111
+    sta $d011
 
     lda #%00011000 // 4400
     sta $d018
@@ -1648,6 +1685,132 @@ restorex2: ldx #$00
 restorey2: ldy #$00
     rti
 
+irq_sc1:    
+    sta restoreaq2+1
+    stx restorexq2+1
+    sty restoreyq2+1
+
+    lda $d011
+    ora #%01100000
+    sta $d011
+
+    lda #63
+    sta $d012
+
+    lda #<irq_sc2
+    sta $fffe
+    lda #>irq_sc2
+    sta $ffff
+
+    lda #$ff
+    sta $d019
+
+restoreaq2: lda #$00
+restorexq2: ldx #$00
+restoreyq2: ldy #$00
+    rti
+
+irq_sc2:    
+    sta restoreaqq2+1
+    stx restorexqq2+1
+    sty restoreyqq2+1
+
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+
+    lda $d011
+    and #%10011111
+    sta $d011
+
+    lda #252-16
+    sta $d012
+
+    lda #<irq_sc3
+    sta $fffe
+    lda #>irq_sc3
+    sta $ffff
+
+    lda #$ff
+    sta $d019
+
+restoreaqq2: lda #$00
+restorexqq2: ldx #$00
+restoreyqq2: ldy #$00
+    rti
+
+irq_sc3:    
+    sta restoreaqqq2+1
+    stx restorexqqq2+1
+    sty restoreyqqq2+1
+
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+
+    lda $d011
+    ora #%01100000
+    sta $d011
+
+    lda #52
+    sta $d012
+
+    lda #<irq_sc1
+    sta $fffe
+    lda #>irq_sc1
+    sta $ffff
+
+    inc part_lo
+    lda part_lo
+    bne no_part_hi_add21
+    inc part_hi
+no_part_hi_add21:
+
+    jsr $c003
+
+    lda #$ff
+    sta $d019
+
+restoreaqqq2: lda #$00
+restorexqqq2: ldx #$00
+restoreyqqq2: ldy #$00
+    rti
+
+
 loopere:
     jmp loopere
 
@@ -1750,6 +1913,16 @@ waiter2:
     dey
     cpy #0
     bne wait2
+    rts
+
+wait5:
+waiter5:
+    lda #252-17
+    cmp $D012
+    bne *-3
+    dey
+    cpy #0
+    bne wait5
     rts
 
 frame:
